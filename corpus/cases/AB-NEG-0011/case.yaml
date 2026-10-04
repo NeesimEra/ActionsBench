@@ -1,0 +1,16 @@
+id: AB-NEG-0011
+title: "Untrusted value in a multi-line script, passed through the environment"
+is_negative: true
+expected: []
+rationale: >-
+  The title is assigned to an environment variable and the script reads it as a quoted
+  shell variable, so its content is never parsed as script text, even though the script
+  has several lines. Clean twin of AB-INJ-0008.
+references:
+  - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+  - https://docs.zizmor.sh/audits/
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"

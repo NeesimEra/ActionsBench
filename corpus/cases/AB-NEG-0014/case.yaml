@@ -1,0 +1,17 @@
+id: AB-NEG-0014
+title: "Registry password read from the secrets context"
+is_negative: true
+expected: []
+rationale: >-
+  The password comes from the secrets context, which is the form both tools recommend.
+  Clean twin of AB-SEC-0002.
+references:
+  - https://docs.zizmor.sh/audits/
+  - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The image digest is synthetic, as in AB-SEC-0002.

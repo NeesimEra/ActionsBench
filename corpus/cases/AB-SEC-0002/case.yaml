@@ -1,0 +1,24 @@
+id: AB-SEC-0002
+title: "Registry password written into the workflow"
+is_negative: false
+expected:
+  - weakness_class: secrets-exposure
+    file: .github/workflows/hardcoded-credentials.yml
+    line: 15
+    evidence: "password: example-not-a-real-password"
+rationale: >-
+  The container credentials contain a literal password instead of a reference to the
+  secrets context, so anyone who can read the workflow can read the password. Both
+  actionlint and zizmor document a check for exactly this.
+references:
+  - https://docs.zizmor.sh/audits/
+  - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+  - https://arxiv.org/html/2601.14455v2
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The password is an obvious placeholder, not a real credential, and the image is pinned
+  by a synthetic digest so that only the credential is labeled.

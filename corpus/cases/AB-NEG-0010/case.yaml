@@ -1,0 +1,21 @@
+id: AB-NEG-0010
+title: "pull_request_target trigger with no untrusted code involved"
+is_negative: true
+expected: []
+rationale: >-
+  The workflow uses the pull_request_target trigger but checks out and runs no code from
+  the pull request and expands no attacker-controlled value, so nothing untrusted reaches
+  a privileged context. The study's definition of the class requires that combination.
+references:
+  - https://arxiv.org/html/2601.14455v2
+  - https://docs.zizmor.sh/audits/
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  A definitional split, deliberately: zizmor's dangerous-triggers audit flags the trigger
+  itself, while the class definition needs the trigger together with untrusted data. A
+  finding here is therefore a disagreement about what the class means rather than a plain
+  error, and it is a candidate for a label challenge.

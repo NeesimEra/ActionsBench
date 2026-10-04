@@ -115,6 +115,8 @@ def test_classes_zizmor_cannot_be_judged_on_here_are_out_of_scope() -> None:
         ("excessive-permissions", WeaknessClass.EXCESSIVE_PERMISSION),
         ("dangerous-triggers", WeaknessClass.PRIVILEGED_TRIGGER),
         ("secrets-inherit", WeaknessClass.SECRETS_EXPOSURE),
+        ("hardcoded-container-credentials", WeaknessClass.SECRETS_EXPOSURE),
+        ("overprovisioned-secrets", WeaknessClass.SECRETS_EXPOSURE),
         ("artipacked", WeaknessClass.ARTIFACT_INTEGRITY),
     ],
 )

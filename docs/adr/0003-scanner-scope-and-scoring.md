@@ -49,12 +49,19 @@ construct is what matters. Evidence, in the order it arrived:
   workflow call (label: `secrets: inherit`) and artifact-integrity at the step header (label: the
   `uses:` line), and actionlint reports the `github-script` case at the `script:` key.
 - Under exact-line matching each costs one false positive and one false negative. Under region
-  matching all four match, and on this corpus the results equal a one-line tolerance exactly
-  (pinned by the integration tests).
+  matching all four match. At 25 cases the results also equalled a one-line tolerance exactly.
+- **That stopped being true at 44 cases, which is the point.** Two harder cases are two lines from
+  their labels: actionlint reports a long multi-line `run: |` block at the `run:` key, two lines
+  above the interpolation (AB-INJ-0008), and zizmor reports hardcoded container credentials at the
+  `container:` block, two lines above the password (AB-SEC-0002). A one-line tolerance misses both
+  (actionlint injection 7/1/3 instead of 8/0/2; zizmor secrets-exposure 2/1/1 instead of 3/0/0)
+  while region matching gets both. A tolerance of two equals region matching on this corpus, but a
+  longer block would need a bigger number. Pinned by the integration tests.
 
-A fixed tolerance would pass these four but is the wrong shape: it depends on a magic number, and
-it cannot cope with a multi-line `run: |` block where the interpolation sits several lines below the
-`run:` key. A region needs no number, and it is the PRD's own wording ("same step").
+A fixed tolerance passes the first four cases but not the two-line ones, and it depends on a magic
+number that every longer block would push up. A region needs no number, and it is the PRD's own
+wording ("same step"). The earlier prediction that a fixed tolerance would fail on a long `run: |`
+block was made from reasoning; it is now shown with real tool output.
 
 **What it costs.**
 

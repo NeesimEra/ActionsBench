@@ -1,7 +1,7 @@
-"""Runs the real, pinned actionlint over the seed corpus. Opt in with: pytest -m integration
+"""Runs the real, pinned actionlint over the corpus. Opt in with: pytest -m integration
 
 Needs the pinned binary: run scripts/install-actionlint.sh first. Excluded from CI because it
-needs a download.
+needs a download. The numbers are observations (2026-10-04, 44 hand-built cases, one reviewer).
 """
 
 from __future__ import annotations
@@ -13,13 +13,18 @@ import pytest
 from actionsbench.adapters.actionlint import ActionlintAdapter
 from actionsbench.corpus import require_valid_corpus
 from actionsbench.runner import run_scanner
-from actionsbench.scoring import score
-from actionsbench.taxonomy import WeaknessClass
+from actionsbench.scoring import ScoreResult, score
+from actionsbench.taxonomy import WeaknessClass as W
 
 pytestmark = pytest.mark.integration
 
 
-def test_actionlint_on_the_seed_corpus(
+def cell(scored: ScoreResult, cls: W) -> tuple[int, int, int]:
+    c = scored.per_class[cls]
+    return (c.tp, c.fp, c.fn)
+
+
+def test_actionlint_on_the_corpus(
     real_corpus: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.chdir(real_corpus.parents[1])  # the repository root, where .tools/ lives
@@ -34,24 +39,25 @@ def test_actionlint_on_the_seed_corpus(
     assert result.failures == {}
     assert result.report.cases_run == {c.id for c in cases}
     assert result.report.version == "1.7.12"
+    assert result.report.configuration == "external-linters=disabled"
 
-    # Observed 2026-10-04. At tolerance 0, actionlint matched AB-INJ-0001/2/3/5 exactly, missed
-    # github.ref_name (AB-INJ-0004) and the composite-action sink (AB-INJ-0007), and anchored
-    # the multi-line github-script case (AB-INJ-0006) at the `script:` key (line 15) while the
-    # label and zizmor use the interpolation line (16).
-    strict = score(cases, result.report, matching="line").per_class[WeaknessClass.INJECTION]
-    assert (strict.tp, strict.fp, strict.fn) == (4, 1, 3)
+    region = score(cases, result.report)
+    # Misses: github.ref_name (AB-INJ-0004) and the composite-action sink (AB-INJ-0007).
+    assert cell(region, W.INJECTION) == (8, 0, 2)
+    assert cell(region, W.CONTROL_FLOW) == (1, 0, 0)
+    assert cell(region, W.RUNNER_COMPATIBILITY) == (2, 0, 0)
+    # The only secrets check is the hardcoded-credentials one, so the other two secrets cases
+    # (secrets: inherit, toJSON(secrets)) count as misses: the class-level scope limitation.
+    assert cell(region, W.SECRETS_EXPOSURE) == (1, 0, 2)
 
-    # The other two reviewed classes are each detected once and never reported on a clean case:
-    # `if-cond` on the constant condition and `runner-label` on the retired runner image.
-    scored = score(cases, result.report, matching="line")
-    for cls in (WeaknessClass.CONTROL_FLOW, WeaknessClass.RUNNER_COMPATIBILITY):
-        cell = scored.per_class[cls]
-        assert (cell.tp, cell.fp, cell.fn) == (1, 0, 0)
+    # Exact line: actionlint reports a multi-line script at the `script:` / `run:` key, above the
+    # labeled interpolation line (one line for github-script, two for the long run block).
+    strict = score(cases, result.report, matching="line")
+    assert cell(strict, W.INJECTION) == (6, 2, 4)
 
-    # Under region matching (the default) the github-script case matches: both lines are in the
-    # same step. Tools anchor multi-line blocks differently; this is the evidence for ADR 0003.
-    region = score(cases, result.report).per_class[WeaknessClass.INJECTION]
-    assert (region.tp, region.fp, region.fn) == (5, 0, 2)
+    # One line of tolerance is not enough for the long run block; two lines happens to equal the
+    # region rule here, but a longer block would need a bigger number (ADR 0003).
     one_line = score(cases, result.report, matching="line", line_tolerance=1)
-    assert one_line.per_class[WeaknessClass.INJECTION] == region
+    assert cell(one_line, W.INJECTION) == (7, 1, 3)
+    two_lines = score(cases, result.report, matching="line", line_tolerance=2)
+    assert cell(two_lines, W.INJECTION) == cell(region, W.INJECTION)

@@ -120,7 +120,9 @@ Each adapter's **baseline** is the tool's default configuration made explicit, b
 the tool is normally run. Any other configuration is run on purpose (`--config KEY=VALUE`) and
 reported next to the baseline, never in place of it.
 
-Observed with zizmor 1.30.1 on the 25-case corpus (2026-10-04, online audits off):
+Observed with zizmor 1.30.1 on the 25-case corpus (2026-10-04, online audits off; the same personas
+behave the same way on the 44-case corpus, where `pedantic` and `auditor` also flag the two safe
+contexts in AB-NEG-0012 and `regular` also suppresses workflow-level `contents: write`):
 
 | Persona | Injection (TP / FP / FN) | `write-all` (AB-PRM-0001) | Other effects |
 |---|---|---|---|
@@ -171,19 +173,24 @@ be reproduced and compared.
   adapter is reviewed independently.
 - **Mapped scope** (review record: [rule-mappings.md](rule-mappings.md)). zizmor is judged on six
   classes (injection, unpinned-dependency, excessive-permission, privileged-trigger,
-  secrets-exposure, artifact-integrity) and actionlint on three (injection, control-flow,
-  runner-compatibility), each through a small number of reviewed rules. Known-vulnerable-component
+  secrets-exposure, artifact-integrity) and actionlint on four (injection, control-flow,
+  runner-compatibility, secrets-exposure), each through a small number of reviewed rules. Known-vulnerable-component
   is out of scope for zizmor because it needs online mode, which the adapter disables for
   determinism. Hardening-gap has no cases. Out of scope means "uncovered", never "missed".
-- **Class-level scope can overstate coverage.** Some mappings cover only part of a broad class
-  (runner-compatibility is much wider than actionlint's one `runner-label` check). When the corpus
-  gains cases for other constructs in a mapped class, the mappings have to be revisited, or a tool
-  will be charged with misses it was never designed to catch.
-- **Anchoring differences are the main source of strict-score disagreement.** On the 25-case
-  corpus every anchoring difference is a different line of the same construct, exactly one line
-  apart (see section 4 for the list). Under exact-line matching each costs one false positive plus
-  one false negative; region matching, the default, removes them without changing anything else.
-  The labels were not changed to suit a tool.
+- **Class-level scope can overstate coverage, and now visibly does.** Some mappings cover only part
+  of a broad class. actionlint's only secrets check is for hardcoded credentials, so the cases for
+  `secrets: inherit` and `toJSON(secrets)` count as misses for it; zizmor is judged on
+  artifact-integrity through `artipacked` alone, so the unverified-download case (AB-ART-0002) counts
+  as a miss although no zizmor rule targets that pattern. Both are honest statements of what the
+  tool detects, but a per-class recall figure reads as "how good is this tool at the class", which it
+  is not. Read the per-case disagreements, not only the totals; a per-pattern notion of coverage is a
+  candidate improvement.
+- **Anchoring differences are the main source of strict-score disagreement.** Every anchoring
+  difference observed is a different line of the same construct, one or two lines apart (section 4
+  lists them; a long `run: |` block reported at its `run:` key is two lines above the labeled
+  interpolation). Under exact-line matching each costs one false positive plus one false negative;
+  region matching, the default, removes them. A one-line tolerance would not (ADR 0003). The labels
+  were not changed to suit a tool.
 - actionlint needs a project marker (an empty `.git` directory) in the isolated copy, and its
   external linters (shellcheck, pyflakes) are disabled so results do not depend on the machine.
 - Early results are recorded in `status.md`. They are one run each over hand-built cases with a

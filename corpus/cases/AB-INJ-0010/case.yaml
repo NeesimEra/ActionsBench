@@ -1,0 +1,24 @@
+id: AB-INJ-0010
+title: "Pull request review comment interpolated into a shell step"
+is_negative: false
+expected:
+  - weakness_class: injection
+    file: .github/workflows/review-comment.yml
+    line: 13
+    evidence: "${{ github.event.comment.body }}"
+rationale: >-
+  The body of a review comment is written by whoever comments and is expanded straight
+  into the script text. github.event.comment.body is in actionlint's documented list of
+  untrusted properties.
+references:
+  - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+  - https://docs.zizmor.sh/audits/
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  Uses pull_request_review_comment rather than issue_comment on purpose: zizmor treats
+  issue_comment as a dangerous trigger, which would add a second weakness to a case meant
+  to label only injection.
