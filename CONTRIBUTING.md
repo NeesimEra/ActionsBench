@@ -42,7 +42,9 @@ Reasoning and trade-offs: [ADR 0004](docs/adr/0004-branching-model.md).
 1. Update `corpus/CHANGELOG.md` on `dev` through a normal pull request.
 2. Open a pull request from `dev` to `main` titled `release: vX.Y.Z` and merge it with a merge
    commit.
-3. Tag the merge commit `vX.Y.Z` on `main`. Tags cannot be moved or deleted.
+3. Create the GitHub release for `vX.Y.Z` targeting that merge commit; this creates the tag. Tags cannot be
+   moved or deleted. Publishing to PyPI and archiving on Zenodo follow from the release; the one-time setup and
+   the full sequence are in [docs/publishing.md](docs/publishing.md).
 
 ## Adding a case
 

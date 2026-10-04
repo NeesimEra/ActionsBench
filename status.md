@@ -702,3 +702,47 @@ Read as: remove the pre-release flag. PyPI was not touched and was not asked for
 
 - PyPI (needs a trusted-publishing workflow and an account decision), the poutine adapter, and independent
   review of the labels.
+
+---
+
+## 2026-10-04: PyPI and Zenodo preparation (version 0.1.1)
+
+**Decision (owner, in chat):** "lets add the zenodo and pypi", after choosing between them. Nothing has been
+published to either yet: both need web steps that only the owner can do (see docs/publishing.md), and a PyPI
+version or a Zenodo DOI cannot be undone.
+
+**Why 0.1.1 and not 0.1.0:** the 0.1.0 wheel does not contain the corpus (so `pip install` would give a tool
+that finds no data), and the 0.1.0 tag is permanent, so its content cannot change. Zenodo also archives releases
+published after it is enabled. The first PyPI and Zenodo version is therefore 0.1.1. The corpus is unchanged
+from 0.1.0 (the diff against the tag is empty).
+
+**Done**
+
+- The wheel now bundles the corpus (44 cases with their `.github/` files) and both licenses, with the license
+  expression `MIT AND CC-BY-4.0`, project URLs and classifiers. The CLI uses `./corpus/cases` if it exists and
+  otherwise the bundled copy.
+- `scripts/check_wheel.py` checks a built wheel the way a user receives it: contents, then a clean-environment
+  install and `actionsbench validate` from an empty directory. It runs in CI. I proved it fails on a bad wheel by
+  pointing it at the 0.1.0 wheel, which it rejected with four distinct errors.
+- `.github/workflows/publish.yml`: builds and checks the distributions, then publishes through trusted
+  publishing with no stored token. Build and publish are separate jobs; PyPI publishing runs only on a published
+  release and only after the tag matches the package version; the manual dispatch can only reach TestPyPI.
+  zizmor reports no findings at any persona.
+- GitHub environments `pypi` (release tags `v*` only) and `testpypi` (branches `dev` and `main` only), both
+  requiring the owner's approval before a job runs. Read back from GitHub after creation.
+- README links made absolute so PyPI's rendering of the README has no dead links. `CITATION.cff` now has type
+  dataset and one license, because both Zenodo and the format take a single license string and Zenodo reads
+  `CITATION.cff` as the metadata source; it names the corpus license and the abstract states that the code is
+  MIT. That is a judgement call and can be changed.
+
+**Verified (by running it)**
+
+- 200 unit tests, ruff and mypy pass; the built wheel installs into a clean environment and validates 44 cases
+  from an empty directory.
+
+**Not done / needs the owner**
+
+- PyPI and TestPyPI: create the accounts and the pending publishers (exact values in docs/publishing.md). The
+  name is free on both today but a pending publisher does not reserve it.
+- Zenodo: log in with GitHub, get the organization to approve access if asked, and switch the repository on.
+- Then: TestPyPI dry run, release pull request, GitHub release, approve the `pypi` deployment.
