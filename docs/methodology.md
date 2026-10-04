@@ -62,6 +62,20 @@ real repositories are never included.
 Every case carries a written `rationale` and at least one `reference`. If a label was
 reasoned from first principles and no independent source exists, the rationale says so.
 
+### Three different levels of confidence
+
+1. **`proposed`**: one person has labeled it.
+2. **Evidence-audited**: the facts the label rests on were checked against primary sources, and where
+   possible demonstrated, and the result is recorded per case in [evidence-audit.md](evidence-audit.md).
+   This is not a status in `case.yaml`; it is a property of the record. It raises confidence in the
+   facts (is this context attacker-controlled, does this advisory range hold, was this runner image
+   retired) and found real defects, but it is not independent: the author, or the assistant that
+   wrote the case, cannot be the independent reviewer of it.
+3. **`agreed`**: a person other than the author checked the label. Judgements such as the choice of
+   class or where a case sits on a definitional boundary can only be settled this way.
+
+Quote results with the level that applies.
+
 ## 4. Matching a finding to a label
 
 A scanner finding is normalized to: case ID, weakness class, file, line, and optionally the

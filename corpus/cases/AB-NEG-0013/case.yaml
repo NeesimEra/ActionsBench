@@ -8,6 +8,7 @@ rationale: >-
 references:
   - https://arxiv.org/html/2601.14455v2
   - https://docs.zizmor.sh/audits/
+  - https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows
 provenance: synthetic-minimal
 status: proposed
 author: Aliu2211

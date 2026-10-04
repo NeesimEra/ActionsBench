@@ -1,5 +1,5 @@
 id: AB-INJ-0003
-title: Untrusted value passed through toJSON() into a shell step
+title: "Untrusted value passed through toJSON() into a shell step"
 is_negative: false
 expected:
   - weakness_class: injection
@@ -8,9 +8,12 @@ expected:
     evidence: "toJSON(github.event.pull_request.title)"
 rationale: >-
   toJSON() wraps the title in double quotes and escapes quotes and backslashes, but it
-  does not escape "$" or backticks, so command substitution inside the resulting
-  double-quoted shell string still runs. Reasoned from expression and shell semantics;
-  not yet confirmed by running it or by an independent source, so this label is proposed.
+  does not escape "$" or backticks, so command substitution inside the resulting double-
+  quoted shell string still runs. Demonstrated on 2026-10-04: GitHub's published
+  expression engine evaluates the expression to a string that contains the attacker's
+  text, and running the resulting script in bash executes it (tools/verify-expressions,
+  docs/evidence-audit.md). The evaluated expression is a double-quoted JSON string, and
+  command substitution still runs inside double quotes.
 references:
   - https://docs.github.com/en/actions/reference/security/secure-use
 provenance: synthetic-minimal

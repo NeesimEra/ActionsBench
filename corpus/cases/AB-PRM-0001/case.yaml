@@ -14,6 +14,7 @@ references:
   - https://arxiv.org/html/2601.14455v2
   - https://docs.zizmor.sh/audits/
   - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+  - https://docs.github.com/en/actions/reference/security/secure-use
 provenance: synthetic-minimal
 status: proposed
 author: Aliu2211

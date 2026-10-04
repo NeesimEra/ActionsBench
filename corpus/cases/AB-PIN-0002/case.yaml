@@ -8,12 +8,13 @@ expected:
     evidence: "actions/checkout@main"
 rationale: >-
   A branch ref moves on every push to that branch, so the workflow runs whatever is on the
-  branch at that moment, which is weaker even than a tag. Only this weakness is labeled: the
-  job is read-only and checkout does not persist credentials, so no other weakness is
+  branch at that moment, which is weaker even than a tag. Only this weakness is labeled:
+  the job is read-only and checkout does not persist credentials, so no other weakness is
   intended.
 references:
   - https://arxiv.org/html/2601.14455v2
   - https://docs.zizmor.sh/audits/
+  - https://docs.github.com/en/actions/reference/security/secure-use
 provenance: synthetic-minimal
 status: proposed
 author: Aliu2211

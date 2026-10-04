@@ -8,12 +8,13 @@ expected:
     evidence: "actions/checkout@v4"
 rationale: >-
   A tag such as v4 can be moved to different code by whoever controls the action's
-  repository, so the workflow can silently start running something else. Only a full commit
-  SHA is immutable. Only this weakness is labeled: the job is read-only and checkout does
-  not persist credentials, so no other weakness is intended.
+  repository, so the workflow can silently start running something else. Only a full
+  commit SHA is immutable. Only this weakness is labeled: the job is read-only and
+  checkout does not persist credentials, so no other weakness is intended.
 references:
   - https://arxiv.org/html/2601.14455v2
   - https://docs.zizmor.sh/audits/
+  - https://docs.github.com/en/actions/reference/security/secure-use
 provenance: synthetic-minimal
 status: proposed
 author: Aliu2211

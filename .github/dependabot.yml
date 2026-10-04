@@ -22,3 +22,14 @@ updates:
       default-days: 7
     commit-message:
       prefix: "chore(deps)"
+
+  # The evidence-check tool pins one npm package (with an integrity hash in its lockfile).
+  - package-ecosystem: "npm"
+    directory: "/tools/verify-expressions"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "chore(deps)"

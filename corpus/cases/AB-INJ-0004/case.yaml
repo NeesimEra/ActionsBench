@@ -1,11 +1,11 @@
 id: AB-INJ-0004
-title: Branch name (github.ref_name) interpolated into a shell step
+title: "Branch name (github.ref_name) interpolated into a shell step"
 is_negative: false
 expected:
   - weakness_class: injection
     file: .github/workflows/ref-name.yml
     line: 13
-    evidence: github.ref_name
+    evidence: "github.ref_name"
 rationale: >-
   Git accepts branch names containing shell metacharacters such as "$(...)", so a branch
   named by an attacker becomes shell code when github.ref_name is expanded into a run
@@ -18,4 +18,10 @@ status: proposed
 author: Aliu2211
 reviewer: null
 added_in: "0.1.0"
-notes: Sourced from public advisories, but still has a single reviewer.
+notes: >-
+  The cited advisory concerns github.ref, not github.ref_name; ref_name is the short form
+  of the same branch or tag name, and the article shows that git ref names may legally
+  contain shell metacharacters, including the branch name used in a real attack.
+  Demonstrated on 2026-10-04 with a branch-name payload that git itself accepts as valid
+  (git check-ref-format), using ${IFS} because ref names cannot contain spaces
+  (tools/verify-expressions). Anchored at the sink.
