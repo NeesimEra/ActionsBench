@@ -3,6 +3,13 @@
 Corpus versions are immutable once released. A new version adds or amends cases; it never
 silently rewrites old ones. Each case records the version that introduced it in `added_in`.
 
+## 0.1.1 (2026-10-04)
+
+The corpus is unchanged from 0.1.0: the same 44 cases with the same labels. This release changes how it is
+packaged. The wheel now bundles the corpus and both licenses, so a `pip install` is usable on its own, and the
+CLI falls back to the bundled corpus when there is no `corpus/cases` in the working directory. The version of
+0.1.0's wheel did not contain the corpus.
+
 ## 0.1.0 (2026-10-04)
 
 Seed set of 44 cases (26 positive, 18 negative), all `proposed`.
