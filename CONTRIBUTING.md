@@ -63,5 +63,5 @@ findings file that matches
 
 ## License
 
-The project has no license yet (plan.md, gate B). Please wait for one before contributing
-substantial work.
+By contributing you agree that your contribution is licensed under the license of the part
+of the repository it touches: MIT for code, CC BY 4.0 for the corpus under `corpus/`.

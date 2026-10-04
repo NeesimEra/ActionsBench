@@ -2,9 +2,9 @@
 
 A labeled benchmark and evaluation harness for GitHub Actions workflow security scanners.
 
-> **Status: pre-alpha, not published.** The corpus is a 9-case seed set, every label is
-> still `proposed` (one reviewer), and the license has not been chosen yet. Nothing here
-> is a result yet.
+> **Status: pre-alpha.** The corpus is a 9-case seed set and every label is still
+> `proposed` (one reviewer). Nothing here is a result yet. It is public early so the
+> labels can be challenged, not because it is finished.
 
 ## Why this exists
 
@@ -79,5 +79,7 @@ development setup.
 
 ## License
 
-Not chosen yet. This is a deliberate decision gate (plan.md, gate B), so please do not
-assume any license until one is added.
+- **Code** (`src/`, `tests/`, tooling): [MIT](LICENSE).
+- **Corpus** (`corpus/`, the labeled cases and their labels):
+  [CC BY 4.0](corpus/LICENSE). Reuse is welcome with attribution; please cite ActionsBench
+  and the corpus version you used.

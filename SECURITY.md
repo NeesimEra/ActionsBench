@@ -18,14 +18,17 @@ vulnerable GitHub Actions workflows. They are inert:
 - Cases derived from a real repository without attribution and a license check
   (see plan.md, gate D).
 
+Because the corpus is licensed CC BY 4.0, anything added to it becomes public and
+redistributable. Treat a contribution as permanent.
+
 ## Reporting a problem
 
 If you find a case that exposes a live issue in a real project, or a vulnerability in the
 harness itself (for example, a way a crafted `case.yaml` could read files outside its
 directory), please report it privately rather than opening a public issue.
 
-Private reporting channel: **to be set before the first public release** (plan.md, gate B).
-Until then this repository is not public.
+Use GitHub's private vulnerability reporting: open the repository's **Security** tab and
+choose **Report a vulnerability**. Only the maintainers can see the report.
 
 ## Supported versions
 

@@ -12,6 +12,11 @@ workflows at the repository root's `.github/workflows/`; these live inside
 Tools that scan this repository as a whole will see these files. Exclude `corpus/` when
 scanning the repository itself.
 
+## License
+
+The corpus is licensed under [CC BY 4.0](LICENSE), separately from the code (MIT). When you
+reuse it, credit ActionsBench and state the corpus version.
+
 ## ID scheme
 
 `AB-<CLASS>-NNNN`, where the class code is the case's primary weakness class, or `NEG` for a

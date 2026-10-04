@@ -5,7 +5,7 @@
 **Owner:** Aliu Tijani
 **Product type:** Open-source benchmark and evaluation harness
 **Domain:** Security of GitHub Actions workflows
-**License:** TBD (see Open Questions)
+**License:** MIT (code), CC BY 4.0 (corpus)
 
 The name is a working name. On 2026-10-04 no GitHub repository, PyPI package or npm package named `actionsbench` was found. The GitHub organization handle, domain and trademark position have not been checked.
 
@@ -282,7 +282,7 @@ Stop or pivot if any of these hold after the spike:
 
 1. **Name:** `actionsbench` is free as a repo name, PyPI package and npm package (checked 2026-10-04). Still to check: GitHub organization handle, domain, and whether using "Actions" in the name conflicts with GitHub's branding guidelines.
 2. **Second reviewer:** who provides independent review of labels? The 80% agreement target depends on this.
-3. **License:** code and corpus data may need different licenses (for example a permissive code license and an attribution-style data license). Decide at gate B.
+3. **License:** decided on 2026-10-04: MIT for code and CC BY 4.0 for the corpus (attribution required for reuse).
 4. **Harness language:** decided as Python for now, with reasoning and reversibility in [ADR 0001](adr/0001-python-and-minimal-dependencies.md). Revisit if distribution as a single binary becomes important.
 5. **Maintainer outreach timing:** recommended before any public result. Confirm at gate C.
 6. **IEEE challenge data:** the terms for reusing competition data are unknown. Do not include any until checked.
@@ -308,3 +308,4 @@ Stop or pivot if any of these hold after the spike:
 |---|---|---|
 | 0.1 | 2026-10-04 | Initial draft. |
 | 0.1.1 | 2026-10-04 | Scaffold added. Case status gains `proposed`; findings input gains `cases_run` ("not run is not clean"); hosted service and frontend added as a non-goal; harness language decided (ADR 0001); name checked for collisions. |
+| 0.1.2 | 2026-10-04 | Licenses chosen (MIT code, CC BY 4.0 corpus) and the repository approved for public release by the owner; gate B visibility and license items closed. |

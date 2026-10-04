@@ -59,3 +59,29 @@ and how, what was decided, and what is still open.
 
 - Everything in `plan.md` Phase 1. Second reviewer unnamed. Name collisions checked only for
   repo, PyPI and npm names.
+
+---
+
+## 2026-10-04: Gate B approved, licenses chosen
+
+**Decision (owner, in chat):** make the repository public. Licenses: MIT for code, CC BY 4.0
+for the corpus. The owner also chose to remove their personal email address from the commit
+history before publication.
+
+**Done**
+
+- Added `LICENSE` (MIT) and `corpus/LICENSE` (the official CC BY 4.0 legal code, fetched from
+  creativecommons.org and checked for the expected header and footer). `pyproject.toml` now
+  declares `license = "MIT"`.
+- Replaced the "license TBD" and "private reporting channel TBD" text in README,
+  CONTRIBUTING, SECURITY, PRD and the corpus README. Security reports go through GitHub's
+  private vulnerability reporting.
+- Commit history rewritten to the GitHub noreply address. Because GitHub can keep old
+  unreachable commits fetchable by SHA, the clean history is published in a fresh repository
+  and the earlier private one is renamed and archived instead of being force-pushed over.
+
+**Still open from the plan**
+
+- Gate C (maintainer outreach before publishing results) and gate D (real-repository
+  material) are unchanged; they apply to results and new cases, not to this scaffold.
+- Second reviewer, taxonomy check against the paper, everything in `plan.md` Phase 1.
