@@ -168,3 +168,44 @@ history before publication.
 - Each release adds one merge commit to `main`, so `main` is not strictly linear. Squashing
   release pull requests would make `dev` and `main` diverge (ADR 0004).
 - The check is enforced by the rulesets, which a repository admin can still edit.
+
+---
+
+## 2026-10-04: Isolated scanner runner and zizmor adapter (M0, steps 1 to 3 for one tool)
+
+**Done**
+
+- `actionsbench run --tool zizmor`: copies each case's `.github/` into a fresh temporary
+  directory, runs the pinned scanner there, stores raw SARIF under `results/` (gitignored), and
+  writes a findings file for `actionsbench score`.
+- Adapter contract (`adapters/base.py`) and the zizmor adapter, pinned to 1.30.1 and run with
+  online audits disabled. Only `zizmor/template-injection` is mapped (to injection); scope is
+  therefore the injection class only. Other rules are reported as unmapped.
+- Runner rules: a case that exits unexpectedly, times out, produces unparseable output,
+  reports a different tool version than the pin, or reports a path that does not resolve in
+  the isolated copy is excluded from `cases_run` with the reason recorded. A missing scanner
+  binary is an error, not a clean run.
+- Corpus validation now rejects symbolic links in case directories, so a contributed case
+  cannot point a scanner at files outside it.
+
+**Verified (by running it)**
+
+- 87 unit tests, ruff and mypy pass. The unit tests use a fake scanner to exercise each runner
+  rule: nonzero exit, garbage output, timeout, bad path, version drift, missing binary, and that
+  the scanner never sees `case.yaml` or a path inside the corpus.
+- Real run (`pytest -m integration` and `actionsbench run` then `score`): all 9 seed cases ran
+  with zizmor 1.30.1; injection TP 7, FP 0, FN 0; the negatives were clean; `self-repository`
+  surfaced as unmapped.
+
+**Findings**
+
+- The seed corpus is easy for zizmor, as expected: the seeds came from weaknesses in a different
+  tool. This is one tool, one class, offline mode, and tolerance 0. It is a pipeline check, not
+  a result.
+
+**Not done / next**
+
+- Adapters for actionlint and poutine, each after inspecting real output.
+- Growing the corpus to about 50 cases across all 10 classes; the second reviewer; the line
+  tolerance decision.
+- The integration test is opt-in and not run in CI (it needs a download).

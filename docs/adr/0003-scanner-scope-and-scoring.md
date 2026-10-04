@@ -42,6 +42,11 @@ output shows how tools anchor their findings.
 - Results are harder to summarize in one line. That is intended.
 - Strict validation of the findings file means an adapter bug that mislabels cases fails
   loudly instead of quietly producing a flattering score.
+- In practice a tool's scope is the intersection of the classes it claims to cover and the
+  classes that have a reviewed rule mapping. Declaring a wider scope than the mappings support
+  would turn a missing mapping into a false negative.
+- The runner (`actionsbench run`) enforces "not run is not clean": a case that crashes, times
+  out, or produces unparseable output is excluded from `cases_run` and reported as failed.
 
 ## Alternatives considered
 

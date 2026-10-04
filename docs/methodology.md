@@ -123,6 +123,14 @@ be reproduced and compared.
   verified against the paper (PRD, open question 7).
 - Labels are only as good as their review. Until a case is `agreed`, treat it as a claim.
 - The line-tolerance rule and the exact scope declarations are unresolved until the spike.
+- zizmor is currently scored on the **injection** class only. Only `zizmor/template-injection`
+  has a reviewed mapping, even though zizmor claims wider coverage, so scoring it on other
+  classes would count missing mappings as missed detections. Its scope grows as rules are
+  reviewed one at a time. Its online audits are disabled for determinism, so audits that need
+  GitHub's API do not run.
+- On the 9-case seed corpus zizmor matched every injection label (7 of 7) with no false
+  positives. That says the seed set is easy for it, not that it is strong everywhere; the seeds
+  were chosen from weaknesses in a different tool.
 - The SARIF parser has been checked against real zizmor 1.30.1 output only (rule IDs are
   prefixed, for example `zizmor/template-injection`, and paths are case-relative on an
   isolated copy). Other tools still have to be checked one at a time.

@@ -79,9 +79,21 @@ request or issue if you disagree.
 
 ## Adding a scanner adapter
 
-Not open yet. Per-tool adapters are added in the M0 spike (plan.md), after each tool's
-real output has been checked. In the meantime, any scanner can be scored by producing a
-findings file that matches
+One adapter exists so far (zizmor). Add another only after checking the tool's real output:
+
+1. Run the tool by hand on an isolated copy of a case's `.github/` and read its raw output.
+   Record the version and the exact flags that make the run deterministic.
+2. Add `src/actionsbench/adapters/<tool>.py` implementing the contract in `adapters/base.py`:
+   the command, accepted exit codes, a parser, a pinned version, and a rule map.
+3. Map only rules whose meaning you have reviewed against a benchmark class. Everything else
+   stays unmapped and is reported by the runner. Set `scope` to the classes that have a
+   reviewed mapping, not to everything the tool claims.
+4. Add unit tests with a trimmed real output sample, and an opt-in integration test
+   (`pytest -m integration`) that runs the real tool.
+5. Register it in `adapters/__init__.py` and say in the pull request which rules you mapped and
+   why.
+
+Any scanner can also be scored without an adapter by producing a findings file that matches
 [findings.schema.json](src/actionsbench/schemas/findings.schema.json).
 
 ## License
