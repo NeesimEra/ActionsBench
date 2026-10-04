@@ -107,7 +107,7 @@ def test_score_reports_missing_findings_file(
 
 
 def _use_adapter(monkeypatch: pytest.MonkeyPatch, adapter: FakeAdapter) -> None:
-    monkeypatch.setattr("actionsbench.cli.get_adapter", lambda name: adapter)
+    monkeypatch.setattr("actionsbench.cli.get_adapter", lambda name, options=None: adapter)
 
 
 def test_run_writes_a_findings_file_that_scores(
@@ -160,3 +160,50 @@ def test_run_reports_a_missing_scanner_binary(
     args = ["run", "--tool", "zizmor", "--corpus", str(real_corpus), "--out", str(tmp_path)]
     assert main([*args, "--cases", "AB-INJ-0001"]) == 1
     assert "cannot start" in capsys.readouterr().err
+
+
+def test_configuration_is_shown_by_run_and_by_score(
+    real_corpus: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _use_adapter(monkeypatch, FakeAdapter(fakes.FINDS, configuration="persona=regular"))
+    args = ["run", "--tool", "zizmor", "--corpus", str(real_corpus), "--out", str(tmp_path)]
+    assert main([*args, "--cases", "AB-INJ-0001"]) == 0
+    assert "configuration: persona=regular" in capsys.readouterr().out
+
+    findings = tmp_path / "fake-9.9" / "findings.json"
+    assert main(["score", str(findings), "--corpus", str(real_corpus)]) == 0
+    assert "configuration: persona=regular" in capsys.readouterr().out
+    assert main(["score", str(findings), "--corpus", str(real_corpus), "--format", "json"]) == 0
+    assert json.loads(capsys.readouterr().out)["configuration"] == "persona=regular"
+
+
+def test_score_says_when_no_configuration_was_recorded(
+    real_corpus: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    findings = tmp_path / "findings.json"
+    findings.write_text(json.dumps(perfect_findings(real_corpus)), encoding="utf-8")
+    assert main(["score", str(findings), "--corpus", str(real_corpus)]) == 0
+    assert "configuration: not recorded" in capsys.readouterr().out
+
+
+def test_run_passes_config_options_to_the_adapter(
+    real_corpus: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    args = ["run", "--tool", "zizmor", "--corpus", str(real_corpus), "--out", str(tmp_path)]
+    # An invalid persona is rejected before anything runs.
+    assert main([*args, "--config", "persona=paranoid"]) == 1
+    assert "unknown zizmor persona" in capsys.readouterr().err
+    assert main([*args, "--config", "colour=red"]) == 1
+    assert "unknown option" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("bad", ["persona", "=regular", "persona="])
+def test_run_rejects_malformed_config(
+    bad: str, real_corpus: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    args = ["run", "--tool", "zizmor", "--corpus", str(real_corpus), "--out", str(tmp_path)]
+    assert main([*args, "--config", bad]) == 1
+    assert "KEY=VALUE" in capsys.readouterr().err

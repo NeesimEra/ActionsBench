@@ -89,6 +89,9 @@ real output:
    if the tool needs something in the isolated copy (actionlint needs a project marker) and
    `probe_version` if the tool does not print its version in its output. If the tool is a
    binary, add a pinned installer under `scripts/` that verifies a checksum.
+   If any setting changes the tool's verdict (zizmor's persona is one), expose it through
+   `from_options`, pass it to the tool explicitly, and report it in `configuration`; the
+   baseline is the tool's default made explicit.
 3. Map only rules whose meaning you have reviewed against a benchmark class. Everything else
    stays unmapped and is reported by the runner. Set `scope` to the classes that have a
    reviewed mapping, not to everything the tool claims.

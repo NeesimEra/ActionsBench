@@ -52,7 +52,15 @@ class ScannerAdapter(Protocol):
 
     @property
     def label(self) -> str:
-        """Directory-safe identifier of this tool and pinned version."""
+        """Directory-safe identifier of the tool, its pinned version and its configuration."""
+        ...
+
+    @property
+    def configuration(self) -> str | None:
+        """Canonical text of every setting that changes the tool's verdict, or None.
+
+        Written into every result so a score always says which configuration produced it.
+        """
         ...
 
     def probe_version(self) -> str | None:

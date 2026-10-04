@@ -72,6 +72,7 @@ class ScoreResult:
     mismatches: list[CaseMismatch] = field(default_factory=list)
     not_run: list[str] = field(default_factory=list)
     cases_scored: int = 0
+    configuration: str | None = None
 
 
 def _match(
@@ -119,6 +120,7 @@ def score(cases: Sequence[Case], report: ScannerReport, *, line_tolerance: int =
         line_tolerance=line_tolerance,
         scope=report.scope,
         per_class={cls: ClassScore(in_scope=cls in report.scope) for cls in WeaknessClass},
+        configuration=report.configuration,
     )
 
     for case in sorted(cases, key=lambda c: c.id):

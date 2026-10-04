@@ -54,6 +54,11 @@ changed to suit a tool; the decision waits for more adapters and more multi-line
 - The runner (`actionsbench run`) enforces "not run is not clean": a case that crashes, times
   out, or produces unparseable output is excluded from `cases_run` and reported as failed.
 
+- Tool configuration is part of the result (methodology 5.1). The findings contract has an optional
+  `configuration` string, adapters pass every verdict-changing setting explicitly instead of relying
+  on a tool's own default, and result directories are named after it. This was prompted by
+  zizmor's personas: the same label is detected or not depending on the persona.
+
 ## Alternatives considered
 
 - **Score every tool on every class:** simple, but penalizes tools for out-of-scope

@@ -301,3 +301,43 @@ history before publication.
 - Mapping review for the new classes, once the configuration question is settled. Candidate rules
   seen so far are listed above; none is mapped yet, so both adapters still score injection only.
 - poutine adapter; a named second reviewer; the tolerance decision; about 25 more cases.
+
+---
+
+## 2026-10-04: Tool configuration is part of the result
+
+**Done**
+
+- The findings contract gains an optional `configuration` string. Adapters report it, `run` and
+  `score` print it ("not recorded" when absent), and the result directory name includes it, so
+  results from different configurations cannot overwrite or be mistaken for each other.
+- zizmor: the persona is now always passed explicitly (`--persona=...`) instead of relying on the
+  tool's default, and is selectable with `actionsbench run --tool zizmor --config persona=...`.
+  Result directories are now `results/zizmor-1.30.1-<persona>/`. actionlint records its fixed
+  `external-linters=disabled`. Unknown or malformed options are rejected before anything runs.
+- Baseline decision: each adapter's baseline is the tool's default configuration made explicit
+  (zizmor: `regular`); other configurations are run on purpose and reported beside it. I
+  recommended this and it was not objected to; it is a judgement and can be revisited.
+
+**Verified (by running it)**
+
+- 127 unit tests, ruff and mypy pass. Five opt-in integration tests pass against the real tools:
+  zizmor 1.30.1 under all three personas, a test that pins the persona effect described below, and
+  actionlint 1.7.12.
+- Real run of zizmor over the 25-case corpus under each persona (online audits off):
+
+| Persona | Injection TP / FP / FN | `write-all` (AB-PRM-0001) | Other effects |
+|---|---|---|---|
+| regular | 7 / 0 / 0 | not reported | none on clean cases |
+| pedantic | 7 / 0 / 0 | reported at line 5 | `anonymous-definition` and `concurrency-limits` on every case |
+| auditor | 7 / 0 / 0 | reported at line 5 | same as pedantic |
+
+- The persona does not change the injection result. It changes whether an excessive-permission
+  label is detected at all, so a score for that class must state its configuration.
+
+**Not done / next**
+
+- Mapping review for the new classes (which zizmor and actionlint rules map to which benchmark
+  class), now that the configuration is explicit. It must decide which persona the baseline uses
+  for classes like excessive-permission, where the default misses a labeled weakness.
+- poutine adapter; a named second reviewer; the line-tolerance decision; about 25 more cases.

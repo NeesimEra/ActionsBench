@@ -163,3 +163,13 @@ def test_installer_script_pins_the_same_version_as_the_adapter() -> None:
 def test_label_and_registry() -> None:
     assert ActionlintAdapter(launcher="x").label == f"actionlint-{PINNED_VERSION}"
     assert isinstance(get_adapter("actionlint"), ActionlintAdapter)
+
+
+def test_configuration_is_recorded() -> None:
+    assert ActionlintAdapter(launcher="x").configuration == "external-linters=disabled"
+
+
+def test_actionlint_accepts_no_options() -> None:
+    assert isinstance(ActionlintAdapter.from_options({}), ActionlintAdapter)
+    with pytest.raises(ValueError, match="unknown option"):
+        ActionlintAdapter.from_options({"persona": "regular"})

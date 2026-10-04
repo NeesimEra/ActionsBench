@@ -40,6 +40,7 @@ def _report_from_json(data: dict[str, Any]) -> ScannerReport:
         version=data["version"],
         scope=frozenset(WeaknessClass(c) for c in data["scope"]),
         cases_run=frozenset(data["cases_run"]),
+        configuration=data.get("configuration"),
         findings=tuple(
             Finding(
                 case_id=f["case_id"],
@@ -127,7 +128,18 @@ def _cmd_run(args: argparse.Namespace) -> int:
             return 1
         cases = [c for c in cases if c.id in wanted]
 
-    adapter = get_adapter(args.tool)
+    options: dict[str, str] = {}
+    for item in args.config:
+        key, sep, value = item.partition("=")
+        if not sep or not key or not value:
+            print(f"error: --config expects KEY=VALUE, got '{item}'", file=sys.stderr)
+            return 1
+        options[key] = value
+    try:
+        adapter = get_adapter(args.tool, options)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
     try:
         result = run_scanner(adapter, cases, args.out, timeout=args.timeout)
     except (ScannerNotFoundError, ScannerVersionError) as exc:
@@ -141,6 +153,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
     report = result.report
     scope = ", ".join(sorted(c.value for c in report.scope))
     print(f"{report.tool} {report.version}: ran {len(report.cases_run)} of {len(cases)} case(s)")
+    print(f"configuration: {report.configuration or 'not recorded'}")
     print(f"scope (classes with a reviewed rule mapping): {scope}")
     print(f"findings: {findings_path}")
     print(f"raw output: {result.raw_dir}")
@@ -181,6 +194,13 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
     run.add_argument("--out", type=Path, default=Path("results"))
     run.add_argument("--cases", nargs="+", metavar="ID", help="only run these case ids")
+    run.add_argument(
+        "--config",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="tool setting, repeatable (zizmor: persona=regular|pedantic|auditor)",
+    )
     run.add_argument("--timeout", type=float, default=120.0, help="seconds per case")
     run.set_defaults(func=_cmd_run)
 

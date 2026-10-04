@@ -65,13 +65,13 @@ def findings_document(report: ScannerReport) -> dict[str, Any]:
         if f.rule_id is not None:
             item["rule_id"] = f.rule_id
         findings.append(item)
-    return {
-        "tool": report.tool,
-        "version": report.version,
-        "scope": sorted(c.value for c in report.scope),
-        "cases_run": sorted(report.cases_run),
-        "findings": findings,
-    }
+    document: dict[str, Any] = {"tool": report.tool, "version": report.version}
+    if report.configuration is not None:
+        document["configuration"] = report.configuration
+    document["scope"] = sorted(c.value for c in report.scope)
+    document["cases_run"] = sorted(report.cases_run)
+    document["findings"] = findings
+    return document
 
 
 def _unresolved_paths(findings: Sequence[Finding], scan_dir: Path) -> list[str]:
@@ -101,6 +101,7 @@ def run_scanner(
             scope=adapter.scope,
             cases_run=frozenset(),
             findings=(),
+            configuration=adapter.configuration,
         ),
         raw_dir=raw_dir,
     )
@@ -184,5 +185,6 @@ def run_scanner(
         scope=adapter.scope,
         cases_run=frozenset(cases_run),
         findings=tuple(findings),
+        configuration=adapter.configuration,
     )
     return result

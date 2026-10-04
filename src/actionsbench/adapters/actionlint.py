@@ -25,6 +25,7 @@ import json
 import os
 import re
 import subprocess
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -69,9 +70,22 @@ class ActionlintAdapter:
     def __init__(self, launcher: str | None = None) -> None:
         self._launcher = launcher or _default_launcher()
 
+    @classmethod
+    def from_options(cls, options: Mapping[str, str]) -> ActionlintAdapter:
+        if options:
+            raise ValueError(
+                f"unknown option(s) for actionlint: {', '.join(sorted(options))} (none accepted)"
+            )
+        return cls()
+
     @property
     def label(self) -> str:
         return f"{self.name}-{PINNED_VERSION}"
+
+    @property
+    def configuration(self) -> str | None:
+        # Fixed, not user-selectable: the external linters would make results machine-dependent.
+        return "external-linters=disabled"
 
     def probe_version(self) -> str | None:
         try:

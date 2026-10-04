@@ -56,8 +56,32 @@ def test_launcher_can_be_overridden_for_a_local_install(tmp_path: Path) -> None:
     assert ZizmorAdapter(launcher=["zizmor"]).command(tmp_path)[0] == "zizmor"
 
 
-def test_label_names_tool_and_version() -> None:
-    assert ZizmorAdapter().label == f"zizmor-{PINNED_VERSION}"
+def test_label_names_tool_version_and_persona() -> None:
+    assert ZizmorAdapter().label == f"zizmor-{PINNED_VERSION}-regular"
+    assert ZizmorAdapter(persona="auditor").label == f"zizmor-{PINNED_VERSION}-auditor"
+
+
+def test_persona_is_always_passed_explicitly(tmp_path: Path) -> None:
+    # Never rely on zizmor's own default: the persona changes its verdict and must be recorded.
+    assert "--persona=regular" in ZizmorAdapter().command(tmp_path)
+    assert "--persona=pedantic" in ZizmorAdapter(persona="pedantic").command(tmp_path)
+
+
+def test_configuration_states_every_setting_that_changes_the_verdict() -> None:
+    assert ZizmorAdapter().configuration == "persona=regular; online-audits=off"
+    assert ZizmorAdapter(persona="auditor").configuration == "persona=auditor; online-audits=off"
+
+
+def test_unknown_persona_is_rejected() -> None:
+    with pytest.raises(ValueError, match="unknown zizmor persona"):
+        ZizmorAdapter(persona="paranoid")
+
+
+def test_options_are_validated() -> None:
+    assert ZizmorAdapter.from_options({"persona": "pedantic"}).label.endswith("-pedantic")
+    assert ZizmorAdapter.from_options({}).label.endswith("-regular")
+    with pytest.raises(ValueError, match="unknown option"):
+        ZizmorAdapter.from_options({"personas": "regular"})
 
 
 def test_scope_is_exactly_the_classes_with_a_reviewed_mapping() -> None:
@@ -92,5 +116,6 @@ def test_run_with_no_results_is_valid() -> None:
 def test_registry() -> None:
     assert set(ADAPTERS) == {"actionlint", "zizmor"}
     assert isinstance(get_adapter("zizmor"), ZizmorAdapter)
+    assert get_adapter("zizmor", {"persona": "auditor"}).label.endswith("-auditor")
     with pytest.raises(ValueError, match="unknown scanner"):
         get_adapter("nope")
