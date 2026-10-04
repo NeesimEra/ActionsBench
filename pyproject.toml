@@ -16,7 +16,8 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Typing :: Typed",
 ]
-# License is intentionally unset: it is a human decision (see plan.md, gate B).
+license = "MIT"
+license-files = ["LICENSE"]
 dependencies = [
     "pyyaml>=6.0",
     "jsonschema>=4.21",
