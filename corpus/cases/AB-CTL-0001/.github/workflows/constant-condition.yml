@@ -1,0 +1,14 @@
+name: Constant condition
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish only from main
+        if: ${{ true }}
+        run: echo "publishing"

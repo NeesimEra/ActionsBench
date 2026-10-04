@@ -1,0 +1,15 @@
+id: AB-NEG-0007
+title: "Action pinned to the patched version"
+is_negative: true
+expected: []
+rationale: >-
+  The SHA is the commit of actions/download-artifact v4.1.3, the advisory's patched version.
+  This is the clean twin of AB-KVC-0001; reporting a known vulnerable component here is
+  wrong.
+references:
+  - https://github.com/advisories/GHSA-cxww-7g56-2vh6
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"

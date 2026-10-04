@@ -1,0 +1,24 @@
+id: AB-PRM-0001
+title: "Workflow token granted write access to every scope"
+is_negative: false
+expected:
+  - weakness_class: excessive-permission
+    file: .github/workflows/write-all.yml
+    line: 5
+    evidence: "permissions: write-all"
+rationale: >-
+  write-all gives the job's token write access to every permission scope although the job
+  only echoes a string. Least privilege means granting only the scopes a job needs, so any
+  compromise of a step in this workflow inherits far more power than necessary.
+references:
+  - https://arxiv.org/html/2601.14455v2
+  - https://docs.zizmor.sh/audits/
+  - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The actionlint checks documentation confirms write-all is a valid value, so the label is
+  about excess, not syntax.

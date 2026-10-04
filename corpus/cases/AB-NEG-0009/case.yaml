@@ -1,0 +1,14 @@
+id: AB-NEG-0009
+title: "Step guarded by a real condition"
+is_negative: true
+expected: []
+rationale: >-
+  The step is gated by a condition that compares the ref to main, so the intended safeguard
+  actually restricts when it runs. This is the clean twin of AB-CTL-0001.
+references:
+  - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"

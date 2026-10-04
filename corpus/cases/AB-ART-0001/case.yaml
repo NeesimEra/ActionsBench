@@ -1,0 +1,28 @@
+id: AB-ART-0001
+title: "Checkout credentials uploaded in a workflow artifact"
+is_negative: false
+expected:
+  - weakness_class: artifact-integrity
+    file: .github/workflows/artipacked.yml
+    line: 13
+    evidence: "actions/checkout@"
+rationale: >-
+  actions/checkout persists the job token in .git/config by default, and the upload step
+  sets include-hidden-files: true, so the token ends up inside the artifact where anyone who
+  can download it can read it. This is the pattern zizmor calls artipacked.
+references:
+  - https://docs.zizmor.sh/audits/
+  - https://github.com/sparkrew/github-actions-security
+  - https://github.com/actions/upload-artifact/blob/043fb46d1a93c77aae656e7c1c64a875d1fc6a0a/action.yml
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  This label follows the paper's rule mapping, which files zizmor's artipacked audit under
+  artifact integrity. The class's prose definition is about unvalidated artifacts, so the
+  fit is debatable and the case is a candidate for challenge. include-hidden-files is set
+  explicitly because it defaults to false (checked in the action's metadata at the pinned
+  SHA), without which .git would not be uploaded and there would be no weakness. The label
+  is anchored at the checkout step, which is where the credentials are persisted.

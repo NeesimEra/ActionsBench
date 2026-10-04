@@ -1,0 +1,15 @@
+id: AB-NEG-0004
+title: "Workflow token limited to read access"
+is_negative: true
+expected: []
+rationale: >-
+  The workflow explicitly grants only contents: read, which is what the job needs. This is
+  the clean twin of AB-PRM-0001; a scanner reporting excessive permissions here is wrong.
+references:
+  - https://docs.zizmor.sh/audits/
+  - https://arxiv.org/html/2601.14455v2
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
