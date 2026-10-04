@@ -77,6 +77,9 @@ Labels are claims, and they are meant to be challenged. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for adding cases, challenging a label, and the
 development setup.
 
+All pull requests target the `dev` branch. `main` and the `v*` tags are the released
+state (see [ADR 0004](docs/adr/0004-branching-model.md)).
+
 ## License
 
 - **Code** (`src/`, `tests/`, tooling): [MIT](LICENSE).

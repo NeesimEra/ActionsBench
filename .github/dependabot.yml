@@ -4,6 +4,7 @@ updates:
   # GitHub Actions are pinned to full commit SHAs; Dependabot keeps the pins current.
   - package-ecosystem: "github-actions"
     directory: "/"
+    target-branch: "dev"
     schedule:
       interval: "weekly"
     cooldown:
@@ -14,6 +15,7 @@ updates:
   # Reads uv.lock. Requires the lockfile to stay committed.
   - package-ecosystem: "uv"
     directory: "/"
+    target-branch: "dev"
     schedule:
       interval: "weekly"
     cooldown:

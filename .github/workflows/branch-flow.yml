@@ -1,0 +1,49 @@
+name: Branch flow
+
+# Every pull request must target dev. The only exception is the release pull request
+# from dev into main. See docs/adr/0004-branching-model.md.
+#
+# This workflow checks out nothing and runs no pull request code. Branch names are
+# attacker-controlled, so they are passed through environment variables and are never
+# interpolated into the script.
+
+on:
+  pull_request:
+    # "edited" fires when a pull request's base branch is changed, so retargeting re-runs
+    # the check.
+    types: [opened, reopened, synchronize, edited]
+
+permissions: {}
+
+concurrency:
+  group: branch-flow-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  target:
+    name: PR target
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    env:
+      BASE_REF: ${{ github.base_ref }}
+      HEAD_REF: ${{ github.head_ref }}
+      HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+      THIS_REPO: ${{ github.repository }}
+    steps:
+      - name: Enforce the branch flow
+        run: |
+          set -eu
+          if [ "$BASE_REF" = "dev" ]; then
+            echo "OK: pull request targets dev."
+            exit 0
+          fi
+          if [ "$BASE_REF" = "main" ]; then
+            if [ "$HEAD_REF" = "dev" ] && [ "$HEAD_REPO" = "$THIS_REPO" ]; then
+              echo "OK: release pull request from dev into main."
+              exit 0
+            fi
+            echo "::error::Only dev may be merged into main. Open this pull request against dev instead."
+            exit 1
+          fi
+          echo "::error::Pull requests must target dev (this one targets '$BASE_REF')."
+          exit 1
