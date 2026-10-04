@@ -3,7 +3,9 @@
 A labeled benchmark and evaluation harness for GitHub Actions workflow security scanners.
 
 > **Status: pre-alpha.** The corpus is a small hand-built set (44 cases) and every label is still
-> `proposed` (one reviewer). Nothing here is a result yet. It is public early so the
+> `proposed` (one author). The facts behind them were audited against primary sources
+> ([docs/evidence-audit.md](docs/evidence-audit.md)), but no label has been independently reviewed.
+> Nothing here is a result yet. It is public early so the
 > labels can be challenged, not because it is finished.
 
 ## Why this exists

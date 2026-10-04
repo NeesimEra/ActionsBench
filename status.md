@@ -541,3 +541,67 @@ the cases.
 
 - poutine adapter (a third tool tests the matching rule and the mappings); a named second reviewer;
   decide what to do about per-pattern coverage and the hardening-gap class.
+
+---
+
+## 2026-10-04: Evidence audit (desk research, nobody else involved)
+
+**What was asked.** Whether the labels can be verified by researching online, without involving a third
+party. Partly yes, and this entry says exactly how far. The record is
+[docs/evidence-audit.md](docs/evidence-audit.md); the experiment is `tools/verify-expressions`.
+
+**Done**
+
+- Checked the facts behind all 44 cases against primary sources: GitHub's secure-use and reusable-workflow
+  documentation, the Security Lab article, the actions' own READMEs and source at pinned tags, the tools'
+  documentation, OWASP CICD-SEC-9, and GitHub's advisories API with the commits resolved from the
+  repositories. 13 case-checks are demonstrated by experiment, 35 confirmed in primary documentation,
+  4 in advisory data, 2 in source code, and 4 are marked as depending on judgement.
+- The experiment evaluates each injection case's expression with GitHub's own published expression engine
+  (`@actions/expressions` 0.3.61, MIT, installed with scripts disabled and pinned by lockfile), substitutes
+  the result into the script as GitHub documents, runs it in bash, and checks for a canary file. Every
+  positive ran the payload (`format()`, `contains(...) && x`, `toJSON()`, `ref_name`, the commit author name,
+  a composite input, a deep line, an issue title, a review comment). Every clean twin was inert: a boolean
+  `contains()`, the pull request number, the commit SHA, and an environment variable. Git itself accepts the
+  branch-name payload as valid.
+- It is a regression check: it exits non-zero when a result differs from the labels. I proved that with a
+  deliberately wrong expectation (my first attempt at that test used GNU-only `sed` on macOS, never changed the
+  file, and "passed" for the wrong reason; the redo diffs the file first).
+
+**Defects found and fixed**
+
+- AB-ART-0001 and AB-NEG-0008 described a weakness that did not exist at the version they pinned. With
+  `actions/checkout` 7.0.1 the job token is not in `.git/config` (changelog 6.0.0: "Persist creds to a separate
+  file"; source confirms), so an artifact of the workspace would not contain it. Both now pin 4.2.2, where
+  the source writes the token into `.git/config` and removes it when `persist-credentials` is false.
+- AB-SEC-0001 omitted that `secrets: inherit` only works within the same organization or enterprise.
+- AB-INJ-0004 cited an advisory about `github.ref`, not `github.ref_name`; the case now says so.
+- Cases that were "reasoned, proposed" (AB-INJ-0001, 0002, 0003, 0007) are now demonstrated, and their
+  wording says so.
+
+**Verified (by running it)**
+
+- 195 unit tests and 5 opt-in integration tests pass; ruff and mypy clean; all 44 cases validate. Tool results
+  are unchanged by the corrections: zizmor still flags the corrected artifact case and is silent on its twin.
+
+**What it does not establish**
+
+- It does not make any label `agreed`. A re-read by the author, or by the assistant that wrote the cases, is
+  not independent, and methodology section 3 now separates `proposed`, evidence-audited and `agreed`.
+- It is not a live run: the expression engine is one of several implementations of the language, the
+  substitution step is modeled from documentation, and checkout behavior was read from source, not run.
+- Judgement calls remain (the cases marked J): the class for AB-ART-0001, the definitional split in
+  AB-NEG-0010, whether a constant condition belongs in control-flow, the class fit of AB-ART-0002.
+
+**Gates (owner decisions, not mine)**
+
+- Gate A (spike go or no-go): the evidence supports a provisional go. Scanners clearly disagree with careful
+  labels, and the labels' facts hold up. It is not firm until label judgement is independently reviewed.
+- Gate C (share results with scanner maintainers before publishing weaknesses): not crossed. The instruction
+  to avoid third parties was about verifying labels; whether it also waives maintainer outreach before an
+  official release is a decision for the owner and has not been made. Per-tool results are already in this
+  public repository, caveated.
+
+**Not done / next**
+
+- poutine adapter; decide the hardening-gap class and per-pattern coverage; put the experiment in CI if wanted.
