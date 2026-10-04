@@ -160,3 +160,9 @@ def test_require_valid_corpus_raises_with_all_problems(make_case: CaseWriter) ->
     with pytest.raises(CorpusError) as excinfo:
         require_valid_corpus(corpus_root)
     assert len(excinfo.value.problems) == 2
+
+
+def test_symbolic_links_are_rejected(make_case: CaseWriter) -> None:
+    case_dir = make_case()
+    (case_dir / ".github" / "link.yml").symlink_to(case_dir / "case.yaml")
+    assert any("symbolic links are not allowed" in m for m in _messages(case_dir))

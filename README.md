@@ -33,13 +33,16 @@ Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 uv sync
 uv run actionsbench validate      # check every case in corpus/cases
 uv run actionsbench stats         # cases per weakness class
-uv run actionsbench score findings.json
+uv run actionsbench run --tool zizmor   # scan isolated copies of every case (needs uvx)
+uv run actionsbench score results/zizmor-1.30.1/findings.json
 ```
 
-`score` takes a normalized findings file (schema:
-[findings.schema.json](src/actionsbench/schemas/findings.schema.json)), so any scanner can
-be scored today by producing that file. Built-in scanner adapters come later (see
-[plan.md](plan.md)).
+`run` executes a scanner that has a reviewed adapter (so far only zizmor, scored on the
+injection class) and writes a findings file; raw output goes to `results/` (gitignored).
+`score` takes any normalized findings file (schema:
+[findings.schema.json](src/actionsbench/schemas/findings.schema.json)), so a scanner
+without an adapter can still be scored by producing that file. More adapters are planned
+(see [plan.md](plan.md)).
 
 Run the commands from the repository root, or pass `--corpus` explicitly.
 

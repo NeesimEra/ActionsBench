@@ -9,7 +9,9 @@ import pytest
 from actionsbench.cli import main
 from actionsbench.corpus import require_valid_corpus
 from actionsbench.taxonomy import WeaknessClass
+from tests import fakes
 from tests.conftest import CaseWriter
+from tests.fakes import FakeAdapter
 
 
 def perfect_findings(corpus: Path) -> dict[str, Any]:
@@ -102,3 +104,59 @@ def test_score_reports_missing_findings_file(
 ) -> None:
     assert main(["score", str(tmp_path / "nope.json"), "--corpus", str(real_corpus)]) == 1
     assert "cannot read findings file" in capsys.readouterr().err
+
+
+def _use_adapter(monkeypatch: pytest.MonkeyPatch, adapter: FakeAdapter) -> None:
+    monkeypatch.setattr("actionsbench.cli.get_adapter", lambda name: adapter)
+
+
+def test_run_writes_a_findings_file_that_scores(
+    real_corpus: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _use_adapter(monkeypatch, FakeAdapter(fakes.FINDS))
+    out = tmp_path / "results"
+    args = ["run", "--tool", "zizmor", "--corpus", str(real_corpus), "--out", str(out)]
+    assert main([*args, "--cases", "AB-INJ-0001"]) == 0
+    printed = capsys.readouterr().out
+    assert "ran 1 of 1 case(s)" in printed
+    assert "fake/other: 1 case(s)" in printed  # the unmapped rule is surfaced
+
+    findings = out / "fake-9.9" / "findings.json"
+    assert main(["score", str(findings), "--corpus", str(real_corpus), "--format", "json"]) == 0
+    result = json.loads(capsys.readouterr().out)
+    injection = next(c for c in result["classes"] if c["class"] == "injection")
+    assert (injection["tp"], injection["fp"], injection["fn"]) == (1, 0, 0)
+
+
+def test_run_fails_loudly_when_a_case_does_not_run(
+    real_corpus: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _use_adapter(monkeypatch, FakeAdapter(fakes.EXIT_2))
+    args = ["run", "--tool", "zizmor", "--corpus", str(real_corpus), "--out", str(tmp_path)]
+    assert main([*args, "--cases", "AB-INJ-0001"]) == 1
+    err = capsys.readouterr().err
+    assert "FAILED AB-INJ-0001: exit code 2: boom" in err
+    assert "excluded from scoring" in err
+
+
+def test_run_rejects_unknown_case_ids(real_corpus: Path, tmp_path: Path) -> None:
+    args = ["run", "--tool", "zizmor", "--corpus", str(real_corpus), "--out", str(tmp_path)]
+    assert main([*args, "--cases", "AB-INJ-9999"]) == 1
+
+
+def test_run_reports_a_missing_scanner_binary(
+    real_corpus: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    _use_adapter(monkeypatch, FakeAdapter(fakes.OK_EMPTY, launcher="no-such-binary-xyz"))
+    args = ["run", "--tool", "zizmor", "--corpus", str(real_corpus), "--out", str(tmp_path)]
+    assert main([*args, "--cases", "AB-INJ-0001"]) == 1
+    assert "cannot start" in capsys.readouterr().err
