@@ -89,6 +89,9 @@ def _cmd_stats(args: argparse.Namespace) -> int:
 
 
 def _cmd_score(args: argparse.Namespace) -> int:
+    if args.match == "region" and args.tolerance is not None:
+        print("error: --tolerance only applies with --match line", file=sys.stderr)
+        return 1
     try:
         data = json.loads(args.findings.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
@@ -101,7 +104,12 @@ def _cmd_score(args: argparse.Namespace) -> int:
         return 1
     try:
         cases = require_valid_corpus(args.corpus)
-        result = score(cases, _report_from_json(data), line_tolerance=args.tolerance)
+        result = score(
+            cases,
+            _report_from_json(data),
+            matching=args.match,
+            line_tolerance=args.tolerance or 0,
+        )
     except CorpusError as exc:
         for problem in exc.problems:
             print(f"error: {problem}", file=sys.stderr)
@@ -208,7 +216,16 @@ def build_parser() -> argparse.ArgumentParser:
     scoring.add_argument("findings", type=Path, help="JSON file matching findings.schema.json")
     scoring.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
     scoring.add_argument(
-        "--tolerance", type=int, default=0, help="allowed line distance (default 0)"
+        "--match",
+        choices=["region", "line"],
+        default="region",
+        help="region (default): same step, job or top-level key; line: exact line, see --tolerance",
+    )
+    scoring.add_argument(
+        "--tolerance",
+        type=int,
+        default=None,
+        help="allowed line distance; only valid with --match line (default 0)",
     )
     scoring.add_argument("--format", choices=["text", "json"], default="text")
     scoring.set_defaults(func=_cmd_score)
