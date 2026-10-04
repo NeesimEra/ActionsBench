@@ -1,0 +1,44 @@
+name: Challenge a label
+description: Say that a case's expected finding is wrong, missing, or should not exist.
+title: "Challenge: AB-XXX-0000"
+labels: ["label-challenge"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Labels are claims, and challenges are how they get better. Please include evidence
+        a reviewer can check. A link to documentation, an advisory, or a minimal
+        reproduction is much more useful than an opinion.
+  - type: input
+    id: case
+    attributes:
+      label: Case ID
+      placeholder: AB-INJ-0001
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is wrong?
+      options:
+        - A reported weakness is not actually one (false label)
+        - A weakness is missing from the expected findings
+        - The weakness class is wrong
+        - The line anchor is wrong
+        - The case is ambiguous and should be marked disputed
+    validations:
+      required: true
+  - type: textarea
+    id: argument
+    attributes:
+      label: Why
+      description: Explain the reasoning in plain language.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Links to documentation, advisories, or a minimal reproduction. Do not post a live vulnerability in a real repository; see SECURITY.md.
+    validations:
+      required: true

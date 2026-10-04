@@ -1,0 +1,22 @@
+version: 2
+
+updates:
+  # GitHub Actions are pinned to full commit SHAs; Dependabot keeps the pins current.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "chore(deps)"
+
+  # Reads uv.lock. Requires the lockfile to stay committed.
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "chore(deps)"

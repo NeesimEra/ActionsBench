@@ -1,0 +1,7 @@
+# Everything needs the maintainer's eyes while the project is single-maintainer.
+*                       @Aliu2211
+
+# Labels are the product. Changes to the corpus and its contracts get explicit ownership.
+/corpus/                @Aliu2211
+/src/actionsbench/schemas/  @Aliu2211
+/.github/               @Aliu2211

@@ -1,0 +1,47 @@
+name: Propose a case
+description: Suggest a workflow pattern that should be in the corpus.
+title: "Case idea: "
+labels: ["new-case"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Cases are small, synthetic, and single-purpose. Please do not paste workflows from
+        real repositories that contain a live, unfixed vulnerability; see SECURITY.md.
+  - type: dropdown
+    id: weakness_class
+    attributes:
+      label: Weakness class
+      options:
+        - artifact-integrity
+        - control-flow
+        - excessive-permission
+        - runner-compatibility
+        - hardening-gap
+        - injection
+        - known-vulnerable-component
+        - privileged-trigger
+        - secrets-exposure
+        - unpinned-dependency
+        - negative (looks risky but is safe)
+    validations:
+      required: true
+  - type: textarea
+    id: pattern
+    attributes:
+      label: The pattern
+      description: Describe the workflow pattern and why a scanner should or should not report it.
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References
+      description: Documentation, an advisory, or a published incident that supports the label.
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed scanner behavior (optional)
+      description: Which scanners report it, which miss it, and the versions you used.
