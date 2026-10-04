@@ -12,6 +12,7 @@ import json
 import sys
 from collections import Counter
 from collections.abc import Sequence
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
@@ -30,7 +31,33 @@ from actionsbench.runner import findings_document, run_scanner
 from actionsbench.scoring import ScoringInputError, score
 from actionsbench.taxonomy import WeaknessClass
 
-DEFAULT_CORPUS = Path("corpus/cases")
+LOCAL_CORPUS = Path("corpus/cases")
+
+
+def _packaged_corpus() -> Path:
+    # The wheel ships the corpus as package data (see pyproject.toml). Installed normally this is a
+    # real directory; a zipped install is not supported.
+    return Path(str(files("actionsbench"))) / "_corpus" / "cases"
+
+
+def default_corpus(*, local: Path = LOCAL_CORPUS, packaged: Path | None = None) -> Path:
+    """Where to read the corpus when --corpus is not given.
+
+    A `corpus/cases` directory in the working directory wins, so a clone of the repository uses its
+    own, possibly edited, corpus. Otherwise the copy bundled in the installed package is used.
+    If neither exists the local path is returned, so the error names the path a user expects.
+    """
+    bundled = packaged if packaged is not None else _packaged_corpus()
+    if local.is_dir():
+        return local
+    if bundled.is_dir():
+        return bundled
+    return local
+
+
+def _corpus(args: argparse.Namespace) -> Path:
+    corpus: Path | None = args.corpus
+    return corpus if corpus is not None else default_corpus()
 
 
 def _report_from_json(data: dict[str, Any]) -> ScannerReport:
@@ -55,7 +82,7 @@ def _report_from_json(data: dict[str, Any]) -> ScannerReport:
 
 
 def _cmd_validate(args: argparse.Namespace) -> int:
-    cases, problems = load_corpus(args.corpus)
+    cases, problems = load_corpus(_corpus(args))
     for problem in problems:
         print(f"error: {problem}", file=sys.stderr)
     if problems:
@@ -67,7 +94,7 @@ def _cmd_validate(args: argparse.Namespace) -> int:
 
 def _cmd_stats(args: argparse.Namespace) -> int:
     try:
-        cases = require_valid_corpus(args.corpus)
+        cases = require_valid_corpus(_corpus(args))
     except CorpusError as exc:
         for problem in exc.problems:
             print(f"error: {problem}", file=sys.stderr)
@@ -103,7 +130,7 @@ def _cmd_score(args: argparse.Namespace) -> int:
             print(f"error: {problem}", file=sys.stderr)
         return 1
     try:
-        cases = require_valid_corpus(args.corpus)
+        cases = require_valid_corpus(_corpus(args))
         result = score(
             cases,
             _report_from_json(data),
@@ -123,7 +150,7 @@ def _cmd_score(args: argparse.Namespace) -> int:
 
 def _cmd_run(args: argparse.Namespace) -> int:
     try:
-        cases = require_valid_corpus(args.corpus)
+        cases = require_valid_corpus(_corpus(args))
     except CorpusError as exc:
         for problem in exc.problems:
             print(f"error: {problem}", file=sys.stderr)
@@ -188,18 +215,33 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
 
     validate = sub.add_parser("validate", help="validate every case in the corpus")
-    validate.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
+    validate.add_argument(
+        "--corpus",
+        type=Path,
+        default=None,
+        help="corpus directory (default: ./corpus/cases, else the bundled corpus)",
+    )
     validate.set_defaults(func=_cmd_validate)
 
     stats = sub.add_parser("stats", help="count cases per weakness class")
-    stats.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
+    stats.add_argument(
+        "--corpus",
+        type=Path,
+        default=None,
+        help="corpus directory (default: ./corpus/cases, else the bundled corpus)",
+    )
     stats.set_defaults(func=_cmd_stats)
 
     run = sub.add_parser(
         "run", help="run a scanner on isolated copies of the cases and write a findings file"
     )
     run.add_argument("--tool", required=True, choices=sorted(ADAPTERS))
-    run.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
+    run.add_argument(
+        "--corpus",
+        type=Path,
+        default=None,
+        help="corpus directory (default: ./corpus/cases, else the bundled corpus)",
+    )
     run.add_argument("--out", type=Path, default=Path("results"))
     run.add_argument("--cases", nargs="+", metavar="ID", help="only run these case ids")
     run.add_argument(
@@ -214,7 +256,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     scoring = sub.add_parser("score", help="score a normalized findings file against the corpus")
     scoring.add_argument("findings", type=Path, help="JSON file matching findings.schema.json")
-    scoring.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
+    scoring.add_argument(
+        "--corpus",
+        type=Path,
+        default=None,
+        help="corpus directory (default: ./corpus/cases, else the bundled corpus)",
+    )
     scoring.add_argument(
         "--match",
         choices=["region", "line"],
