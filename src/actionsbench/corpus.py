@@ -126,6 +126,13 @@ def _check_semantics(case_dir: Path, raw: dict[str, Any]) -> list[Problem]:
     if not (case_dir / ".github").is_dir():
         problems.append(Problem(location, "case has no .github/ directory to scan"))
 
+    # Scanners are run on a copy of the case. A symlink could make that copy (or a scanner)
+    # read files outside the case directory, so links are not allowed at all.
+    for path in sorted(case_dir.rglob("*")):
+        if path.is_symlink():
+            rel = path.relative_to(case_dir).as_posix()
+            problems.append(Problem(location, f"symbolic links are not allowed ('{rel}')"))
+
     for item in expected:
         problems.extend(_check_expected_file(case_dir, item, location))
     return problems
