@@ -1,0 +1,12 @@
+{
+  "name": "actionsbench-verify-expressions",
+  "private": true,
+  "description": "Evidence check for the injection cases: evaluates their expressions with GitHub's own engine and runs the result in a shell.",
+  "type": "module",
+  "scripts": {
+    "verify": "node experiment.mjs"
+  },
+  "dependencies": {
+    "@actions/expressions": "0.3.61"
+  }
+}
