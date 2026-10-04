@@ -207,3 +207,81 @@ def test_run_rejects_malformed_config(
     args = ["run", "--tool", "zizmor", "--corpus", str(real_corpus), "--out", str(tmp_path)]
     assert main([*args, "--config", bad]) == 1
     assert "KEY=VALUE" in capsys.readouterr().err
+
+
+OFFSET_FINDINGS = {
+    # the four anchoring differences observed from real zizmor 1.30.1 and actionlint 1.7.12:
+    # (case, file, line the tool reports); each label is on a different line of the same construct
+    "AB-TRG-0001": ("privileged-trigger", ".github/workflows/pwn-request.yml", 2),
+    "AB-SEC-0001": ("secrets-exposure", ".github/workflows/inherit.yml", 10),
+    "AB-ART-0001": ("artifact-integrity", ".github/workflows/artipacked.yml", 12),
+    "AB-INJ-0006": ("injection", ".github/workflows/github-script.yml", 15),
+}
+
+
+def _offset_findings_file(tmp_path: Path) -> Path:
+    data = {
+        "tool": "offset-tool",
+        "version": "1.0",
+        "scope": sorted(cls for cls, _, _ in OFFSET_FINDINGS.values()),
+        "cases_run": sorted(OFFSET_FINDINGS),
+        "findings": [
+            {"case_id": cid, "weakness_class": cls, "file": file, "line": line}
+            for cid, (cls, file, line) in OFFSET_FINDINGS.items()
+        ],
+    }
+    path = tmp_path / "offsets.json"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    return path
+
+
+def _cells(output: str) -> dict[str, tuple[int, int, int]]:
+    return {
+        c["class"]: (c["tp"], c["fp"], c["fn"])
+        for c in json.loads(output)["classes"]
+        if c["class"] in {cls for cls, _, _ in OFFSET_FINDINGS.values()}
+    }
+
+
+def test_score_matches_the_same_step_by_default(
+    real_corpus: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    path = _offset_findings_file(tmp_path)
+    assert main(["score", str(path), "--corpus", str(real_corpus), "--format", "json"]) == 0
+    cells = _cells(capsys.readouterr().out)
+    assert set(cells.values()) == {(1, 0, 0)}
+    assert len(cells) == 4
+
+
+def test_score_reports_the_matching_rule(
+    real_corpus: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    path = _offset_findings_file(tmp_path)
+    assert main(["score", str(path), "--corpus", str(real_corpus)]) == 0
+    assert "matching: region" in capsys.readouterr().out
+
+
+def test_strict_line_matching_charges_each_offset_as_a_miss_and_a_false_alarm(
+    real_corpus: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    path = _offset_findings_file(tmp_path)
+    args = ["score", str(path), "--corpus", str(real_corpus), "--format", "json"]
+    assert main([*args, "--match", "line"]) == 0
+    assert set(_cells(capsys.readouterr().out).values()) == {(0, 1, 1)}
+
+
+def test_a_one_line_tolerance_in_line_mode_matches_them_again(
+    real_corpus: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    path = _offset_findings_file(tmp_path)
+    args = ["score", str(path), "--corpus", str(real_corpus), "--format", "json"]
+    assert main([*args, "--match", "line", "--tolerance", "1"]) == 0
+    assert set(_cells(capsys.readouterr().out).values()) == {(1, 0, 0)}
+
+
+def test_tolerance_without_line_matching_is_an_error(
+    real_corpus: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    path = _offset_findings_file(tmp_path)
+    assert main(["score", str(path), "--corpus", str(real_corpus), "--tolerance", "1"]) == 1
+    assert "--tolerance only applies with --match line" in capsys.readouterr().err

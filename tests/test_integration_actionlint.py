@@ -39,17 +39,19 @@ def test_actionlint_on_the_seed_corpus(
     # github.ref_name (AB-INJ-0004) and the composite-action sink (AB-INJ-0007), and anchored
     # the multi-line github-script case (AB-INJ-0006) at the `script:` key (line 15) while the
     # label and zizmor use the interpolation line (16).
-    strict = score(cases, result.report).per_class[WeaknessClass.INJECTION]
+    strict = score(cases, result.report, matching="line").per_class[WeaknessClass.INJECTION]
     assert (strict.tp, strict.fp, strict.fn) == (4, 1, 3)
 
     # The other two reviewed classes are each detected once and never reported on a clean case:
     # `if-cond` on the constant condition and `runner-label` on the retired runner image.
-    scored = score(cases, result.report)
+    scored = score(cases, result.report, matching="line")
     for cls in (WeaknessClass.CONTROL_FLOW, WeaknessClass.RUNNER_COMPATIBILITY):
         cell = scored.per_class[cls]
         assert (cell.tp, cell.fp, cell.fn) == (1, 0, 0)
 
-    # With one line of tolerance the github-script case matches. This is the evidence for the
-    # open line-tolerance decision (ADR 0003): tools anchor multi-line blocks differently.
-    lenient = score(cases, result.report, line_tolerance=1).per_class[WeaknessClass.INJECTION]
-    assert (lenient.tp, lenient.fp, lenient.fn) == (5, 0, 2)
+    # Under region matching (the default) the github-script case matches: both lines are in the
+    # same step. Tools anchor multi-line blocks differently; this is the evidence for ADR 0003.
+    region = score(cases, result.report).per_class[WeaknessClass.INJECTION]
+    assert (region.tp, region.fp, region.fn) == (5, 0, 2)
+    one_line = score(cases, result.report, matching="line", line_tolerance=1)
+    assert one_line.per_class[WeaknessClass.INJECTION] == region
