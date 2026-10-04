@@ -3,6 +3,10 @@
 Needs `uvx` and network access to download the pinned release. It is excluded from CI on
 purpose: CI should not depend on a download, and a tool-side change should not fail unrelated
 pull requests. Run it when changing the adapter, the rule map, or the corpus.
+
+The tables below are observations (2026-10-04, 44 hand-built cases, one reviewer), pinned so that
+a change in the adapter, the rule map, the labels or zizmor itself is noticed. Cells are
+(TP, FP, FN). Each disagreement is explained in docs/rule-mappings.md or status.md.
 """
 
 from __future__ import annotations
@@ -16,7 +20,7 @@ from actionsbench.adapters.zizmor import PERSONAS, ZizmorAdapter
 from actionsbench.corpus import require_valid_corpus
 from actionsbench.runner import run_scanner
 from actionsbench.scoring import ScoreResult, score
-from actionsbench.taxonomy import WeaknessClass
+from actionsbench.taxonomy import WeaknessClass as W
 
 pytestmark = [
     pytest.mark.integration,
@@ -24,8 +28,25 @@ pytestmark = [
 ]
 
 
-def _cells(scored: ScoreResult) -> dict[WeaknessClass, tuple[int, int, int]]:
+def _cells(scored: ScoreResult) -> dict[W, tuple[int, int, int]]:
     return {cls: (c.tp, c.fp, c.fn) for cls, c in scored.per_class.items() if c.in_scope}
+
+
+def _expected_region(persona: str) -> dict[W, tuple[int, int, int]]:
+    default = persona == "regular"
+    return {
+        # pedantic and auditor flag every template expansion, including the two safe contexts
+        # (pull request number and commit SHA) in AB-NEG-0012: a configuration effect.
+        W.INJECTION: (10, 0, 0) if default else (10, 2, 0),
+        W.UNPINNED_DEPENDENCY: (3, 0, 0),
+        # the default persona suppresses both workflow-level write grants
+        W.EXCESSIVE_PERMISSION: (0, 0, 2) if default else (2, 0, 0),
+        # AB-NEG-0010: zizmor flags the trigger itself, the class definition needs untrusted data
+        W.PRIVILEGED_TRIGGER: (1, 1, 0),
+        W.SECRETS_EXPOSURE: (3, 0, 0),
+        # AB-ART-0002 is a miss only because the class is judged through artipacked alone
+        W.ARTIFACT_INTEGRITY: (1, 0, 1),
+    }
 
 
 @pytest.mark.parametrize("persona", PERSONAS)
@@ -38,36 +59,27 @@ def test_zizmor_on_the_corpus(persona: str, real_corpus: Path, tmp_path: Path) -
     assert result.report.version == "1.30.1"
     assert result.report.configuration == f"persona={persona}; online-audits=off"
 
-    # Observed 2026-10-04 (hand-built labels, one reviewer; see docs/rule-mappings.md). Cells are
-    # (TP, FP, FN). No tool-reported finding landed on a clean case, under any persona.
-    #
-    # With region matching (the default) every labeled weakness in scope is found, except
-    # `write-all` at the default persona, which zizmor suppresses.
-    expected_region = {
-        WeaknessClass.INJECTION: (7, 0, 0),
-        WeaknessClass.UNPINNED_DEPENDENCY: (2, 0, 0),
-        WeaknessClass.EXCESSIVE_PERMISSION: (0, 0, 1) if persona == "regular" else (1, 0, 0),
-        WeaknessClass.PRIVILEGED_TRIGGER: (1, 0, 0),
-        WeaknessClass.SECRETS_EXPOSURE: (1, 0, 0),
-        WeaknessClass.ARTIFACT_INTEGRITY: (1, 0, 0),
-    }
-    assert _cells(score(cases, result.report)) == expected_region
-    # On this corpus region matching and a one-line tolerance agree exactly; that agreement is the
-    # evidence the region rule rests on (ADR 0003).
-    one_line = score(cases, result.report, matching="line", line_tolerance=1)
-    assert _cells(one_line) == expected_region
+    expected = _expected_region(persona)
+    assert _cells(score(cases, result.report)) == expected
 
-    # Strictly (exact line), three classes are detected one line away from the label: zizmor
-    # reports the `on:` line, the `uses:` line of the reusable-workflow call and the step header.
-    # Each costs one false positive and one false negative. This pins that anchoring evidence
-    # for the open matching-rule decision (ADR 0003).
-    expected_strict = {
-        **expected_region,
-        WeaknessClass.PRIVILEGED_TRIGGER: (0, 1, 1),
-        WeaknessClass.SECRETS_EXPOSURE: (0, 1, 1),
-        WeaknessClass.ARTIFACT_INTEGRITY: (0, 1, 1),
+    # Strictly (exact line) the anchoring differences show up: zizmor reports the `on:` line, the
+    # call's `uses:` line, a step header, and for container credentials the `container:` block two
+    # lines above the password.
+    strict = {
+        **expected,
+        W.PRIVILEGED_TRIGGER: (0, 2, 1),
+        W.SECRETS_EXPOSURE: (1, 2, 2),
+        W.ARTIFACT_INTEGRITY: (0, 1, 2),
     }
-    assert _cells(score(cases, result.report, matching="line")) == expected_strict
+    assert _cells(score(cases, result.report, matching="line")) == strict
+
+    # A one-line tolerance is not enough once a report is two lines from the label (the container
+    # credentials case); a tolerance of two happens to equal the region rule on this corpus, but a
+    # longer block would need a bigger number. That is the argument for regions (ADR 0003).
+    one_line = _cells(score(cases, result.report, matching="line", line_tolerance=1))
+    assert one_line == {**expected, W.SECRETS_EXPOSURE: (2, 1, 1)}
+    two_lines = score(cases, result.report, matching="line", line_tolerance=2)
+    assert _cells(two_lines) == expected
 
     # Rules without a reviewed mapping must be surfaced, not hidden.
     assert "zizmor/self-repository" in result.unmapped_rules
@@ -80,6 +92,6 @@ def test_persona_changes_whether_write_all_is_reported(real_corpus: Path, tmp_pa
     for persona in PERSONAS:
         result = run_scanner(ZizmorAdapter(persona=persona), cases, tmp_path / persona)
         seen[persona] = any(
-            f.weakness_class is WeaknessClass.EXCESSIVE_PERMISSION for f in result.report.findings
+            f.weakness_class is W.EXCESSIVE_PERMISSION for f in result.report.findings
         )
     assert seen == {"regular": False, "pedantic": True, "auditor": True}

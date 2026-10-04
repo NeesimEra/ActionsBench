@@ -117,6 +117,7 @@ def test_scope_is_exactly_the_reviewed_classes() -> None:
         WeaknessClass.INJECTION,
         WeaknessClass.CONTROL_FLOW,
         WeaknessClass.RUNNER_COMPATIBILITY,
+        WeaknessClass.SECRETS_EXPOSURE,
     }
     assert frozenset(expected) == SCOPE
     assert ActionlintAdapter(launcher="x").scope == SCOPE
@@ -185,6 +186,7 @@ def test_actionlint_accepts_no_options() -> None:
     [
         ("if-cond", WeaknessClass.CONTROL_FLOW),
         ("runner-label", WeaknessClass.RUNNER_COMPATIBILITY),
+        ("credentials", WeaknessClass.SECRETS_EXPOSURE),
     ],
 )
 def test_reviewed_check_kinds_map_to_their_class(kind: str, expected: WeaknessClass) -> None:
@@ -197,7 +199,6 @@ def test_reviewed_check_kinds_map_to_their_class(kind: str, expected: WeaknessCl
     "kind",
     [
         "permissions",  # validates scope names and values; says nothing about excess
-        "credentials",  # semantically secrets-exposure, but no corpus case exercises it yet
         "syntax-check",
         "shellcheck",
         "action",
