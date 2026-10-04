@@ -1,0 +1,13 @@
+name: Commit author
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  announce:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Announce
+        run: echo "Author is ${{ github.event.head_commit.author.name }}"

@@ -1,0 +1,16 @@
+id: AB-NEG-0001
+title: Untrusted value passed through an environment variable
+is_negative: true
+expected: []
+rationale: >-
+  The untrusted title is assigned to an environment variable and the shell reads it as
+  a quoted variable, so its content is never parsed as script text. This is the pattern
+  GitHub recommends for inline scripts. A scanner reporting injection here is a false
+  positive.
+references:
+  - https://docs.github.com/en/actions/reference/security/secure-use
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"

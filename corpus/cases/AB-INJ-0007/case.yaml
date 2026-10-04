@@ -1,0 +1,22 @@
+id: AB-INJ-0007
+title: Composite action sink with shallow indentation, tainted through an input
+is_negative: false
+expected:
+  - weakness_class: injection
+    file: .github/actions/greet/action.yml
+    line: 10
+    evidence: "${{ inputs.title }}"
+rationale: >-
+  The caller passes the pull request title as an input and the composite action
+  expands it into a run step, so the title reaches the shell. The step list sits at
+  the same indentation as its parent key, which is valid YAML and tests whether a
+  scanner parses structure instead of relying on fixed indentation. Reasoned from the
+  data flow; no independent source was found, so this label is proposed.
+references:
+  - https://docs.github.com/en/actions/reference/security/secure-use
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: The source is the caller's with input at .github/workflows/caller.yml line 15. By convention the label is anchored at the sink.

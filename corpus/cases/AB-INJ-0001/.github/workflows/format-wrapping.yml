@@ -1,0 +1,13 @@
+name: Format wrapping
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Greet
+        run: echo ${{ format('Title is {0}', github.event.pull_request.title) }}

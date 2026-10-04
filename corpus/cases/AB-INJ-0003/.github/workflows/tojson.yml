@@ -1,0 +1,13 @@
+name: toJSON wrapping
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Greet
+        run: echo ${{ toJSON(github.event.pull_request.title) }}

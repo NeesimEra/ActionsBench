@@ -1,0 +1,21 @@
+id: AB-INJ-0001
+title: Untrusted value wrapped in format() and interpolated into a shell step
+is_negative: false
+expected:
+  - weakness_class: injection
+    file: .github/workflows/format-wrapping.yml
+    line: 13
+    evidence: "format('Title is {0}'"
+rationale: >-
+  format() returns a string that embeds the pull request title, so the expression is
+  expanded into the script text before the shell parses it. Wrapping the value in a
+  function does not make it safe. Reasoned from expression semantics; no independent
+  source was found, so this label is proposed.
+references:
+  - https://docs.github.com/en/actions/reference/security/secure-use
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: Found as a false negative in the author's own challenge scanner, which treated format() as safe.

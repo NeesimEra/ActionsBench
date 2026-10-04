@@ -1,0 +1,16 @@
+name: github-script sink
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log title
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            console.log("${{ github.event.pull_request.title }}")

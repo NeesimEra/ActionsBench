@@ -1,0 +1,15 @@
+name: Env indirection
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Greet
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: echo "$TITLE"

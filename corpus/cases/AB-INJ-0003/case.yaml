@@ -1,0 +1,20 @@
+id: AB-INJ-0003
+title: Untrusted value passed through toJSON() into a shell step
+is_negative: false
+expected:
+  - weakness_class: injection
+    file: .github/workflows/tojson.yml
+    line: 13
+    evidence: "toJSON(github.event.pull_request.title)"
+rationale: >-
+  toJSON() wraps the title in double quotes and escapes quotes and backslashes, but it
+  does not escape "$" or backticks, so command substitution inside the resulting
+  double-quoted shell string still runs. Reasoned from expression and shell semantics;
+  not yet confirmed by running it or by an independent source, so this label is proposed.
+references:
+  - https://docs.github.com/en/actions/reference/security/secure-use
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"

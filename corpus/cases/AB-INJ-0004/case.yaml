@@ -1,0 +1,21 @@
+id: AB-INJ-0004
+title: Branch name (github.ref_name) interpolated into a shell step
+is_negative: false
+expected:
+  - weakness_class: injection
+    file: .github/workflows/ref-name.yml
+    line: 13
+    evidence: github.ref_name
+rationale: >-
+  Git accepts branch names containing shell metacharacters such as "$(...)", so a branch
+  named by an attacker becomes shell code when github.ref_name is expanded into a run
+  step. Published advisories describe exactly this pattern.
+references:
+  - https://github.com/stacklok/toolhive/security/advisories/GHSA-g976-wp3r-q8c6
+  - https://www.kenmuse.com/blog/the-hidden-danger-in-git-ref-names/
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: Sourced from public advisories, but still has a single reviewer.

@@ -1,0 +1,13 @@
+name: Ref name
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Announce
+        run: echo "Building ${{ github.ref_name }}"

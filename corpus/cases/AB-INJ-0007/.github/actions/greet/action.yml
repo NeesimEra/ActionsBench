@@ -1,0 +1,11 @@
+name: Greet
+description: Print a title.
+inputs:
+  title:
+    description: Title to print
+    required: true
+runs:
+  using: composite
+  steps:
+  - run: echo ${{ inputs.title }}
+    shell: bash

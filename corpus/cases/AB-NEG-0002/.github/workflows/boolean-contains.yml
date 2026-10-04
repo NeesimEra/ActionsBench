@@ -1,0 +1,14 @@
+name: Boolean contains
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  greet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Not a work in progress
+        if: ${{ !contains(github.event.pull_request.title, 'WIP') }}
+        run: echo "Ready for review"

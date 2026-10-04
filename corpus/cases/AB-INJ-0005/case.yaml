@@ -1,0 +1,20 @@
+id: AB-INJ-0005
+title: Commit author name interpolated into a shell step
+is_negative: false
+expected:
+  - weakness_class: injection
+    file: .github/workflows/commit-author.yml
+    line: 13
+    evidence: github.event.head_commit.author.name
+rationale: >-
+  The author name of a pushed commit is set by whoever made the commit and is not
+  validated, so expanding it into a run step lets that person inject shell commands.
+  Public lists of untrusted contexts include head_commit.author.name.
+references:
+  - https://www.synacktiv.com/en/publications/github-actions-exploitation-untrusted-input
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: Sourced from a public list of untrusted contexts (secondary source), but still has a single reviewer.
