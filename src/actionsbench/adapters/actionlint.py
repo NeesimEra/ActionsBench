@@ -15,12 +15,12 @@ Observed behaviour this adapter depends on:
 
 actionlint is mainly a correctness linter. Mapping policy (the review record is
 docs/rule-mappings.md): a result is mapped only if the check's documentation has been read, its
-benchmark class is unambiguous or the choice is recorded, and a corpus case exercises it. Three
+benchmark class is unambiguous or the choice is recorded, and a corpus case exercises it. Four
 checks are mapped: the untrusted-input check of the `expression` rule (an `expression` result
 whose message says the value "is potentially untrusted") to injection, `if-cond` to control-flow,
-and `runner-label` to runner-compatibility. Every other result is reported as unmapped, not
-guessed at. The `permissions` check is deliberately not mapped: it validates scope names and
-values, which says nothing about excess.
+`runner-label` to runner-compatibility and `credentials` to secrets-exposure. Every other result
+is reported as unmapped, not guessed at. The `permissions` check is deliberately not mapped: it
+validates scope names and values, which says nothing about excess.
 
 Scope is class-level but some mappings cover only part of a class (runner-compatibility is much
 wider than one runner-label check). When the corpus gains cases for other constructs in a mapped
@@ -51,6 +51,7 @@ UNTRUSTED_RULE_ID = "actionlint/expression:untrusted-input"
 KIND_MAP: dict[str, WeaknessClass] = {
     "if-cond": WeaknessClass.CONTROL_FLOW,
     "runner-label": WeaknessClass.RUNNER_COMPATIBILITY,
+    "credentials": WeaknessClass.SECRETS_EXPOSURE,
 }
 
 SCOPE: frozenset[WeaknessClass] = frozenset({WeaknessClass.INJECTION, *KIND_MAP.values()})

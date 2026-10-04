@@ -41,6 +41,8 @@ RULE_MAP: dict[str, WeaknessClass] = {
     "zizmor/excessive-permissions": WeaknessClass.EXCESSIVE_PERMISSION,
     "zizmor/dangerous-triggers": WeaknessClass.PRIVILEGED_TRIGGER,
     "zizmor/secrets-inherit": WeaknessClass.SECRETS_EXPOSURE,
+    "zizmor/hardcoded-container-credentials": WeaknessClass.SECRETS_EXPOSURE,
+    "zizmor/overprovisioned-secrets": WeaknessClass.SECRETS_EXPOSURE,
     # Debatable: the class's prose is about unvalidated artifacts, but persisted checkout
     # credentials are filed here by the source study, and the corpus label follows it.
     "zizmor/artipacked": WeaknessClass.ARTIFACT_INTEGRITY,
