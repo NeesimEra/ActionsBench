@@ -48,6 +48,12 @@ class ZizmorAdapter:
     def label(self) -> str:
         return f"{self.name}-{PINNED_VERSION}"
 
+    def probe_version(self) -> str | None:
+        return None  # zizmor reports its version inside every SARIF document
+
+    def prepare(self, scan_dir: Path) -> None:
+        return None  # zizmor needs nothing beyond the copied .github directory
+
     def command(self, scan_dir: Path) -> list[str]:
         return [*self._launcher, "--format", "sarif", "--no-online-audits", str(scan_dir)]
 

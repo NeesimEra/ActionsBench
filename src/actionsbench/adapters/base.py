@@ -20,6 +20,14 @@ class ScannerOutputError(Exception):
     """The tool ran but its output could not be understood for this case."""
 
 
+class ScannerNotFoundError(RuntimeError):
+    """The scanner executable could not be started at all."""
+
+
+class ScannerVersionError(RuntimeError):
+    """The installed scanner is not the version the adapter is pinned to."""
+
+
 @dataclass(slots=True)
 class ScannerOutput:
     findings: list[Finding] = field(default_factory=list)
@@ -45,6 +53,21 @@ class ScannerAdapter(Protocol):
     @property
     def label(self) -> str:
         """Directory-safe identifier of this tool and pinned version."""
+        ...
+
+    def probe_version(self) -> str | None:
+        """Ask the tool for its version once, before any case runs.
+
+        Return None if the tool reports its version inside its normal output instead. May raise
+        ScannerNotFoundError if the executable cannot be started.
+        """
+        ...
+
+    def prepare(self, scan_dir: Path) -> None:
+        """Make the isolated copy acceptable to the tool (for example add a project marker).
+
+        Runs on the temporary copy only, never on the corpus.
+        """
         ...
 
     def command(self, scan_dir: Path) -> list[str]: ...

@@ -17,6 +17,7 @@ from typing import Any
 
 from actionsbench import __version__
 from actionsbench.adapters import ADAPTERS, get_adapter
+from actionsbench.adapters.base import ScannerNotFoundError, ScannerVersionError
 from actionsbench.corpus import (
     CorpusError,
     load_corpus,
@@ -25,7 +26,7 @@ from actionsbench.corpus import (
 )
 from actionsbench.models import Finding, ScannerReport
 from actionsbench.report import to_json, to_text
-from actionsbench.runner import ScannerNotFoundError, findings_document, run_scanner
+from actionsbench.runner import findings_document, run_scanner
 from actionsbench.scoring import ScoringInputError, score
 from actionsbench.taxonomy import WeaknessClass
 
@@ -129,7 +130,7 @@ def _cmd_run(args: argparse.Namespace) -> int:
     adapter = get_adapter(args.tool)
     try:
         result = run_scanner(adapter, cases, args.out, timeout=args.timeout)
-    except ScannerNotFoundError as exc:
+    except (ScannerNotFoundError, ScannerVersionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 
