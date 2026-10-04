@@ -12,7 +12,7 @@ url: "https://github.com/NeesimEra/ActionsBench"
 abstract: >-
   A labeled corpus of minimized GitHub Actions workflows, each tagged with the weakness it contains or marked
   clean, and a harness that scores workflow security scanners against it per weakness class. The code is MIT
-  licensed and the corpus is CC BY 4.0. Version 0.1.0 is an initial pre-release: 44 hand-built cases, all labels
+  licensed and the corpus is CC BY 4.0. Version 0.1.0 is an initial release (pre-1.0): 44 hand-built cases, all labels
   proposed by one author and audited against primary sources but not independently reviewed.
 keywords:
   - github-actions

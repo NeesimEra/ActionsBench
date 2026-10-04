@@ -671,3 +671,34 @@ label judgement calls remain un-reviewed (see the evidence audit).
 - The documentation says in three places that the author, or the assistant that wrote the cases, cannot be the
   independent reviewer. That is a truthful statement about independence, left as written pending the owner's call
   on whether to reword it.
+
+---
+
+## 2026-10-04: v0.1.0 is now a normal release
+
+**Decision (owner, in chat):** "release it now", after the release had been published as a GitHub pre-release.
+Read as: remove the pre-release flag. PyPI was not touched and was not asked for.
+
+**Done**
+
+- The GitHub release was changed from a pre-release to a normal release and marked as the repository's latest.
+  The tag, the release commit and the assets are unchanged; the assets were downloaded again and still match
+  `SHA256SUMS`.
+- The release title and notes no longer say "pre-release". The limits are still the first thing in the notes,
+  because the release itself has not changed: every label is `proposed`, none has been independently reviewed,
+  the maintainers were not consulted, and the results are one run per tool and not a ranking. The notes now
+  frame it as a 0.x initial release that does not yet meet the project's own bar for a mature one
+  (150 to 200 cases, independent review, a third scanner).
+- This change updates the README status line and the citation abstract on `dev` so that nothing in the
+  repository contradicts the release page.
+
+**Note**
+
+- The files inside the `v0.1.0` tag are immutable and still say "pre-release" in the README status line, the
+  citation abstract, the PRD revision log and an earlier part of this log. That is accurate history: the tag was
+  cut when the release was a pre-release. The release page and `dev` are the current statement.
+
+**Not done / next**
+
+- PyPI (needs a trusted-publishing workflow and an account decision), the poutine adapter, and independent
+  review of the labels.
