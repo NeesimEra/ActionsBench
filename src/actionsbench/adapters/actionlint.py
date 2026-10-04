@@ -13,10 +13,19 @@ Observed behaviour this adapter depends on:
 * `-shellcheck=` and `-pyflakes=` disable the external linters. They are picked up from PATH by
   default, which would make results depend on the machine.
 
-actionlint is mainly a correctness linter. Only its untrusted-input check is mapped here: an
-`expression` result whose message says the value "is potentially untrusted" is an injection
-finding. Every other result is reported as unmapped, not guessed at. Scope is therefore the
-injection class only.
+actionlint is mainly a correctness linter. Mapping policy (the review record is
+docs/rule-mappings.md): a result is mapped only if the check's documentation has been read, its
+benchmark class is unambiguous or the choice is recorded, and a corpus case exercises it. Three
+checks are mapped: the untrusted-input check of the `expression` rule (an `expression` result
+whose message says the value "is potentially untrusted") to injection, `if-cond` to control-flow,
+and `runner-label` to runner-compatibility. Every other result is reported as unmapped, not
+guessed at. The `permissions` check is deliberately not mapped: it validates scope names and
+values, which says nothing about excess.
+
+Scope is class-level but some mappings cover only part of a class (runner-compatibility is much
+wider than one runner-label check). When the corpus gains cases for other constructs in a mapped
+class, the mapping has to be revisited or the tool will be charged with misses it was never
+designed to catch.
 """
 
 from __future__ import annotations
@@ -37,7 +46,14 @@ PINNED_VERSION = "1.7.12"
 ENV_VAR = "ACTIONSBENCH_ACTIONLINT"
 
 UNTRUSTED_RULE_ID = "actionlint/expression:untrusted-input"
-SCOPE: frozenset[WeaknessClass] = frozenset({WeaknessClass.INJECTION})
+# Whole check kinds, as printed by actionlint in the `kind` field. The untrusted-input check is
+# handled separately in classify() because it is a message pattern inside the `expression` kind.
+KIND_MAP: dict[str, WeaknessClass] = {
+    "if-cond": WeaknessClass.CONTROL_FLOW,
+    "runner-label": WeaknessClass.RUNNER_COMPATIBILITY,
+}
+
+SCOPE: frozenset[WeaknessClass] = frozenset({WeaknessClass.INJECTION, *KIND_MAP.values()})
 
 # Exact wording as of 1.7.12; the version pin protects against it changing silently.
 _UNTRUSTED_MESSAGE = re.compile(r'^"[^"]+" is potentially untrusted\.')
@@ -57,7 +73,7 @@ def classify(kind: str, message: str) -> tuple[str, WeaknessClass | None]:
     """Return (rule id, benchmark class or None) for one actionlint result."""
     if kind == "expression" and _UNTRUSTED_MESSAGE.match(message):
         return UNTRUSTED_RULE_ID, WeaknessClass.INJECTION
-    return f"actionlint/{kind}", None
+    return f"actionlint/{kind}", KIND_MAP.get(kind)
 
 
 class ActionlintAdapter:
