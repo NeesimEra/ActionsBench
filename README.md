@@ -53,7 +53,8 @@ Run the commands from the repository root, or pass `--corpus` explicitly.
 - A tool is judged only on the weakness classes it declares in `scope`. Anything outside
   that scope is reported as a coverage gap, never as a miss or a false alarm.
 - Cases the tool did not run on are excluded, not counted as clean.
-- Matching is one-to-one (class, file, line within a tolerance), so duplicate findings do
+- Matching is one-to-one (class, file, and the same step, job or top-level key; use
+  `--match line` for exact lines), so duplicate findings do
   not inflate recall.
 - Results are per class. There is no overall score on purpose.
 

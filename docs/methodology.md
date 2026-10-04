@@ -69,10 +69,24 @@ tool's rule ID. A finding matches an expected finding when:
 
 - the weakness class is equal,
 - the file is equal, and
-- the lines are within `line_tolerance`.
+- both lines are in the same **region** of that file.
 
-`line_tolerance` defaults to 0. That default is a placeholder; the right value (or a
-step-level rule) is a decision for the M0 spike.
+A region is the smallest of: a step (`jobs.<job>.steps[i]`, or `runs.steps[i]` in a composite
+action), a job outside its steps (this also covers a reusable-workflow call, whose `uses:` and
+`secrets:` lines belong together), or a top-level key such as `on` or `permissions`. Boundaries come
+from YAML node positions, not from indentation (`src/actionsbench/regions.py`).
+
+Why a region and not a line: scanners anchor one construct at different lines, so "which line" is a
+tool convention and the construct is the unit that matters. Observed: zizmor reports a privileged
+trigger at the `on:` line, a reusable-workflow call at its `uses:` line and a step at its header,
+and actionlint reports a multi-line script at the `script:` key. Each is a different line of the
+same construct as the label. Neighbouring constructs stay distinct: a finding in the next step, or
+in `permissions` instead of `on`, does not match.
+
+If the labeled file cannot be parsed as a single YAML mapping, matching falls back to exact line
+equality; nothing is guessed. Exact-line matching with an optional tolerance remains available for a
+strict comparison (`actionsbench score --match line [--tolerance N]`), and every result states which
+rule produced it. The decision and its costs are in ADR 0003.
 
 Matching is **one-to-one**: a finding can satisfy at most one expected finding. A scanner
 that reports the same line twice gets one true positive and one false positive, so
@@ -144,8 +158,9 @@ be reproduced and compared.
 ## 9. Known limitations
 
 - Labels are only as good as their review. Until a case is `agreed`, treat it as a claim.
-- The line-tolerance rule is unresolved (ADR 0003 holds the evidence). Scope declarations are
-  reviewed per adapter and recorded in [rule-mappings.md](rule-mappings.md).
+- Region matching is coarser than a line and rests on two tools and four anchoring cases (ADR 0003
+  records the costs and says when to revisit it). Scope declarations are reviewed per adapter and
+  recorded in [rule-mappings.md](rule-mappings.md).
 - **A tool's configuration changes its verdict.** It is now recorded with every result (section
   5.1), but the choice of baseline configuration is still a judgement. For zizmor the baseline is the
   default `regular` persona, made explicit; `pedantic` and `auditor` are run and reported separately.
@@ -165,11 +180,10 @@ be reproduced and compared.
   gains cases for other constructs in a mapped class, the mappings have to be revisited, or a tool
   will be charged with misses it was never designed to catch.
 - **Anchoring differences are the main source of strict-score disagreement.** On the 25-case
-  corpus every anchoring difference is exactly one line: zizmor reports privileged-trigger at the
-  `on:` line, secrets-exposure at the `uses:` line of the call and artifact-integrity at the step
-  header, and actionlint reports the multi-line `github-script` case at the `script:` key. At
-  tolerance 0 each becomes one false positive plus one false negative; at tolerance 1 they match.
-  The labels are not changed to suit a tool, and the matching rule is still open (ADR 0003).
+  corpus every anchoring difference is a different line of the same construct, exactly one line
+  apart (see section 4 for the list). Under exact-line matching each costs one false positive plus
+  one false negative; region matching, the default, removes them without changing anything else.
+  The labels were not changed to suit a tool.
 - actionlint needs a project marker (an empty `.git` directory) in the isolated copy, and its
   external linters (shellcheck, pyflakes) are disabled so results do not depend on the machine.
 - Early results are recorded in `status.md`. They are one run each over hand-built cases with a
