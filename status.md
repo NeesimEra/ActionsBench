@@ -85,3 +85,48 @@ history before publication.
 - Gate C (maintainer outreach before publishing results) and gate D (real-repository
   material) are unchanged; they apply to results and new cases, not to this scaffold.
 - Second reviewer, taxonomy check against the paper, everything in `plan.md` Phase 1.
+
+---
+
+## 2026-10-04: Published, with protections
+
+**Done**
+
+- Repository public at https://github.com/NeesimEra/ActionsBench (GitHub detects the MIT
+  license). The earlier private repository was renamed `ActionsBench-private-archive` and
+  archived; it still contains the original commits and can be deleted by an org admin.
+- **Merge policy:** squash only, branch deleted after merge, no wiki, projects or discussions.
+- **Actions:** only GitHub-owned actions and `astral-sh/setup-uv` are allowed; full-commit-SHA
+  pinning is required; the default token is read-only; workflows cannot approve pull
+  requests; first-run approval is required for all external contributors.
+- **Security features:** secret scanning with push protection, Dependabot alerts and security
+  updates, Dependabot version updates for `github-actions` and `uv` (7-day cooldown), and
+  private vulnerability reporting (the channel named in `SECURITY.md`).
+- **Ruleset `protect-main`** (no bypass actors): pull request required, squash merge only,
+  conversations must be resolved, branch must be up to date, both CI checks required and
+  pinned to the GitHub Actions app, linear history, no force-push, no deletion.
+- **Ruleset `immutable-release-tags`** on `v*`: no update, no deletion. Corpus releases are
+  tagged, so tags must not move.
+
+**Verified (by doing it)**
+
+- CI passed on GitHub on Python 3.11 and 3.13, under the hardened Actions policy above.
+- A direct push to `main` was rejected ("Changes must be made through a pull request; 2 of 2
+  required status checks are expected") and so was a force-push. Remote `main` was unchanged.
+- This entry went through a pull request and the required checks, which exercises the
+  protected workflow end to end.
+- Commit metadata uses the GitHub noreply address on all commits, and a search of every
+  reachable object found no trace of the previous address.
+
+**Decisions and limits**
+
+- No required approvals: with one maintainer, a pull request could never be approved by
+  anyone else. A pull request and passing checks are still required. Revisit when a second
+  maintainer joins; `.github/CODEOWNERS` is in place but not enforced.
+- Signed commits are not required, because commit signing is not set up. Worth adding.
+- CodeQL is not enabled. The corpus contains deliberately vulnerable workflows, so any
+  workflow scanner run on this repository must first exclude `corpus/`.
+- There is no `CODE_OF_CONDUCT.md` yet.
+- The ruleset has no bypass actors, so even an admin must change the ruleset itself to push
+  around it.
+- Not yet observed: Dependabot's first pull requests.
