@@ -5,7 +5,7 @@ silently rewrites old ones. Each case records the version that introduced it in 
 
 ## Unreleased (0.1.0)
 
-Seed set of 25 cases (16 positive, 9 negative), all `proposed`.
+Seed set of 44 cases (26 positive, 18 negative), all `proposed`.
 
 Injection (first batch):
 
@@ -30,3 +30,18 @@ Other classes (second batch, each positive has a clean twin):
 - AB-CTL-0001: constant `if` condition
 - AB-ART-0001: checkout credentials uploaded in an artifact
 - AB-NEG-0003 to 0009: clean twins for the above
+
+Third batch (harder variants and more than one positive per class, each with a clean twin):
+
+- AB-INJ-0008: untrusted value on a deep line of a multi-line script
+- AB-INJ-0009, AB-INJ-0010: issue title, review comment body
+- AB-PIN-0003: reusable workflow referenced by a tag
+- AB-PRM-0002: workflow-level `contents: write`
+- AB-SEC-0002: hardcoded container registry password
+- AB-SEC-0003: `toJSON(secrets)` in a step's environment
+- AB-KVC-0002: `shivammathur/setup-php` 2.37.0, inside GHSA-pqwm-q9pv-ph8r's vulnerable range
+- AB-RUN-0002: retired `macos-10.15` runner image
+- AB-ART-0002: archive downloaded and unpacked without an integrity check
+- AB-NEG-0010 to 0018: clean twins and probes (a `pull_request_target` trigger with nothing untrusted,
+  a multi-line script via the environment, safe contexts, a pinned reusable workflow, credentials
+  from secrets, one named secret, patched setup-php, `macos-latest`, a verified download)

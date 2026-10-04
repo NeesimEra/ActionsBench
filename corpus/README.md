@@ -52,7 +52,14 @@ clean case that looks risky but is safe.
 | AB-RUN-0001 | A job that targets the retired `ubuntu-18.04` runner image |
 | AB-CTL-0001 | A step guarded by the constant condition `if: ${{ true }}` |
 | AB-ART-0001 | Checkout credentials uploaded inside a workflow artifact |
-| AB-NEG-0001 to 0009 | Clean twins and safe patterns that look risky: environment-variable indirection, boolean-only `contains()`, a pinned action, read-only permissions, a `pull_request` head checkout, a single named secret, the patched action version, credentials not persisted, and a real condition |
+| AB-INJ-0008 to 0010 | Untrusted values on a deep line of a multi-line script, in an issue title, and in a review comment |
+| AB-PIN-0003 | A reusable workflow referenced by a tag |
+| AB-PRM-0002 | Workflow-level `contents: write` |
+| AB-SEC-0002, 0003 | A hardcoded container registry password, and `toJSON(secrets)` in a step's environment |
+| AB-KVC-0002 | `shivammathur/setup-php` pinned inside a second advisory's vulnerable range |
+| AB-RUN-0002 | The retired `macos-10.15` runner image |
+| AB-ART-0002 | An archive downloaded and unpacked without an integrity check |
+| AB-NEG-0001 to 0018 | Clean twins and probes. 0001 to 0009:  environment-variable indirection, boolean-only `contains()`, a pinned action, read-only permissions, a `pull_request` head checkout, a single named secret, the patched action version, credentials not persisted, and a real condition. 0010 to 0018: `pull_request_target` with nothing untrusted (a definitional split), a multi-line script via the environment, safe contexts (the pull request number and the commit SHA), a pinned reusable workflow, credentials from secrets, one named secret, the patched setup-php, `macos-latest`, and a checksum-verified download |
 
 Every label is `proposed`: one reviewer, not yet independently checked.
 

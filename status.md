@@ -450,3 +450,94 @@ left as written and this entry is the record.
 
 - More cases, including harder variants and more than one positive per class, so a cell is not
   decided by a single case. poutine adapter; a named second reviewer.
+
+---
+
+## 2026-10-04: Corpus batch 3 (19 cases): harder variants and more than one positive per class
+
+I read "yes" to "the matching rule or more cases?" as both; the matching rule was done first, this is
+the cases.
+
+**Done**
+
+- 19 new cases (10 positive, 9 clean twins or probes); the corpus is now 44 (26 positive, 18
+  negative), all `proposed`. Harder variants: a long multi-line script, an issue title, a review
+  comment, a reusable workflow referenced by a tag, workflow-level `contents: write`, a hardcoded
+  container password, `toJSON(secrets)`, a second advisory (`shivammathur/setup-php` 2.37.0), the
+  retired `macos-10.15` runner, and a download with no integrity check. Probes: safe contexts (pull
+  request number and commit SHA) and a `pull_request_target` trigger with nothing untrusted.
+- Every source was read before being cited. Details that came from checking, not memory: the advisory's
+  range and patched version were read from GitHub's API; setup-php's tags have no `v` prefix and the
+  2.37.0 tag is annotated, so it was dereferenced to its commit; both commits were resolved and the
+  patched one is literally "Bump version to 2.37.1".
+- One idea was dropped for lack of a source: an always-true condition written as mixed `${{ }}` and
+  text. actionlint's documentation does not describe it, so it is not labeled from memory.
+- Mapping additions, each after its documentation was read and a case exercised it: zizmor
+  `hardcoded-container-credentials` and `overprovisioned-secrets`, and actionlint `credentials`, all
+  to secrets-exposure. actionlint is now judged on four classes.
+
+**Mistakes caught (mine)**
+
+- AB-INJ-0009 and AB-INJ-0010 were malformed workflows: an unquoted value with a colon and a space
+  (`echo "New issue: ..."`) is invalid YAML. The runner did its job: zizmor refused both, they were
+  reported as not run rather than clean, and actionlint reported `syntax-check`, which would have
+  scored as two bogus misses. The cases are fixed, and the corpus validator now requires every YAML
+  file under `.github/` to parse (with tests), so this cannot recur.
+- My note on AB-ART-0002 said both tools would leave it "uncovered", but zizmor is judged on that
+  class through `artipacked`, so it scores as a miss. The note now says what the scoring does.
+- **My earlier claim that region matching equals a one-line tolerance was only true at 25 cases.** At
+  44 it is false: actionlint reports the long `run: |` block at its `run:` key and zizmor reports the
+  container credentials at the `container:` block, each two lines from the label. A one-line
+  tolerance misses both (actionlint injection 7/1/3 instead of 8/0/2; zizmor secrets-exposure 2/1/1
+  instead of 3/0/0); region matching gets both; a tolerance of two happens to equal region matching,
+  but a longer block would need a bigger number. ADR 0003 and the methodology are corrected; this is
+  the failure mode that ADR predicted, now seen with real tool output.
+
+**Verified (by running it)**
+
+- 195 unit tests and 5 opt-in integration tests pass against the real tools; ruff and mypy clean; all
+  44 cases ran in every configuration with no failures. Results (region matching; TP / FP / FN; "n/a" is
+  out of scope, i.e. uncovered, not missed):
+
+| Class | zizmor regular | zizmor pedantic | zizmor auditor | actionlint |
+|---|---|---|---|---|
+| injection | 10/0/0 | 10/2/0 | 10/2/0 | 8/0/2 |
+| unpinned-dependency | 3/0/0 | 3/0/0 | 3/0/0 | n/a |
+| excessive-permission | 0/0/2 | 2/0/0 | 2/0/0 | n/a |
+| privileged-trigger | 1/1/0 | 1/1/0 | 1/1/0 | n/a |
+| secrets-exposure | 3/0/0 | 3/0/0 | 3/0/0 | 1/0/2 |
+| artifact-integrity | 1/0/1 | 1/0/1 | 1/0/1 | n/a |
+| control-flow | n/a | n/a | n/a | 1/0/0 |
+| runner-compatibility | n/a | n/a | n/a | 2/0/0 |
+| known-vulnerable-component, hardening-gap | n/a | n/a | n/a | n/a |
+
+**Findings**
+
+- `pedantic` and `auditor` are identical on every class.
+- Configuration shows up in two places. The default persona misses both excessive-permission cases
+  (`write-all` and workflow-level `contents: write`). `pedantic` and `auditor` flag the two safe
+  contexts in AB-NEG-0012 (the pull request number and the commit SHA), which zizmor's own
+  documentation says they do, costing two false positives on injection.
+- Both personas flag the trigger-only negative AB-NEG-0010. That was labeled as a deliberate
+  definitional split: zizmor flags `pull_request_target` itself, while the class definition needs
+  untrusted data as well. It is a candidate for a label challenge, not a plain error.
+- actionlint misses `github.ref_name` and the composite-action sink as before, finds both new
+  untrusted-input cases once they were valid, and catches only the hardcoded-credentials pattern in
+  secrets-exposure.
+- Class-level scope shows its limit: two of actionlint's three secrets-exposure misses and zizmor's
+  artifact-integrity miss are patterns no rule of that tool targets. They are honest statements of
+  what each tool detects, but a per-class recall figure over-reads as "how good the tool is at the
+  class". A per-pattern notion of coverage is a candidate improvement.
+- Nothing in the corpus can be detected for known-vulnerable-component (zizmor needs online mode,
+  actionlint has no rule) or hardening-gap (no cases). The class is in the corpus to define it, not
+  because a tool covers it.
+
+**Caveats**
+
+- One reviewer, hand-built cases, one run each. Many classes still have only two or three positives,
+  so a cell moves in whole cases. A pipeline check and an early signal, not a ranking.
+
+**Next**
+
+- poutine adapter (a third tool tests the matching rule and the mappings); a named second reviewer;
+  decide what to do about per-pattern coverage and the hardening-gap class.

@@ -2,7 +2,7 @@
 
 A labeled benchmark and evaluation harness for GitHub Actions workflow security scanners.
 
-> **Status: pre-alpha.** The corpus is a 9-case seed set and every label is still
+> **Status: pre-alpha.** The corpus is a small hand-built set (44 cases) and every label is still
 > `proposed` (one reviewer). Nothing here is a result yet. It is public early so the
 > labels can be challenged, not because it is finished.
 
