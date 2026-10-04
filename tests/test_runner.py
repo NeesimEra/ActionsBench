@@ -164,3 +164,24 @@ def test_probed_version_is_recorded_when_the_tool_does_not_report_one_in_its_out
 def test_wrong_probed_version_stops_the_whole_run(one_case: list[Case], tmp_path: Path) -> None:
     with pytest.raises(ScannerVersionError, match=r"pinned to 9\.9"):
         run_scanner(FakeAdapter(fakes.OK_EMPTY, probed_version="1.0"), one_case, tmp_path)
+
+
+def test_configuration_is_carried_into_the_report_and_the_findings_file(
+    one_case: list[Case], tmp_path: Path
+) -> None:
+    adapter = FakeAdapter(fakes.OK_EMPTY, configuration="persona=regular")
+    result = run_scanner(adapter, one_case, tmp_path)
+    assert result.report.configuration == "persona=regular"
+    document = findings_document(result.report)
+    assert document["configuration"] == "persona=regular"
+    assert validate_json(document, "findings.schema.json", "doc") == []
+
+
+def test_findings_file_without_configuration_is_still_valid(
+    one_case: list[Case], tmp_path: Path
+) -> None:
+    document = findings_document(
+        run_scanner(FakeAdapter(fakes.OK_EMPTY), one_case, tmp_path).report
+    )
+    assert "configuration" not in document
+    assert validate_json(document, "findings.schema.json", "doc") == []

@@ -74,16 +74,22 @@ class FakeAdapter:
         launcher: str | None = None,
         probed_version: str | None = None,
         marker: str | None = None,
+        configuration: str | None = None,
     ) -> None:
         self._script = script
         self._launcher = launcher or sys.executable
         self.expected_version = expected_version
         self.probed_version = probed_version
         self.marker = marker
+        self._configuration = configuration
 
     @property
     def label(self) -> str:
         return "fake-9.9"
+
+    @property
+    def configuration(self) -> str | None:
+        return self._configuration
 
     def probe_version(self) -> str | None:
         return self.probed_version
