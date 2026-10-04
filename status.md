@@ -209,3 +209,50 @@ history before publication.
 - Growing the corpus to about 50 cases across all 10 classes; the second reviewer; the line
   tolerance decision.
 - The integration test is opt-in and not run in CI (it needs a download).
+
+---
+
+## 2026-10-04: actionlint adapter (M0, step 3, second tool)
+
+**Done**
+
+- `scripts/install-actionlint.sh`: downloads the official release (pinned 1.7.12), verifies its
+  SHA-256 from the release's checksum file, installs to `.tools/` (gitignored). A wrong
+  checksum is refused. The checksum comes from the same release, so it detects a corrupted or
+  altered download, not a compromised release.
+- actionlint adapter, pinned to 1.7.12. Maps only the untrusted-input check (an `expression`
+  result saying a value "is potentially untrusted") to injection; scope is injection only. Every
+  other result is reported as unmapped. External linters are disabled for determinism.
+- Adapter contract gained two small, general hooks: `prepare` (the copy needs an empty `.git`
+  directory or actionlint exits 3 with "no project was found") and `probe_version` (actionlint
+  does not print its version in its output). A pinned-version mismatch stops the whole run.
+- `actionsbench run --tool actionlint` works end to end.
+
+**Verified (by running it)**
+
+- 113 unit tests, ruff and mypy pass. Opt-in integration tests (`pytest -m integration`) pass
+  against the real zizmor 1.30.1 and actionlint 1.7.12.
+- A first false alarm worth recording: actionlint's `{{json .}}` output looked invalid, but the
+  cause was zsh's `echo` expanding `\n` inside my test harness. The raw output parses strictly.
+
+**Findings (injection class, 9 seed cases, one run each)**
+
+| Tool | TP | FP | FN | tolerance |
+|---|---|---|---|---|
+| zizmor 1.30.1 | 7 | 0 | 0 | 0 or 1 |
+| actionlint 1.7.12 | 4 | 1 | 3 | 0 |
+| actionlint 1.7.12 | 5 | 0 | 2 | 1 |
+
+- actionlint missed `github.ref_name` (AB-INJ-0004) and the composite-action sink (AB-INJ-0007).
+- Tools anchor multi-line blocks differently (zizmor line 16, actionlint line 15 for
+  AB-INJ-0006). Recorded as evidence for the open tolerance decision; labels were not changed.
+- Caveats: the seeds came from weaknesses in a third tool, actionlint is mainly a correctness
+  linter, and this is injection only. It shows the pipeline works and that tools disagree; it is
+  not a ranking.
+
+**Not done / next**
+
+- poutine adapter, after inspecting its real output.
+- The corpus still needs to grow to about 50 cases across all 10 classes; with zizmor at 7 of 7
+  the seed set does not separate it from anything.
+- Second reviewer; tolerance decision.

@@ -128,6 +128,18 @@ be reproduced and compared.
   classes would count missing mappings as missed detections. Its scope grows as rules are
   reviewed one at a time. Its online audits are disabled for determinism, so audits that need
   GitHub's API do not run.
+- actionlint is scored on the **injection** class only, through one check: an `expression`
+  result whose message says a value "is potentially untrusted". actionlint is mainly a
+  correctness linter, so this is a narrow slice of what it does, and its other results are
+  reported as unmapped. It needs a project marker (an empty `.git` directory) in the isolated
+  copy, and its external linters (shellcheck, pyflakes) are disabled so results do not depend on
+  the machine.
+- First head-to-head on the 9 seed cases (injection class, one run each): zizmor matched all 7
+  labels; actionlint matched 4 exactly, missed the `github.ref_name` case (AB-INJ-0004) and the
+  composite-action case (AB-INJ-0007), and reported the multi-line `github-script` case
+  (AB-INJ-0006) at the `script:` key (line 15) where the label and zizmor use the interpolation
+  line (16). The seeds were chosen from weaknesses in a third tool, so this is a pipeline check
+  and an early signal, not a ranking. Per-class numbers, never a single score, are the output.
 - On the 9-case seed corpus zizmor matched every injection label (7 of 7) with no false
   positives. That says the seed set is easy for it, not that it is strong everywhere; the seeds
   were chosen from weaknesses in a different tool.

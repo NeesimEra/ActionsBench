@@ -79,12 +79,16 @@ request or issue if you disagree.
 
 ## Adding a scanner adapter
 
-One adapter exists so far (zizmor). Add another only after checking the tool's real output:
+Two adapters exist so far (zizmor and actionlint). Add another only after checking the tool's
+real output:
 
 1. Run the tool by hand on an isolated copy of a case's `.github/` and read its raw output.
    Record the version and the exact flags that make the run deterministic.
 2. Add `src/actionsbench/adapters/<tool>.py` implementing the contract in `adapters/base.py`:
-   the command, accepted exit codes, a parser, a pinned version, and a rule map.
+   the command, accepted exit codes, a parser, a pinned version, and a rule map. Use `prepare`
+   if the tool needs something in the isolated copy (actionlint needs a project marker) and
+   `probe_version` if the tool does not print its version in its output. If the tool is a
+   binary, add a pinned installer under `scripts/` that verifies a checksum.
 3. Map only rules whose meaning you have reviewed against a benchmark class. Everything else
    stays unmapped and is reported by the runner. Set `scope` to the classes that have a
    reviewed mapping, not to everything the tool claims.
