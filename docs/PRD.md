@@ -310,3 +310,4 @@ Stop or pivot if any of these hold after the spike:
 | 0.1.1 | 2026-10-04 | Scaffold added. Case status gains `proposed`; findings input gains `cases_run` ("not run is not clean"); hosted service and frontend added as a non-goal; harness language decided (ADR 0001); name checked for collisions. |
 | 0.1.2 | 2026-10-04 | Licenses chosen (MIT code, CC BY 4.0 corpus) and the repository approved for public release by the owner; gate B visibility and license items closed. |
 | 0.1.3 | 2026-10-04 | Matching rule decided: same step, job or top-level key instead of a line tolerance (ADR 0003). Taxonomy verified against the paper. |
+| 0.1.4 | 2026-10-04 | First pre-release (v0.1.0) cut with gate C waived by the owner: 44 cases, two scanner adapters, labels evidence-audited but not independently reviewed. |
