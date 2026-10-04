@@ -119,10 +119,20 @@ be reproduced and compared.
 
 ## 9. Known limitations
 
-- The taxonomy is the study's 10 classes as summarized in the PRD. It has not yet been
-  verified against the paper (PRD, open question 7).
 - Labels are only as good as their review. Until a case is `agreed`, treat it as a claim.
 - The line-tolerance rule and the exact scope declarations are unresolved until the spike.
+- **A tool's configuration changes its verdict, and results do not yet record which configuration
+  produced them.** zizmor has personas. At its default `regular` persona it suppresses
+  `permissions: write-all` ("3 suppressed" on AB-PRM-0001); at `pedantic` or `auditor` it reports
+  `excessive-permissions` at exactly the labeled line with high confidence. The adapter runs the
+  default persona, so any future score for that class would depend on a choice the findings file
+  does not state. Fixing this means making the configuration explicit in the adapter and the
+  findings contract; it is tracked in `status.md`.
+- The ten classes were checked against the source study (2026-10-04): there are exactly ten, with
+  the definitions used here. The study defines them by grouping scanner rules, so in practice
+  they are broader than their prose, and the study's rule mapping lives in a repository that
+  declares no license; this project reads it but does not copy it, and every mapping in an
+  adapter is reviewed independently.
 - zizmor is currently scored on the **injection** class only. Only `zizmor/template-injection`
   has a reviewed mapping, even though zizmor claims wider coverage, so scoring it on other
   classes would count missing mappings as missed detections. Its scope grows as rules are
