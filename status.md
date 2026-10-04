@@ -628,3 +628,46 @@ label judgement calls remain un-reviewed (see the evidence audit).
   label or mapping through the issue templates.
 
 **Checked before tagging:** see the next entry, which records the verification and the release itself.
+
+---
+
+## 2026-10-04: v0.1.0 released (initial pre-release)
+
+**Done**
+
+- Tag `v0.1.0` on `main` at `5139507f30fde0929cc993dccbfb98c5ffbc2ae8`, a merge commit of `dev` with identical
+  content, published as a GitHub **pre-release**: https://github.com/NeesimEra/ActionsBench/releases/tag/v0.1.0
+- Assets: the wheel, the sdist, a corpus-only archive (with its CC BY 4.0 license, changelog and
+  `CITATION.cff`) and `SHA256SUMS`. Not published to PyPI.
+- The release notes lead with the limits (one author, evidence-audited but not independently reviewed,
+  maintainers not consulted, one run per tool, not a ranking) and invite challenges through the issue templates.
+  Their results table was generated from the release commit.
+
+**Verified (by running it) before and after tagging**
+
+- On a fresh clone of the release content: locked install, ruff, format, mypy, 195 unit tests, corpus
+  validation (44 cases), `--version` 0.1.0, a built wheel installed into a clean environment, the checksum-verified
+  actionlint install, the 5 integration tests against the real zizmor (three personas) and actionlint, and the
+  expression experiment (13 of 13). `CITATION.cff` validates against schema 1.2.0 and all 33 relative links
+  resolve.
+- After tagging: the tag points at the release commit, the release is a pre-release and not a draft, the assets
+  downloaded back from GitHub verify against `SHA256SUMS` and are byte-identical to the files built before upload,
+  and the release notes contain no attribution text.
+- The tag ruleset (`immutable-release-tags`) is active, but its enforcement was deliberately **not** tested:
+  the only test is a deletion or move, and a failed protection would have destroyed the release tag.
+
+**Decisions and records**
+
+- Gate C was waived by the owner and the provisional gate A go was accepted (see the previous entry).
+- No attribution lines are to be added anywhere in the repository (owner instruction). Commits never had
+  any trailer on any branch; the footer had been added to 14 pull request descriptions and was removed from all
+  of them.
+- `dev` is one commit behind `main` (the release merge commit), as designed in ADR 0004.
+
+**Not done / next**
+
+- poutine adapter; independent review of the labels; hardening-gap and per-pattern coverage; whether to publish
+  to PyPI (needs a trusted-publishing workflow); putting the expression experiment in CI.
+- The documentation says in three places that the author, or the assistant that wrote the cases, cannot be the
+  independent reviewer. That is a truthful statement about independence, left as written pending the owner's call
+  on whether to reword it.
