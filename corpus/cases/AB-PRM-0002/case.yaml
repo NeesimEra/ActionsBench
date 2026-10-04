@@ -1,0 +1,25 @@
+id: AB-PRM-0002
+title: "Write access granted to every job at workflow level"
+is_negative: false
+expected:
+  - weakness_class: excessive-permission
+    file: .github/workflows/workflow-write.yml
+    line: 6
+    evidence: "contents: write"
+rationale: >-
+  contents: write is granted at the top of the workflow, so every job inherits it,
+  although the only job builds and writes nothing. Least privilege means granting write
+  only to the job that needs it.
+references:
+  - https://docs.zizmor.sh/audits/
+  - https://arxiv.org/html/2601.14455v2
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The study's own example of this class is permissions: contents: write without
+  restriction, and zizmor's documentation describes workflow-level broad permissions
+  inherited by all jobs. The label is the grant line; any line of the permissions block is
+  the same region.

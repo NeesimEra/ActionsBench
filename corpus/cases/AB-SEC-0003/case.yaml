@@ -1,0 +1,22 @@
+id: AB-SEC-0003
+title: "Every secret handed to a step that needs none"
+is_negative: false
+expected:
+  - weakness_class: secrets-exposure
+    file: .github/workflows/all-secrets.yml
+    line: 14
+    evidence: "ALL_SECRETS: ${{ toJSON(secrets) }}"
+rationale: >-
+  toJSON(secrets) puts every secret into the environment of a step that only echoes a
+  string. zizmor documents this as excessive sharing of the secrets context that violates
+  least privilege.
+references:
+  - https://docs.zizmor.sh/audits/
+  - https://arxiv.org/html/2601.14455v2
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  Anchored at the env entry where the whole context is exposed.

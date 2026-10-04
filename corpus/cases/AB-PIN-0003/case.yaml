@@ -1,0 +1,24 @@
+id: AB-PIN-0003
+title: "Reusable workflow referenced by a tag"
+is_negative: false
+expected:
+  - weakness_class: unpinned-dependency
+    file: .github/workflows/reusable-tag.yml
+    line: 10
+    evidence: "uses: example-org/shared-workflows/.github/workflows/build.yml@v1"
+rationale: >-
+  A reusable workflow is reused code, and the tag v1 can be moved by whoever controls that
+  repository, so the job can silently run something else. Only a full commit SHA is
+  immutable.
+references:
+  - https://arxiv.org/html/2601.14455v2
+  - https://docs.zizmor.sh/audits/
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  Reasoned from the class definition (floating tags on reused dependencies); the zizmor
+  documentation describes actions rather than reusable workflows, so whether a scanner
+  covers job-level uses is part of what this case tests. The repository is fictional.

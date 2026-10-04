@@ -1,0 +1,15 @@
+name: Unverified download
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download tool
+        run: |
+          curl -sSL -o tool.tar.gz https://example.com/releases/tool-1.0.tar.gz
+          tar xzf tool.tar.gz

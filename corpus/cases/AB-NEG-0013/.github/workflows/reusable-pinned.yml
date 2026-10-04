@@ -1,0 +1,10 @@
+name: Reusable workflow pinned
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  call:
+    uses: example-org/shared-workflows/.github/workflows/build.yml@0123456789abcdef0123456789abcdef01234567

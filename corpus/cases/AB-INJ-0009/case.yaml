@@ -1,0 +1,20 @@
+id: AB-INJ-0009
+title: "Issue title interpolated into a shell step"
+is_negative: false
+expected:
+  - weakness_class: injection
+    file: .github/workflows/issue-title.yml
+    line: 13
+    evidence: "${{ github.event.issue.title }}"
+rationale: >-
+  The issue title is chosen by whoever opens the issue and is expanded straight into the
+  script text. github.event.issue.title is the first entry of actionlint's documented list
+  of untrusted properties and zizmor's own example of an attacker-controllable context.
+references:
+  - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+  - https://docs.zizmor.sh/audits/
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"

@@ -1,0 +1,22 @@
+id: AB-NEG-0012
+title: "Run step that expands only the pull request number and the commit SHA"
+is_negative: true
+expected: []
+rationale: >-
+  The pull request number and the commit SHA are assigned by GitHub, not chosen by an
+  attacker. Neither appears in actionlint's documented list of untrusted properties, and
+  zizmor's documentation describes numbers and SHAs as inherently safer contexts. A
+  scanner reporting injection here is wrong.
+references:
+  - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+  - https://docs.zizmor.sh/audits/
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  A probe for precision: zizmor's documentation says that at the pedantic and auditor
+  personas the template-injection audit flags every expansion in a code context, even
+  likely-safe ones, so a finding under those personas is a configuration effect, not a
+  detection.

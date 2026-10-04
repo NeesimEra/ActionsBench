@@ -1,0 +1,14 @@
+id: AB-NEG-0016
+title: "Action pinned to the patched version"
+is_negative: true
+expected: []
+rationale: >-
+  The SHA is the commit of shivammathur/setup-php 2.37.1, the advisory's patched version.
+  Clean twin of AB-KVC-0002.
+references:
+  - https://github.com/advisories/GHSA-pqwm-q9pv-ph8r
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"

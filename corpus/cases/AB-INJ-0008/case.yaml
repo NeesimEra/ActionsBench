@@ -1,0 +1,23 @@
+id: AB-INJ-0008
+title: "Untrusted value on a line deep inside a multi-line script"
+is_negative: false
+expected:
+  - weakness_class: injection
+    file: .github/workflows/multiline-script.yml
+    line: 15
+    evidence: "Title: ${{ github.event.pull_request.title }}"
+rationale: >-
+  The pull request title is expanded into a multi-line run block, on a line below the run
+  key, so it is pasted into the script text before the shell parses it.
+references:
+  - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+  - https://docs.zizmor.sh/audits/
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The label is the interpolation line. A scanner may report the run key instead, so this
+  case probes how tools anchor inside a multi-line block; under region matching both fall
+  in the same step.

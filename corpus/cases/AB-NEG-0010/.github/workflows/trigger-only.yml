@@ -1,0 +1,13 @@
+name: Privileged trigger without untrusted code
+on:
+  pull_request_target:
+
+permissions:
+  contents: read
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Announce
+        run: echo "A pull request was opened"

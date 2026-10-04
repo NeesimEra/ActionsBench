@@ -1,0 +1,13 @@
+name: Issue title
+on:
+  issues:
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Announce
+        run: echo "New issue ${{ github.event.issue.title }}"

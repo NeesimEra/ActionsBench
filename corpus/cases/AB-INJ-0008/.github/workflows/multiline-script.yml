@@ -1,0 +1,16 @@
+name: Multi-line script
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report
+        run: |
+          echo "Starting report"
+          echo "Title: ${{ github.event.pull_request.title }}"
+          echo "Done"

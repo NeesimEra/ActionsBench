@@ -1,0 +1,14 @@
+id: AB-NEG-0017
+title: "Job targets the current macOS runner label"
+is_negative: true
+expected: []
+rationale: >-
+  macos-latest is a label GitHub maintains and resolves to a supported image, and it is in
+  actionlint's documented list of available labels. Clean twin of AB-RUN-0002.
+references:
+  - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"

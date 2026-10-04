@@ -1,0 +1,14 @@
+id: AB-NEG-0015
+title: "One named secret passed to a step"
+is_negative: true
+expected: []
+rationale: >-
+  Only the single secret the step could need is passed, by name, which is the form zizmor
+  recommends over toJSON(secrets). Clean twin of AB-SEC-0003.
+references:
+  - https://docs.zizmor.sh/audits/
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
