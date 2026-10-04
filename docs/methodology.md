@@ -144,7 +144,8 @@ be reproduced and compared.
 ## 9. Known limitations
 
 - Labels are only as good as their review. Until a case is `agreed`, treat it as a claim.
-- The line-tolerance rule and the exact scope declarations are unresolved until the spike.
+- The line-tolerance rule is unresolved (ADR 0003 holds the evidence). Scope declarations are
+  reviewed per adapter and recorded in [rule-mappings.md](rule-mappings.md).
 - **A tool's configuration changes its verdict.** It is now recorded with every result (section
   5.1), but the choice of baseline configuration is still a judgement. For zizmor the baseline is the
   default `regular` persona, made explicit; `pedantic` and `auditor` are run and reported separately.
@@ -153,26 +154,27 @@ be reproduced and compared.
   they are broader than their prose, and the study's rule mapping lives in a repository that
   declares no license; this project reads it but does not copy it, and every mapping in an
   adapter is reviewed independently.
-- zizmor is currently scored on the **injection** class only. Only `zizmor/template-injection`
-  has a reviewed mapping, even though zizmor claims wider coverage, so scoring it on other
-  classes would count missing mappings as missed detections. Its scope grows as rules are
-  reviewed one at a time. Its online audits are disabled for determinism, so audits that need
-  GitHub's API do not run.
-- actionlint is scored on the **injection** class only, through one check: an `expression`
-  result whose message says a value "is potentially untrusted". actionlint is mainly a
-  correctness linter, so this is a narrow slice of what it does, and its other results are
-  reported as unmapped. It needs a project marker (an empty `.git` directory) in the isolated
-  copy, and its external linters (shellcheck, pyflakes) are disabled so results do not depend on
-  the machine.
-- First head-to-head on the 9 seed cases (injection class, one run each): zizmor matched all 7
-  labels; actionlint matched 4 exactly, missed the `github.ref_name` case (AB-INJ-0004) and the
-  composite-action case (AB-INJ-0007), and reported the multi-line `github-script` case
-  (AB-INJ-0006) at the `script:` key (line 15) where the label and zizmor use the interpolation
-  line (16). The seeds were chosen from weaknesses in a third tool, so this is a pipeline check
-  and an early signal, not a ranking. Per-class numbers, never a single score, are the output.
-- On the 9-case seed corpus zizmor matched every injection label (7 of 7) with no false
-  positives. That says the seed set is easy for it, not that it is strong everywhere; the seeds
-  were chosen from weaknesses in a different tool.
+- **Mapped scope** (review record: [rule-mappings.md](rule-mappings.md)). zizmor is judged on six
+  classes (injection, unpinned-dependency, excessive-permission, privileged-trigger,
+  secrets-exposure, artifact-integrity) and actionlint on three (injection, control-flow,
+  runner-compatibility), each through a small number of reviewed rules. Known-vulnerable-component
+  is out of scope for zizmor because it needs online mode, which the adapter disables for
+  determinism. Hardening-gap has no cases. Out of scope means "uncovered", never "missed".
+- **Class-level scope can overstate coverage.** Some mappings cover only part of a broad class
+  (runner-compatibility is much wider than actionlint's one `runner-label` check). When the corpus
+  gains cases for other constructs in a mapped class, the mappings have to be revisited, or a tool
+  will be charged with misses it was never designed to catch.
+- **Anchoring differences are the main source of strict-score disagreement.** On the 25-case
+  corpus every anchoring difference is exactly one line: zizmor reports privileged-trigger at the
+  `on:` line, secrets-exposure at the `uses:` line of the call and artifact-integrity at the step
+  header, and actionlint reports the multi-line `github-script` case at the `script:` key. At
+  tolerance 0 each becomes one false positive plus one false negative; at tolerance 1 they match.
+  The labels are not changed to suit a tool, and the matching rule is still open (ADR 0003).
+- actionlint needs a project marker (an empty `.git` directory) in the isolated copy, and its
+  external linters (shellcheck, pyflakes) are disabled so results do not depend on the machine.
+- Early results are recorded in `status.md`. They are one run each over hand-built cases with a
+  single reviewer, so they are a pipeline check and an early signal, not a ranking. Per-class
+  numbers, never a single score, are the output.
 - The SARIF parser has been checked against real zizmor 1.30.1 output only (rule IDs are
   prefixed, for example `zizmor/template-injection`, and paths are case-relative on an
   isolated copy). Other tools still have to be checked one at a time.

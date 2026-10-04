@@ -8,10 +8,13 @@ Online audits are disabled so a run is deterministic and needs no network or tok
 audits that depend on GitHub's API (for example known-vulnerable actions or impostor-commit
 checks) do not run; results must say so.
 
-Mapping policy: only rules whose meaning has been reviewed against a benchmark class are mapped.
-Everything else is reported as unmapped by the runner instead of being guessed. Scope is
-limited to the classes that have a reviewed mapping, even though zizmor claims wider coverage.
-Extend RULE_MAP and SCOPE together, one reviewed rule at a time.
+Mapping policy (the review record is docs/rule-mappings.md): a rule is mapped only if its
+documentation has been read, its benchmark class is unambiguous or the choice is recorded, and a
+corpus case exercises it. A rule is never mapped just because it fired on a labeled case.
+Everything else is reported as unmapped by the runner instead of being guessed. Scope is the
+mapped classes that the tool can actually detect under this configuration: known-vulnerable
+components are excluded because zizmor needs online mode for them and this adapter runs offline.
+Extend RULE_MAP and docs/rule-mappings.md together, one reviewed rule at a time.
 """
 
 from __future__ import annotations
@@ -34,6 +37,13 @@ DEFAULT_PERSONA = "regular"
 
 RULE_MAP: dict[str, WeaknessClass] = {
     "zizmor/template-injection": WeaknessClass.INJECTION,
+    "zizmor/unpinned-uses": WeaknessClass.UNPINNED_DEPENDENCY,
+    "zizmor/excessive-permissions": WeaknessClass.EXCESSIVE_PERMISSION,
+    "zizmor/dangerous-triggers": WeaknessClass.PRIVILEGED_TRIGGER,
+    "zizmor/secrets-inherit": WeaknessClass.SECRETS_EXPOSURE,
+    # Debatable: the class's prose is about unvalidated artifacts, but persisted checkout
+    # credentials are filed here by the source study, and the corpus label follows it.
+    "zizmor/artipacked": WeaknessClass.ARTIFACT_INTEGRITY,
 }
 
 SCOPE: frozenset[WeaknessClass] = frozenset(RULE_MAP.values())

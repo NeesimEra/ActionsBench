@@ -41,6 +41,18 @@ step, zizmor reports the interpolation line (16, matching the label) and actionl
 tolerance 1 it matches. Two tools are not enough to choose a rule, and the labels are not
 changed to suit a tool; the decision waits for more adapters and more multi-line cases.
 
+**Update after the mapping review (25 cases, nine classes):** the pattern held and widened. Every
+anchoring difference between a tool and a label is exactly one line, across four cases and two
+tools: zizmor reports privileged-trigger at the `on:` line (label: the trigger line), secrets-
+exposure at the `uses:` line of the reusable-workflow call (label: `secrets: inherit`) and
+artifact-integrity at the step header (label: the `uses:` line), and actionlint reports the
+multi-line `github-script` case at the `script:` key. At tolerance 0 each costs one false
+positive and one false negative; at tolerance 1 all of them match and nothing else changes. A
+fixed tolerance is crude: it would not cope with a multi-line `run: |` block, where the right
+rule is probably "same step" (the PRD's wording). Two tools and one-line differences are still
+thin evidence, so the default stays at 0 and results are shown at both tolerances until a
+step-level rule is designed.
+
 ## Consequences
 
 - A tool is only criticized for what it claims to do. The cost is that the scope

@@ -112,8 +112,13 @@ def test_exit_code_3_is_not_an_accepted_outcome() -> None:
     assert ActionlintAdapter(launcher="x").ok_exit_codes == frozenset({0, 1})
 
 
-def test_scope_is_injection_only() -> None:
-    assert frozenset({WeaknessClass.INJECTION}) == SCOPE
+def test_scope_is_exactly_the_reviewed_classes() -> None:
+    expected = {
+        WeaknessClass.INJECTION,
+        WeaknessClass.CONTROL_FLOW,
+        WeaknessClass.RUNNER_COMPATIBILITY,
+    }
+    assert frozenset(expected) == SCOPE
     assert ActionlintAdapter(launcher="x").scope == SCOPE
 
 
@@ -173,3 +178,38 @@ def test_actionlint_accepts_no_options() -> None:
     assert isinstance(ActionlintAdapter.from_options({}), ActionlintAdapter)
     with pytest.raises(ValueError, match="unknown option"):
         ActionlintAdapter.from_options({"persona": "regular"})
+
+
+@pytest.mark.parametrize(
+    ("kind", "expected"),
+    [
+        ("if-cond", WeaknessClass.CONTROL_FLOW),
+        ("runner-label", WeaknessClass.RUNNER_COMPATIBILITY),
+    ],
+)
+def test_reviewed_check_kinds_map_to_their_class(kind: str, expected: WeaknessClass) -> None:
+    rule_id, weakness_class = classify(kind, "any message")
+    assert rule_id == f"actionlint/{kind}"
+    assert weakness_class is expected
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "permissions",  # validates scope names and values; says nothing about excess
+        "credentials",  # semantically secrets-exposure, but no corpus case exercises it yet
+        "syntax-check",
+        "shellcheck",
+        "action",
+    ],
+)
+def test_check_kinds_that_are_deliberately_not_mapped(kind: str) -> None:
+    assert classify(kind, "any message")[1] is None
+
+
+def test_mapped_kind_results_become_findings(tmp_path: Path) -> None:
+    item = {**UNTRUSTED, "kind": "runner-label", "message": 'label "ubuntu-18.04" is unknown.'}
+    output = parse([item], tmp_path)
+    assert [(f.weakness_class, f.rule_id) for f in output.findings] == [
+        (WeaknessClass.RUNNER_COMPATIBILITY, "actionlint/runner-label")
+    ]

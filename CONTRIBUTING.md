@@ -93,7 +93,9 @@ real output:
    `from_options`, pass it to the tool explicitly, and report it in `configuration`; the
    baseline is the tool's default made explicit.
 3. Map only rules whose meaning you have reviewed against a benchmark class. Everything else
-   stays unmapped and is reported by the runner. Set `scope` to the classes that have a
+   stays unmapped and is reported by the runner. Record each decision, mapped or deliberately not
+   mapped, in [docs/rule-mappings.md](docs/rule-mappings.md), including where you disagree with
+   the source study. Never map a rule just because it fired on a labeled case. Set `scope` to the classes that have a
    reviewed mapping, not to everything the tool claims.
 4. Add unit tests with a trimmed real output sample, and an opt-in integration test
    (`pytest -m integration`) that runs the real tool.

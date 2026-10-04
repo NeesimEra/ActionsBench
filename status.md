@@ -341,3 +341,68 @@ history before publication.
   class), now that the configuration is explicit. It must decide which persona the baseline uses
   for classes like excessive-permission, where the default misses a labeled weakness.
 - poutine adapter; a named second reviewer; the line-tolerance decision; about 25 more cases.
+
+---
+
+## 2026-10-04: Rule mappings for the new classes and the first multi-class results
+
+**Done**
+
+- Reviewed and recorded rule mappings ([docs/rule-mappings.md](docs/rule-mappings.md)). Policy: map a
+  rule only if its documentation was read, its class is unambiguous or the choice is recorded, and
+  a corpus case exercises it; never map a rule because it fired on a labeled case.
+- zizmor now judged on six classes: injection, unpinned-dependency, excessive-permission,
+  privileged-trigger, secrets-exposure, artifact-integrity. actionlint on three: injection,
+  control-flow (`if-cond`), runner-compatibility (`runner-label`).
+- Deliberate exclusions, with reasons in the review record: zizmor's `known-vulnerable-actions`
+  (online mode only, so that class is out of scope for zizmor here), `obfuscation` (fires on the
+  constant-condition case but is not a control-flow rule), and actionlint's `permissions` check
+  (validates names and values, not excess; this disagrees with the source study, whose own mapping
+  was read for orientation but not copied because its repository declares no license).
+
+**Verified (by running it)**
+
+- 149 unit tests and 5 opt-in integration tests pass; ruff and mypy are clean. The integration tests
+  now pin the per-class results below.
+- Real runs over the 25-case corpus, baseline configurations plus zizmor's `auditor`. Cells are
+  TP / FP / FN; "n/a" is out of scope for that tool (uncovered, not missed).
+
+| Class | zizmor regular (tol 0 / tol 1) | zizmor auditor (tol 0 / tol 1) | actionlint (tol 0 / tol 1) |
+|---|---|---|---|
+| injection | 7/0/0 / 7/0/0 | 7/0/0 / 7/0/0 | 4/1/3 / 5/0/2 |
+| unpinned-dependency | 2/0/0 / 2/0/0 | 2/0/0 / 2/0/0 | n/a |
+| excessive-permission | 0/0/1 / 0/0/1 | 1/0/0 / 1/0/0 | n/a |
+| privileged-trigger | 0/1/1 / 1/0/0 | 0/1/1 / 1/0/0 | n/a |
+| secrets-exposure | 0/1/1 / 1/0/0 | 0/1/1 / 1/0/0 | n/a |
+| artifact-integrity | 0/1/1 / 1/0/0 | 0/1/1 / 1/0/0 | n/a |
+| control-flow | n/a | n/a | 1/0/0 / 1/0/0 |
+| runner-compatibility | n/a | n/a | 1/0/0 / 1/0/0 |
+| known-vulnerable-component, hardening-gap | n/a | n/a | n/a |
+
+**Findings**
+
+- No tool reported a mapped-class finding on any clean case, at either tolerance.
+- Anchoring is the dominant strict-score disagreement, and every difference is exactly one line:
+  zizmor reports privileged-trigger at the `on:` line, secrets-exposure at the call's `uses:` line and
+  artifact-integrity at the step header, and actionlint reports the multi-line `github-script` case
+  at the `script:` key. At tolerance 0 each is one false positive plus one false negative. Labels
+  were not changed to suit a tool. A fixed tolerance is crude (ADR 0003 is updated); the PRD's
+  "same step" rule is the likely answer and needs a design.
+- The persona effect shows in one class: excessive-permission is a miss at the default persona and
+  found at `auditor`.
+- zizmor's `obfuscation` fires on the constant-condition case but stays unmapped, so zizmor is
+  uncovered (not missed) on control-flow.
+
+**Caveats**
+
+- One reviewer, 25 hand-built cases, one run each, labels written before looking at tool output, and
+  one positive per class for most classes, so each cell moves in whole cases. This is a pipeline
+  check and an early signal, not a ranking.
+- Class-level scope can overstate coverage when a mapping covers part of a broad class
+  (documented as a limit).
+
+**Next**
+
+- Design the matching rule (step-level instead of a fixed line tolerance).
+- poutine adapter; a named second reviewer; more cases per class, including harder variants, so that
+  results are not decided by single cases.
