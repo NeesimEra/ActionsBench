@@ -17,7 +17,7 @@ Extend RULE_MAP and SCOPE together, one reviewed rule at a time.
 from __future__ import annotations
 
 import json
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 
 from actionsbench.adapters.base import ScannerOutput, ScannerOutputError
@@ -25,6 +25,12 @@ from actionsbench.sarif import parse_sarif
 from actionsbench.taxonomy import WeaknessClass
 
 PINNED_VERSION = "1.30.1"
+
+# zizmor suppresses findings by persona. Observed on 2026-10-04: `permissions: write-all` is
+# suppressed at "regular" (the default) and reported at "pedantic" and "auditor". The persona is
+# therefore always passed explicitly and recorded in every result.
+PERSONAS = ("regular", "pedantic", "auditor")
+DEFAULT_PERSONA = "regular"
 
 RULE_MAP: dict[str, WeaknessClass] = {
     "zizmor/template-injection": WeaknessClass.INJECTION,
@@ -40,13 +46,32 @@ class ZizmorAdapter:
     ok_exit_codes = frozenset({0})
     raw_suffix = "sarif"
 
-    def __init__(self, launcher: Sequence[str] | None = None) -> None:
+    def __init__(
+        self, launcher: Sequence[str] | None = None, persona: str = DEFAULT_PERSONA
+    ) -> None:
+        if persona not in PERSONAS:
+            raise ValueError(f"unknown zizmor persona '{persona}' (known: {', '.join(PERSONAS)})")
+        self._persona = persona
         # uvx runs the pinned release without installing it into the project environment.
         self._launcher = list(launcher or ["uvx", "--from", f"zizmor=={PINNED_VERSION}", "zizmor"])
 
+    @classmethod
+    def from_options(cls, options: Mapping[str, str]) -> ZizmorAdapter:
+        remaining = dict(options)
+        persona = remaining.pop("persona", DEFAULT_PERSONA)
+        if remaining:
+            raise ValueError(
+                f"unknown option(s) for zizmor: {', '.join(sorted(remaining))} (accepted: persona)"
+            )
+        return cls(persona=persona)
+
     @property
     def label(self) -> str:
-        return f"{self.name}-{PINNED_VERSION}"
+        return f"{self.name}-{PINNED_VERSION}-{self._persona}"
+
+    @property
+    def configuration(self) -> str | None:
+        return f"persona={self._persona}; online-audits=off"
 
     def probe_version(self) -> str | None:
         return None  # zizmor reports its version inside every SARIF document
@@ -55,7 +80,14 @@ class ZizmorAdapter:
         return None  # zizmor needs nothing beyond the copied .github directory
 
     def command(self, scan_dir: Path) -> list[str]:
-        return [*self._launcher, "--format", "sarif", "--no-online-audits", str(scan_dir)]
+        return [
+            *self._launcher,
+            f"--persona={self._persona}",
+            "--format",
+            "sarif",
+            "--no-online-audits",
+            str(scan_dir),
+        ]
 
     def parse(self, stdout: str, *, case_id: str, scan_dir: Path) -> ScannerOutput:
         try:
