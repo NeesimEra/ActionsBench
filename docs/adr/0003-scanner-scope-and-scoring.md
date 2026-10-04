@@ -35,6 +35,12 @@ single number that reads as a leaderboard.
 tolerance, or "within the same step", is a decision for the M0 spike, once real scanner
 output shows how tools anchor their findings.
 
+**Evidence so far (2026-10-04):** tools do anchor differently. For a multi-line `github-script`
+step, zizmor reports the interpolation line (16, matching the label) and actionlint reports the
+`script:` key (15). At tolerance 0 that is one miss and one false positive for actionlint; at
+tolerance 1 it matches. Two tools are not enough to choose a rule, and the labels are not
+changed to suit a tool; the decision waits for more adapters and more multi-line cases.
+
 ## Consequences
 
 - A tool is only criticized for what it claims to do. The cost is that the scope

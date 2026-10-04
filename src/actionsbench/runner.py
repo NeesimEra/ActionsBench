@@ -24,12 +24,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from actionsbench.adapters.base import ScannerAdapter, ScannerOutputError
+from actionsbench.adapters.base import (
+    ScannerAdapter,
+    ScannerNotFoundError,
+    ScannerOutputError,
+    ScannerVersionError,
+)
 from actionsbench.models import Case, Finding, ScannerReport
-
-
-class ScannerNotFoundError(RuntimeError):
-    """The scanner executable could not be started at all."""
 
 
 @dataclass(slots=True)
@@ -105,11 +106,20 @@ def run_scanner(
     )
     cases_run: set[str] = set()
     findings: list[Finding] = []
-    seen_version: str | None = None
+
+    # Tools that do not print their version in their output are asked once, up front. A tool
+    # that is not the pinned version would make every result misleading, so this fails the run.
+    seen_version = adapter.probe_version()
+    if seen_version and adapter.expected_version and seen_version != adapter.expected_version:
+        raise ScannerVersionError(
+            f"{adapter.name} reports version {seen_version}, but the adapter is pinned to "
+            f"{adapter.expected_version}"
+        )
 
     with tempfile.TemporaryDirectory(prefix="actionsbench-") as tmp:
         for case in sorted(cases, key=lambda c: c.id):
             scan_dir = materialize_case(case, Path(tmp))
+            adapter.prepare(scan_dir)
             command = adapter.command(scan_dir)
             try:
                 # No shell is involved: the command is a list built by a trusted adapter.

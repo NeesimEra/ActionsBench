@@ -4,14 +4,10 @@ from pathlib import Path
 
 import pytest
 
+from actionsbench.adapters.base import ScannerNotFoundError, ScannerVersionError
 from actionsbench.corpus import require_valid_corpus, validate_json
 from actionsbench.models import Case
-from actionsbench.runner import (
-    ScannerNotFoundError,
-    findings_document,
-    materialize_case,
-    run_scanner,
-)
+from actionsbench.runner import findings_document, materialize_case, run_scanner
 from actionsbench.scoring import score
 from actionsbench.taxonomy import WeaknessClass
 from tests import fakes
@@ -133,3 +129,38 @@ def test_run_output_feeds_straight_into_scoring(
     assert (injection.tp, injection.fp, injection.fn) == (1, 0, 0)
     assert scored.cases_scored == 1
     assert "AB-INJ-0002" in scored.not_run
+
+
+def test_prepare_hook_runs_on_the_copy_before_the_scanner(
+    one_case: list[Case], tmp_path: Path
+) -> None:
+    result = run_scanner(FakeAdapter(fakes.NEEDS_MARKER, marker=".marker"), one_case, tmp_path)
+    assert result.failures == {}
+    # and it never touches the corpus itself
+    assert not (one_case[0].root / ".marker").exists()
+
+
+def test_scanner_without_the_prepare_marker_fails_the_case(
+    one_case: list[Case], tmp_path: Path
+) -> None:
+    result = run_scanner(FakeAdapter(fakes.NEEDS_MARKER), one_case, tmp_path)
+    assert result.report.cases_run == frozenset()
+    assert "exit code 4" in result.failures["AB-INJ-0001"]
+
+
+def test_probed_version_is_recorded_when_the_tool_does_not_report_one_in_its_output(
+    one_case: list[Case], tmp_path: Path
+) -> None:
+    # SARIF with no tool version, like a scanner that only reports it via a separate command
+    script = (
+        "import json; print(json.dumps({'version': '2.1.0', "
+        "'runs': [{'tool': {'driver': {'name': 'x'}}, 'results': []}]}))"
+    )
+    result = run_scanner(FakeAdapter(script, probed_version="9.9"), one_case, tmp_path)
+    assert result.failures == {}
+    assert result.report.version == "9.9"
+
+
+def test_wrong_probed_version_stops_the_whole_run(one_case: list[Case], tmp_path: Path) -> None:
+    with pytest.raises(ScannerVersionError, match=r"pinned to 9\.9"):
+        run_scanner(FakeAdapter(fakes.OK_EMPTY, probed_version="1.0"), one_case, tmp_path)

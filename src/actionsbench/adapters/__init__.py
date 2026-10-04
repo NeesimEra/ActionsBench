@@ -5,10 +5,12 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
+from actionsbench.adapters.actionlint import ActionlintAdapter
 from actionsbench.adapters.base import ScannerAdapter
 from actionsbench.adapters.zizmor import ZizmorAdapter
 
 ADAPTERS: dict[str, Callable[[], ScannerAdapter]] = {
+    "actionlint": ActionlintAdapter,
     "zizmor": ZizmorAdapter,
 }
 
