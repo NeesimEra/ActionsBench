@@ -84,9 +84,82 @@ def test_options_are_validated() -> None:
         ZizmorAdapter.from_options({"personas": "regular"})
 
 
-def test_scope_is_exactly_the_classes_with_a_reviewed_mapping() -> None:
-    assert SCOPE == frozenset(RULE_MAP.values()) == frozenset({WeaknessClass.INJECTION})
+def test_scope_is_exactly_the_reviewed_classes() -> None:
+    # Changing this set is a review decision (docs/rule-mappings.md), so it is spelled out here.
+    expected = {
+        WeaknessClass.INJECTION,
+        WeaknessClass.UNPINNED_DEPENDENCY,
+        WeaknessClass.EXCESSIVE_PERMISSION,
+        WeaknessClass.PRIVILEGED_TRIGGER,
+        WeaknessClass.SECRETS_EXPOSURE,
+        WeaknessClass.ARTIFACT_INTEGRITY,
+    }
+    assert SCOPE == frozenset(RULE_MAP.values()) == expected
     assert ZizmorAdapter().scope == SCOPE
+
+
+def test_classes_zizmor_cannot_be_judged_on_here_are_out_of_scope() -> None:
+    # known-vulnerable-component needs online mode; control-flow and runner-compatibility have no
+    # reviewed zizmor rule. Out of scope means "uncovered", never "missed".
+    assert WeaknessClass.KNOWN_VULNERABLE_COMPONENT not in SCOPE
+    assert WeaknessClass.CONTROL_FLOW not in SCOPE
+    assert WeaknessClass.RUNNER_COMPATIBILITY not in SCOPE
+    assert WeaknessClass.HARDENING_GAP not in SCOPE
+
+
+@pytest.mark.parametrize(
+    ("rule", "expected"),
+    [
+        ("template-injection", WeaknessClass.INJECTION),
+        ("unpinned-uses", WeaknessClass.UNPINNED_DEPENDENCY),
+        ("excessive-permissions", WeaknessClass.EXCESSIVE_PERMISSION),
+        ("dangerous-triggers", WeaknessClass.PRIVILEGED_TRIGGER),
+        ("secrets-inherit", WeaknessClass.SECRETS_EXPOSURE),
+        ("artipacked", WeaknessClass.ARTIFACT_INTEGRITY),
+    ],
+)
+def test_each_reviewed_rule_maps_to_its_class(
+    rule: str, expected: WeaknessClass, tmp_path: Path
+) -> None:
+    document = {
+        "version": "2.1.0",
+        "runs": [
+            {
+                "tool": {"driver": {"name": "zizmor", "version": "1.30.1"}},
+                "results": [
+                    {
+                        "ruleId": f"zizmor/{rule}",
+                        "locations": [
+                            {
+                                "physicalLocation": {
+                                    "artifactLocation": {"uri": ".github/workflows/a.yml"},
+                                    "region": {"startLine": 4},
+                                }
+                            }
+                        ],
+                    }
+                ],
+            }
+        ],
+    }
+    output = ZizmorAdapter().parse(json.dumps(document), case_id="AB-PIN-0001", scan_dir=tmp_path)
+    assert [f.weakness_class for f in output.findings] == [expected]
+
+
+@pytest.mark.parametrize(
+    "rule",
+    [
+        "obfuscation",  # fires on the constant-condition case, but is not a control-flow rule
+        "known-vulnerable-actions",  # needs online mode, which this adapter disables
+        "self-repository",
+        "anonymous-definition",
+        "concurrency-limits",
+        "unsound-condition",  # control-flow in spirit, but its documentation was not reviewed
+        "github-env",  # semantically injection, but no corpus case exercises it yet
+    ],
+)
+def test_rules_that_are_deliberately_not_mapped(rule: str) -> None:
+    assert f"zizmor/{rule}" not in RULE_MAP
 
 
 def test_every_mapped_rule_id_uses_zizmors_prefix() -> None:

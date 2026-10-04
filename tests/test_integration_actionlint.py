@@ -42,6 +42,13 @@ def test_actionlint_on_the_seed_corpus(
     strict = score(cases, result.report).per_class[WeaknessClass.INJECTION]
     assert (strict.tp, strict.fp, strict.fn) == (4, 1, 3)
 
+    # The other two reviewed classes are each detected once and never reported on a clean case:
+    # `if-cond` on the constant condition and `runner-label` on the retired runner image.
+    scored = score(cases, result.report)
+    for cls in (WeaknessClass.CONTROL_FLOW, WeaknessClass.RUNNER_COMPATIBILITY):
+        cell = scored.per_class[cls]
+        assert (cell.tp, cell.fp, cell.fn) == (1, 0, 0)
+
     # With one line of tolerance the github-script case matches. This is the evidence for the
     # open line-tolerance decision (ADR 0003): tools anchor multi-line blocks differently.
     lenient = score(cases, result.report, line_tolerance=1).per_class[WeaknessClass.INJECTION]
