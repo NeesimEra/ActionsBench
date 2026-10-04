@@ -41,9 +41,9 @@ def test_zizmor_on_the_corpus(persona: str, real_corpus: Path, tmp_path: Path) -
     # Observed 2026-10-04 (hand-built labels, one reviewer; see docs/rule-mappings.md). Cells are
     # (TP, FP, FN). No tool-reported finding landed on a clean case, under any persona.
     #
-    # With a one-line tolerance every labeled weakness in scope is found, except `write-all` at
-    # the default persona, which zizmor suppresses.
-    expected_tolerance_1 = {
+    # With region matching (the default) every labeled weakness in scope is found, except
+    # `write-all` at the default persona, which zizmor suppresses.
+    expected_region = {
         WeaknessClass.INJECTION: (7, 0, 0),
         WeaknessClass.UNPINNED_DEPENDENCY: (2, 0, 0),
         WeaknessClass.EXCESSIVE_PERMISSION: (0, 0, 1) if persona == "regular" else (1, 0, 0),
@@ -51,19 +51,23 @@ def test_zizmor_on_the_corpus(persona: str, real_corpus: Path, tmp_path: Path) -
         WeaknessClass.SECRETS_EXPOSURE: (1, 0, 0),
         WeaknessClass.ARTIFACT_INTEGRITY: (1, 0, 0),
     }
-    assert _cells(score(cases, result.report, line_tolerance=1)) == expected_tolerance_1
+    assert _cells(score(cases, result.report)) == expected_region
+    # On this corpus region matching and a one-line tolerance agree exactly; that agreement is the
+    # evidence the region rule rests on (ADR 0003).
+    one_line = score(cases, result.report, matching="line", line_tolerance=1)
+    assert _cells(one_line) == expected_region
 
-    # Strictly (tolerance 0), three classes are detected one line away from the label: zizmor
+    # Strictly (exact line), three classes are detected one line away from the label: zizmor
     # reports the `on:` line, the `uses:` line of the reusable-workflow call and the step header.
     # Each costs one false positive and one false negative. This pins that anchoring evidence
     # for the open matching-rule decision (ADR 0003).
     expected_strict = {
-        **expected_tolerance_1,
+        **expected_region,
         WeaknessClass.PRIVILEGED_TRIGGER: (0, 1, 1),
         WeaknessClass.SECRETS_EXPOSURE: (0, 1, 1),
         WeaknessClass.ARTIFACT_INTEGRITY: (0, 1, 1),
     }
-    assert _cells(score(cases, result.report)) == expected_strict
+    assert _cells(score(cases, result.report, matching="line")) == expected_strict
 
     # Rules without a reviewed mapping must be surfaced, not hidden.
     assert "zizmor/self-repository" in result.unmapped_rules

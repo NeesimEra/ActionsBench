@@ -32,7 +32,8 @@ def to_json(result: ScoreResult) -> dict[str, Any]:
         "tool": result.tool,
         "version": result.version,
         "configuration": result.configuration,
-        "line_tolerance": result.line_tolerance,
+        "matching": result.matching,
+        "line_tolerance": result.line_tolerance if result.matching == "line" else None,
         "cases_scored": result.cases_scored,
         "not_run": result.not_run,
         "classes": [_class_row(cls, result.per_class[cls]) for cls in WeaknessClass],
@@ -59,9 +60,14 @@ def to_json(result: ScoreResult) -> dict[str, Any]:
 
 
 def to_text(result: ScoreResult) -> str:
+    matching = (
+        "region (same step, job or top-level key)"
+        if result.matching == "region"
+        else f"line (tolerance {result.line_tolerance})"
+    )
     lines = [
         f"{result.tool} {result.version}  |  cases scored: {result.cases_scored}  |  "
-        f"line tolerance: {result.line_tolerance}",
+        f"matching: {matching}",
         f"configuration: {result.configuration or 'not recorded'}",
         "",
         f"{'class':<28}{'scope':<7}{'TP':>4}{'FP':>4}{'FN':>4}{'prec':>7}{'rec':>7}{'uncov':>7}",

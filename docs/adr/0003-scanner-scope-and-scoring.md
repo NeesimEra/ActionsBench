@@ -29,29 +29,45 @@ single number that reads as a leaderboard.
   adapters and SARIF rule maps are added separately, one tool at a time, after the tool's
   real output has been checked.
 
-## Open
+## Matching rule (decided 2026-10-04)
 
-`line_tolerance` defaults to 0 as a placeholder. Whether the right rule is a fixed
-tolerance, or "within the same step", is a decision for the M0 spike, once real scanner
-output shows how tools anchor their findings.
+A finding matches a label when class and file are equal and both lines are in the same *region* of
+the file: the same step, the same job outside its steps, or the same top-level key
+(`src/actionsbench/regions.py`, methodology section 4). Exact-line matching with an optional
+tolerance remains available for a strict comparison (`score --match line --tolerance N`). If the
+labeled file cannot be parsed as a single YAML mapping, matching falls back to exact line equality.
+Every result states the rule that produced it.
 
-**Evidence so far (2026-10-04):** tools do anchor differently. For a multi-line `github-script`
-step, zizmor reports the interpolation line (16, matching the label) and actionlint reports the
-`script:` key (15). At tolerance 0 that is one miss and one false positive for actionlint; at
-tolerance 1 it matches. Two tools are not enough to choose a rule, and the labels are not
-changed to suit a tool; the decision waits for more adapters and more multi-line cases.
+**Why.** Scanners anchor one construct at different lines, so the line is a tool convention and the
+construct is what matters. Evidence, in the order it arrived:
 
-**Update after the mapping review (25 cases, nine classes):** the pattern held and widened. Every
-anchoring difference between a tool and a label is exactly one line, across four cases and two
-tools: zizmor reports privileged-trigger at the `on:` line (label: the trigger line), secrets-
-exposure at the `uses:` line of the reusable-workflow call (label: `secrets: inherit`) and
-artifact-integrity at the step header (label: the `uses:` line), and actionlint reports the
-multi-line `github-script` case at the `script:` key. At tolerance 0 each costs one false
-positive and one false negative; at tolerance 1 all of them match and nothing else changes. A
-fixed tolerance is crude: it would not cope with a multi-line `run: |` block, where the right
-rule is probably "same step" (the PRD's wording). Two tools and one-line differences are still
-thin evidence, so the default stays at 0 and results are shown at both tolerances until a
-step-level rule is designed.
+- For a multi-line `github-script` step, zizmor reports the interpolation line (16, matching the
+  label) and actionlint reports the `script:` key (15).
+- After the mapping review (25 cases, nine classes) every anchoring difference between a tool and a
+  label was exactly one line, across four cases and two tools: zizmor reports privileged-trigger at
+  the `on:` line (label: the trigger line), secrets-exposure at the `uses:` line of the reusable
+  workflow call (label: `secrets: inherit`) and artifact-integrity at the step header (label: the
+  `uses:` line), and actionlint reports the `github-script` case at the `script:` key.
+- Under exact-line matching each costs one false positive and one false negative. Under region
+  matching all four match, and on this corpus the results equal a one-line tolerance exactly
+  (pinned by the integration tests).
+
+A fixed tolerance would pass these four but is the wrong shape: it depends on a magic number, and
+it cannot cope with a multi-line `run: |` block where the interpolation sits several lines below the
+`run:` key. A region needs no number, and it is the PRD's own wording ("same step").
+
+**What it costs.**
+
+- A region is coarser than a line. A tool that reports the wrong line inside a long step still
+  matches, so region matching cannot distinguish a precise report from a loose one. Strict
+  line-level results stay one flag away.
+- Outside steps, a whole job is one region, so two different keys of the same job match each other
+  (a label on `runs-on` is matched by a finding on `permissions` of that job).
+- A step with several labeled problems of one class needs one expected finding per problem;
+  matching stays one-to-one, so a tool reporting several lines of one problem gets one true positive
+  and the rest are false positives.
+- The evidence base is thin: two tools and four anchoring cases. Revisit when a third adapter
+  (poutine) is added, and whenever a tool is found to anchor in a different construct from the label.
 
 ## Consequences
 

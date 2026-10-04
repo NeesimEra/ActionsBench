@@ -406,3 +406,47 @@ history before publication.
 - Design the matching rule (step-level instead of a fixed line tolerance).
 - poutine adapter; a named second reviewer; more cases per class, including harder variants, so that
   results are not decided by single cases.
+
+---
+
+## 2026-10-04: Matching rule decided (same region, not N lines)
+
+**Decision.** A finding matches a label when class and file are equal and both lines are in the same
+*region*: the same step, the same job outside its steps, or the same top-level key. I read "yes" to
+"the matching rule or more cases?" as both and did this first because I had recommended it.
+Exact-line matching with an optional tolerance stays available (`--match line [--tolerance N]`);
+every result now states which rule produced it. Details and costs: ADR 0003, methodology section 4.
+`plan.md` still lists the tolerance as an open step; it is a draft that was never approved, so it is
+left as written and this entry is the record.
+
+**Done**
+
+- `regions.py` maps a line to its region using PyYAML node positions (not indentation), so a block
+  list whose dash sits at the parent's indentation, comments and blank lines are handled by the
+  parser. A file that is not a single YAML mapping has no index and matching falls back to exact
+  line equality; nothing is guessed.
+- `score` gains `matching` ("region" by default, or "line" with an optional tolerance); the CLI gains
+  `--match`; `--tolerance` without `--match line` is an error; text and JSON output state the rule.
+  Only the labeled file is read, and its path was validated at corpus load, so a findings file cannot
+  choose what the scorer reads.
+
+**Verified (by running it)**
+
+- 189 unit tests and 5 opt-in integration tests pass; ruff and mypy are clean. The four real anchoring
+  differences (zizmor at the `on:` line, the call's `uses:` line and the step header; actionlint at
+  the `script:` key) are tested as same-region, and neighbouring constructs (the next step, the
+  permissions block, the job) as different regions.
+- Against the real tools, region matching gives exactly the results of a one-line tolerance on this
+  corpus, and strict line results are unchanged. A hand-counted line number in one of my own tests was
+  off by one and the code correctly refused the cross-step match; the tests now look lines up by text.
+
+**Limits**
+
+- Region matching is coarser than a line: it cannot tell a precise report from a loose one inside a
+  step, and a whole job is one region outside its steps.
+- The evidence is two tools and four anchoring cases. Revisit when poutine is added.
+
+**Next**
+
+- More cases, including harder variants and more than one positive per class, so a cell is not
+  decided by a single case. poutine adapter; a named second reviewer.

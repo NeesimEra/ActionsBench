@@ -4,9 +4,13 @@ Rules (see docs/methodology.md and docs/adr/0003-scanner-scope-and-scoring.md):
 
 * Matching is one-to-one: one finding can satisfy at most one expected finding, so a
   scanner cannot inflate recall by reporting the same line twice.
-* A finding matches an expected finding when class and file are equal and the lines are
-  within `line_tolerance`. The default of 0 is a placeholder; the tolerance is a decision
-  for the M0 spike.
+* A finding matches an expected finding when class and file are equal and the two lines are
+  in the same *region* (matching="region", the default): the same step, the same job outside
+  its steps, or the same top-level key. Scanners anchor one construct at different lines, so
+  "which line" is a tool convention and the construct is what matters (see
+  src/actionsbench/regions.py and ADR 0003). Exact-line matching with an optional tolerance
+  remains available (matching="line") for a strict comparison. If the labeled file cannot be
+  parsed as YAML, region matching falls back to exact line equality rather than guessing.
 * A tool is only judged on the classes it declares in `scope`. Expected findings outside
   scope count as `uncovered`; findings outside scope count as `out_of_scope_findings`.
   Neither is a false negative or a false positive.
@@ -19,8 +23,10 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
+from typing import Protocol
 
 from actionsbench.models import Case, ExpectedFinding, Finding, ScannerReport
+from actionsbench.regions import RegionIndex
 from actionsbench.taxonomy import WeaknessClass
 
 
@@ -73,22 +79,69 @@ class ScoreResult:
     not_run: list[str] = field(default_factory=list)
     cases_scored: int = 0
     configuration: str | None = None
+    # "region" or "line"; line_tolerance is only meaningful for "line" and is 0 otherwise.
+    matching: str = "region"
+
+
+class _Matcher(Protocol):
+    def distance(self, case: Case, expected: ExpectedFinding, found: Finding) -> int | None:
+        """Line distance if `found` can match `expected`, else None. Smaller is a closer match."""
+        ...
+
+
+class _LineMatcher:
+    def __init__(self, tolerance: int) -> None:
+        self._tolerance = tolerance
+
+    def distance(self, case: Case, expected: ExpectedFinding, found: Finding) -> int | None:
+        if found.file != expected.file:
+            return None
+        gap = abs(found.line - expected.line)
+        return gap if gap <= self._tolerance else None
+
+
+class _RegionMatcher:
+    def __init__(self) -> None:
+        self._indexes: dict[tuple[str, str], RegionIndex | None] = {}
+
+    def _index(self, case: Case, file: str) -> RegionIndex | None:
+        key = (case.id, file)
+        if key not in self._indexes:
+            # Only the labeled file is read, and its path was validated to stay inside the case
+            # directory when the corpus was loaded. A findings file cannot choose what is read.
+            try:
+                text = (case.root / file).read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError):
+                self._indexes[key] = None
+            else:
+                self._indexes[key] = RegionIndex.from_text(text)
+        return self._indexes[key]
+
+    def distance(self, case: Case, expected: ExpectedFinding, found: Finding) -> int | None:
+        if found.file != expected.file:
+            return None
+        gap = abs(found.line - expected.line)
+        index = self._index(case, expected.file)
+        if index is None:
+            return gap if gap == 0 else None  # unparseable: exact line only, never a guess
+        return gap if index.region(found.line) == index.region(expected.line) else None
 
 
 def _match(
-    expected: Sequence[ExpectedFinding], found: Sequence[Finding], tolerance: int
+    case: Case,
+    expected: Sequence[ExpectedFinding],
+    found: Sequence[Finding],
+    matcher: _Matcher,
 ) -> tuple[int, list[ExpectedFinding], list[Finding]]:
     unmatched = list(found)
     missed: list[ExpectedFinding] = []
     matched = 0
     for exp in expected:
         best: Finding | None = None
-        best_distance = tolerance + 1
+        best_distance: int | None = None
         for candidate in unmatched:
-            if candidate.file != exp.file:
-                continue
-            distance = abs(candidate.line - exp.line)
-            if distance < best_distance:
+            distance = matcher.distance(case, exp, candidate)
+            if distance is not None and (best_distance is None or distance < best_distance):
                 best, best_distance = candidate, distance
         if best is None:
             missed.append(exp)
@@ -110,7 +163,19 @@ def _check_inputs(cases_by_id: dict[str, Case], report: ScannerReport) -> None:
         )
 
 
-def score(cases: Sequence[Case], report: ScannerReport, *, line_tolerance: int = 0) -> ScoreResult:
+def score(
+    cases: Sequence[Case],
+    report: ScannerReport,
+    *,
+    matching: str = "region",
+    line_tolerance: int = 0,
+) -> ScoreResult:
+    if matching not in ("region", "line"):
+        raise ScoringInputError(f"unknown matching rule '{matching}' (known: region, line)")
+    if matching == "region" and line_tolerance != 0:
+        raise ScoringInputError("a line tolerance only applies to matching='line'")
+    matcher: _Matcher = _RegionMatcher() if matching == "region" else _LineMatcher(line_tolerance)
+
     cases_by_id = {case.id: case for case in cases}
     _check_inputs(cases_by_id, report)
 
@@ -121,6 +186,7 @@ def score(cases: Sequence[Case], report: ScannerReport, *, line_tolerance: int =
         scope=report.scope,
         per_class={cls: ClassScore(in_scope=cls in report.scope) for cls in WeaknessClass},
         configuration=report.configuration,
+        matching=matching,
     )
 
     for case in sorted(cases, key=lambda c: c.id):
@@ -136,7 +202,7 @@ def score(cases: Sequence[Case], report: ScannerReport, *, line_tolerance: int =
             expected = [e for e in case.expected if e.weakness_class == cls]
             found = [f for f in case_findings if f.weakness_class == cls]
             counts = result.per_class[cls]
-            matched, missed, extra = _match(expected, found, line_tolerance)
+            matched, missed, extra = _match(case, expected, found, matcher)
             if counts.in_scope:
                 counts.tp += matched
                 counts.fn += len(missed)
