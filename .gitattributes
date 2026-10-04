@@ -1,0 +1,8 @@
+# Corpus labels point at line numbers. Line endings must never change under a contributor.
+* text=auto eol=lf
+corpus/** text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+
+uv.lock linguist-generated=true

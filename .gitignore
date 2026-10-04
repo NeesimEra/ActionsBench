@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+
+# Tooling caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Local scanner run output (reports are published deliberately, never committed by accident)
+results/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
