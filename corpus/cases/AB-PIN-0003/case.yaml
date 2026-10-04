@@ -13,12 +13,16 @@ rationale: >-
 references:
   - https://arxiv.org/html/2601.14455v2
   - https://docs.zizmor.sh/audits/
+  - https://docs.github.com/en/actions/reference/security/secure-use
+  - https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows
 provenance: synthetic-minimal
 status: proposed
 author: Aliu2211
 reviewer: null
 added_in: "0.1.0"
 notes: >-
-  Reasoned from the class definition (floating tags on reused dependencies); the zizmor
-  documentation describes actions rather than reusable workflows, so whether a scanner
-  covers job-level uses is part of what this case tests. The repository is fictional.
+  GitHub's reusable-workflow documentation says using the commit SHA is the safest option
+  for stability and security, which supports treating a tag on a reusable workflow like a
+  tag on an action. zizmor's documentation describes actions rather than reusable
+  workflows, so whether a scanner covers job-level uses is part of what this case tests.
+  The repository is fictional.
