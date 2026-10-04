@@ -1,7 +1,8 @@
-"""Command-line entry point: `actionsbench validate | stats | score`.
+"""Command-line entry point: `actionsbench validate | stats | run | score`.
 
-Running scanners is intentionally not a command yet. Per-tool adapters are an M0 task
-(plan.md) and are added only once each tool's real output has been checked.
+`run` executes a scanner that has a reviewed adapter and writes a findings file; `score` judges
+any findings file. Adapters are added one at a time, after each tool's real output has been
+checked (docs/adr/0003-scanner-scope-and-scoring.md).
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from actionsbench import __version__
+from actionsbench.adapters import ADAPTERS, get_adapter
 from actionsbench.corpus import (
     CorpusError,
     load_corpus,
@@ -23,6 +25,7 @@ from actionsbench.corpus import (
 )
 from actionsbench.models import Finding, ScannerReport
 from actionsbench.report import to_json, to_text
+from actionsbench.runner import ScannerNotFoundError, findings_document, run_scanner
 from actionsbench.scoring import ScoringInputError, score
 from actionsbench.taxonomy import WeaknessClass
 
@@ -108,6 +111,55 @@ def _cmd_score(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_run(args: argparse.Namespace) -> int:
+    try:
+        cases = require_valid_corpus(args.corpus)
+    except CorpusError as exc:
+        for problem in exc.problems:
+            print(f"error: {problem}", file=sys.stderr)
+        return 1
+    if args.cases:
+        wanted = set(args.cases)
+        unknown = sorted(wanted - {c.id for c in cases})
+        if unknown:
+            print(f"error: unknown case ids: {', '.join(unknown)}", file=sys.stderr)
+            return 1
+        cases = [c for c in cases if c.id in wanted]
+
+    adapter = get_adapter(args.tool)
+    try:
+        result = run_scanner(adapter, cases, args.out, timeout=args.timeout)
+    except ScannerNotFoundError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+
+    findings_path = args.out / adapter.label / "findings.json"
+    findings_path.write_text(
+        json.dumps(findings_document(result.report), indent=2) + "\n", encoding="utf-8"
+    )
+    report = result.report
+    scope = ", ".join(sorted(c.value for c in report.scope))
+    print(f"{report.tool} {report.version}: ran {len(report.cases_run)} of {len(cases)} case(s)")
+    print(f"scope (classes with a reviewed rule mapping): {scope}")
+    print(f"findings: {findings_path}")
+    print(f"raw output: {result.raw_dir}")
+    if result.unmapped_rules:
+        print("rules reported but not mapped to a class (excluded from scoring, not hidden):")
+        for rule, case_ids in sorted(result.unmapped_rules.items()):
+            print(f"  {rule}: {len(case_ids)} case(s)")
+    if result.locationless:
+        print(f"results without a usable file and line: {len(result.locationless)}")
+    for case_id, reason in sorted(result.failures.items()):
+        print(f"FAILED {case_id}: {reason}", file=sys.stderr)
+    if result.failures:
+        print(
+            f"{len(result.failures)} case(s) did not run and are excluded from scoring.",
+            file=sys.stderr,
+        )
+        return 1
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="actionsbench", description=__doc__.splitlines()[0])
     parser.add_argument("--version", action="version", version=f"actionsbench {__version__}")
@@ -120,6 +172,16 @@ def build_parser() -> argparse.ArgumentParser:
     stats = sub.add_parser("stats", help="count cases per weakness class")
     stats.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
     stats.set_defaults(func=_cmd_stats)
+
+    run = sub.add_parser(
+        "run", help="run a scanner on isolated copies of the cases and write a findings file"
+    )
+    run.add_argument("--tool", required=True, choices=sorted(ADAPTERS))
+    run.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
+    run.add_argument("--out", type=Path, default=Path("results"))
+    run.add_argument("--cases", nargs="+", metavar="ID", help="only run these case ids")
+    run.add_argument("--timeout", type=float, default=120.0, help="seconds per case")
+    run.set_defaults(func=_cmd_run)
 
     scoring = sub.add_parser("score", help="score a normalized findings file against the corpus")
     scoring.add_argument("findings", type=Path, help="JSON file matching findings.schema.json")
