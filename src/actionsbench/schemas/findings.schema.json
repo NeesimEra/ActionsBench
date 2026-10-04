@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ActionsBench scanner findings",
+  "description": "Normalized output of one scanner run, the input to `actionsbench score`. Any scanner can be scored by producing this file, with or without a built-in adapter.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["tool", "version", "scope", "cases_run", "findings"],
+  "properties": {
+    "tool": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "minLength": 1 },
+    "scope": {
+      "description": "Weakness classes the tool claims to cover. Findings and expected findings outside this set are reported separately, never as errors.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "artifact-integrity",
+          "control-flow",
+          "excessive-permission",
+          "runner-compatibility",
+          "hardening-gap",
+          "injection",
+          "known-vulnerable-component",
+          "privileged-trigger",
+          "secrets-exposure",
+          "unpinned-dependency"
+        ]
+      }
+    },
+    "cases_run": {
+      "description": "Case IDs the tool was actually run on. A case that is absent here is not scored; it is never treated as 'ran and found nothing'.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^AB-[A-Z]{3}-[0-9]{4}$" }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["case_id", "weakness_class", "file", "line"],
+        "properties": {
+          "case_id": { "type": "string", "pattern": "^AB-[A-Z]{3}-[0-9]{4}$" },
+          "weakness_class": {
+            "enum": [
+              "artifact-integrity",
+              "control-flow",
+              "excessive-permission",
+              "runner-compatibility",
+              "hardening-gap",
+              "injection",
+              "known-vulnerable-component",
+              "privileged-trigger",
+              "secrets-exposure",
+              "unpinned-dependency"
+            ]
+          },
+          "file": { "type": "string", "minLength": 1 },
+          "line": { "type": "integer", "minimum": 1 },
+          "rule_id": { "type": "string" }
+        }
+      }
+    }
+  }
+}
