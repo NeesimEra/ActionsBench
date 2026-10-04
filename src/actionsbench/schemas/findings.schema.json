@@ -8,6 +8,11 @@
   "properties": {
     "tool": { "type": "string", "minLength": 1 },
     "version": { "type": "string", "minLength": 1 },
+    "configuration": {
+      "description": "Every setting that changes the tool's verdict, as the adapter reports it (for example 'persona=regular'). Results from different configurations are different results and must not be mixed. Optional so that findings produced without an adapter remain valid.",
+      "type": "string",
+      "minLength": 1
+    },
     "scope": {
       "description": "Weakness classes the tool claims to cover. Findings and expected findings outside this set are reported separately, never as errors.",
       "type": "array",
