@@ -1,0 +1,17 @@
+id: AB-NEG-0005
+title: "Pull request head checked out under the pull_request trigger"
+is_negative: true
+expected: []
+rationale: >-
+  The workflow builds the pull request head under the plain pull_request trigger. For forks
+  that trigger does not expose secrets or a write token to the target repository, so
+  checking out and building the head is safe. This is the clean twin of AB-TRG-0001.
+references:
+  - https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  A scanner that reports a privileged trigger here is wrong: the trigger is not privileged.

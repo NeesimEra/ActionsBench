@@ -1,0 +1,25 @@
+id: AB-RUN-0001
+title: "Job targets a retired runner image"
+is_negative: false
+expected:
+  - weakness_class: runner-compatibility
+    file: .github/workflows/retired-runner.yml
+    line: 10
+    evidence: "runs-on: ubuntu-18.04"
+rationale: >-
+  GitHub deprecated the ubuntu-18.04 runner image on 2022-08-08 and it was fully unsupported
+  by 2023-04-03, so a job that still targets it cannot be reliably run in the current
+  environment. That matches the class definition: a construct that cannot be reliably
+  resolved or supported.
+references:
+  - https://github.blog/changelog/2022-08-09-github-actions-the-ubuntu-18-04-actions-runner-image-is-being-deprecated-and-will-be-removed-by-12-1-22/
+  - https://github.com/actions/runner-images/issues/6002
+  - https://arxiv.org/html/2601.14455v2
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  Whether a given scanner still recognizes this label as invalid is part of what the case
+  tests. The actionlint documentation does not say it rejects retired labels.

@@ -1,0 +1,14 @@
+name: Real condition
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Publish only from main
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: echo "publishing"

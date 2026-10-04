@@ -1,0 +1,24 @@
+id: AB-CTL-0001
+title: "Step guarded by a constant condition"
+is_negative: false
+expected:
+  - weakness_class: control-flow
+    file: .github/workflows/constant-condition.yml
+    line: 13
+    evidence: "if: ${{ true }}"
+rationale: >-
+  The step is named 'Publish only from main', which states an intended safeguard, but its
+  condition is the constant true, so the safeguard never restricts anything. The paper's
+  definition covers flawed conditions that are always true.
+references:
+  - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+  - https://arxiv.org/html/2601.14455v2
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The pattern follows the constant-condition example in actionlint's documentation. The
+  paper's rule mapping files both actionlint's if-cond check and poutine's if_always_true
+  under this class.

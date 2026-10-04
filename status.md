@@ -256,3 +256,48 @@ history before publication.
 - The corpus still needs to grow to about 50 cases across all 10 classes; with zizmor at 7 of 7
   the seed set does not separate it from anything.
 - Second reviewer; tolerance decision.
+
+---
+
+## 2026-10-04: Corpus batch 2 (16 new cases) and the taxonomy check
+
+**Done**
+
+- Checked the taxonomy against the paper: exactly ten classes with the definitions in use. Closes
+  PRD open question 7. The classes are defined by grouping scanner rules, so they are broader than
+  their prose (for example persisted checkout credentials are filed under artifact integrity).
+- Added 16 cases (9 positive, 7 negative twins) covering eight more classes: unpinned-dependency,
+  excessive-permission, privileged-trigger, secrets-exposure, known-vulnerable-component,
+  runner-compatibility, control-flow, artifact-integrity. With injection, the corpus now covers
+  nine of the ten classes. The corpus is now 25 cases (16 positive,
+  9 negative), all `proposed`.
+- Every reference was read before being cited. Things I corrected by checking: the download-artifact
+  advisory's vulnerable range is `>= 4.0.0, < 4.1.3` (I had assumed `< 4.1.7` from memory); a CVE ID
+  could not be confirmed through GitHub's API, so only the advisory ID is cited; and
+  `include-hidden-files` defaults to `false` in upload-artifact, so the artifact case sets it to true
+  or there would be no weakness.
+- hardening-gap has no cases yet and the reason is recorded in `corpus/README.md`.
+
+**Verified (by running it)**
+
+- The corpus validates (25 cases). Both adapters, scoped to injection, report no injection on any
+  new case, and the seed results are unchanged (zizmor 7/0/0, actionlint 4/1/3 at tolerance 0).
+- Raw reports on the new cases, before any mapping review: zizmor fired `unpinned-uses`,
+  `secrets-inherit`, `dangerous-triggers` and `artipacked` where the labels expect those
+  weaknesses, plus `obfuscation` on the constant condition; actionlint fired `runner-label` on the
+  retired image and `if-cond` on the constant condition. Neither tool reported anything on any
+  negative. zizmor reported nothing on the known-vulnerable action, as expected offline.
+
+**Finding: tool configuration changes the verdict**
+
+- zizmor at its default `regular` persona suppresses `permissions: write-all`; at `pedantic` or
+  `auditor` it reports `excessive-permissions` at the labeled line (5) with high confidence.
+  The runner records the tool version but not the configuration, so a score would silently depend
+  on this choice. Next: make the configuration explicit in the adapter and add an optional
+  configuration field to the findings contract so it appears in every result.
+
+**Not done / next**
+
+- Mapping review for the new classes, once the configuration question is settled. Candidate rules
+  seen so far are listed above; none is mapped yet, so both adapters still score injection only.
+- poutine adapter; a named second reviewer; the tolerance decision; about 25 more cases.

@@ -1,0 +1,24 @@
+id: AB-SEC-0001
+title: "All repository secrets passed to a reusable workflow"
+is_negative: false
+expected:
+  - weakness_class: secrets-exposure
+    file: .github/workflows/inherit.yml
+    line: 11
+    evidence: "secrets: inherit"
+rationale: >-
+  secrets: inherit hands every repository secret to the called workflow, which lives in
+  another repository, instead of the one it needs. This violates least authority and makes
+  it impossible to tell which secrets the called workflow actually used.
+references:
+  - https://docs.zizmor.sh/audits/
+  - https://arxiv.org/html/2601.14455v2
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The called workflow reference is a placeholder: the repository is fictional and the SHA is
+  not a real commit. Offline scanners do not resolve it. It is pinned so that only the
+  secret handling is labeled.

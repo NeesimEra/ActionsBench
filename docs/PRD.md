@@ -286,7 +286,7 @@ Stop or pivot if any of these hold after the spike:
 4. **Harness language:** decided as Python for now, with reasoning and reversibility in [ADR 0001](adr/0001-python-and-minimal-dependencies.md). Revisit if distribution as a single binary becomes important.
 5. **Maintainer outreach timing:** recommended before any public result. Confirm at gate C.
 6. **IEEE challenge data:** the terms for reusing competition data are unknown. Do not include any until checked.
-7. **Taxonomy verification:** confirm the 10 classes and their definitions against the paper itself.
+7. **Taxonomy verification:** done on 2026-10-04. The paper defines exactly ten classes, with the definitions in the schema. Two observations: the classes are defined by grouping scanner rules, so they are broader than their prose, and hardening-gap is the absence of security tooling, which needs an anchoring rule before it can be labeled (see corpus/README.md).
 8. **Prior-art re-check:** the search for an existing labeled workflow benchmark was shallow.
 
 ---

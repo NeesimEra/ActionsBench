@@ -1,0 +1,16 @@
+id: AB-NEG-0008
+title: "Checkout credentials not persisted before an artifact upload"
+is_negative: true
+expected: []
+rationale: >-
+  Checkout runs with persist-credentials: false, so the token is not written to .git/config
+  and nothing sensitive is in the uploaded workspace even with hidden files included. This
+  is the clean twin of AB-ART-0001.
+references:
+  - https://docs.zizmor.sh/audits/
+  - https://github.com/actions/upload-artifact/blob/043fb46d1a93c77aae656e7c1c64a875d1fc6a0a/action.yml
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"

@@ -1,0 +1,29 @@
+id: AB-TRG-0001
+title: "pull_request_target workflow checks out and builds the pull request head"
+is_negative: false
+expected:
+  - weakness_class: privileged-trigger
+    file: .github/workflows/pwn-request.yml
+    line: 3
+    evidence: "pull_request_target"
+rationale: >-
+  pull_request_target runs in the context of the base repository, with its secrets and a
+  token that may have write access, while this job checks out and runs code from the pull
+  request head, which the pull request author controls. This is the well-known 'pwn request'
+  pattern.
+references:
+  - https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/
+  - https://docs.zizmor.sh/audits/
+  - https://arxiv.org/html/2601.14455v2
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  Anchored at the trigger line, which is where the privileged context is declared; the
+  untrusted checkout is at line 15 and the build that runs its code is at line 18. Scanners
+  may anchor at the trigger or at the checkout, which is evidence for the line-tolerance
+  decision. Note that zizmor's dangerous-triggers audit flags the trigger itself, while the
+  paper's definition is the combination with untrusted data, so AB-NEG-0005 and a future
+  pull_request_target-without-checkout negative probe that difference.
