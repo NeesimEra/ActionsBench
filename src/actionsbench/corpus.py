@@ -126,6 +126,25 @@ def _check_semantics(case_dir: Path, raw: dict[str, Any]) -> list[Problem]:
     if not (case_dir / ".github").is_dir():
         problems.append(Problem(location, "case has no .github/ directory to scan"))
 
+    # A case whose workflow is not valid YAML would be scored as if scanners had failed on it,
+    # and a scanner would reject it before looking at the weakness. PyYAML is a conservative
+    # parser, so a rare file that GitHub accepts and PyYAML rejects has to be rewritten.
+    github_dir = case_dir / ".github"
+    if github_dir.is_dir():
+        for path in sorted(github_dir.rglob("*")):
+            if path.suffix not in (".yml", ".yaml") or path.is_symlink() or not path.is_file():
+                continue
+            rel = path.relative_to(case_dir).as_posix()
+            try:
+                yaml.compose(path.read_text(encoding="utf-8"))
+            except yaml.YAMLError as exc:
+                mark = getattr(exc, "problem_mark", None)
+                where = f" (line {mark.line + 1})" if mark is not None else ""
+                reason = getattr(exc, "problem", None) or "invalid YAML"
+                problems.append(Problem(location, f"{rel} is not valid YAML{where}: {reason}"))
+            except UnicodeDecodeError:
+                problems.append(Problem(location, f"{rel} is not valid UTF-8"))
+
     # Scanners are run on a copy of the case. A symlink could make that copy (or a scanner)
     # read files outside the case directory, so links are not allowed at all.
     for path in sorted(case_dir.rglob("*")):
