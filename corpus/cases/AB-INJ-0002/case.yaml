@@ -1,5 +1,5 @@
 id: AB-INJ-0002
-title: contains(...) && untrusted value used in a shell step
+title: "contains(...) && untrusted value used in a shell step"
 is_negative: false
 expected:
   - weakness_class: injection
@@ -7,10 +7,12 @@ expected:
     line: 13
     evidence: "&& github.head_ref"
 rationale: >-
-  contains() looks like a boolean helper, but "a && b" evaluates to b when a is true.
-  On a pull_request event github.ref contains "refs/pull/", so the expression returns
-  github.head_ref, which the pull request author controls. Reasoned from expression
-  semantics; no independent source was found, so this label is proposed.
+  contains() looks like a boolean helper, but "a && b" evaluates to b when a is true. On a
+  pull_request event github.ref contains "refs/pull/", so the expression returns
+  github.head_ref, which the pull request author controls. Demonstrated on 2026-10-04:
+  GitHub's published expression engine evaluates the expression to a string that contains
+  the attacker's text, and running the resulting script in bash executes it (tools/verify-
+  expressions, docs/evidence-audit.md).
 references:
   - https://docs.github.com/en/actions/reference/security/secure-use
 provenance: synthetic-minimal
@@ -18,4 +20,6 @@ status: proposed
 author: Aliu2211
 reviewer: null
 added_in: "0.1.0"
-notes: Found as a false negative in the author's own challenge scanner, which skipped any expression starting with contains().
+notes: >-
+  Found as a false negative in the author's own challenge scanner, which skipped any
+  expression starting with contains().

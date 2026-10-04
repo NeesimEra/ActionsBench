@@ -1,21 +1,27 @@
 id: AB-INJ-0006
-title: Untrusted value interpolated into an actions/github-script script
+title: "Untrusted value interpolated into an actions/github-script script"
 is_negative: false
 expected:
   - weakness_class: injection
     file: .github/workflows/github-script.yml
     line: 16
-    evidence: github.event.pull_request.title
+    evidence: "github.event.pull_request.title"
 rationale: >-
   The script input of actions/github-script is JavaScript source. Expanding the pull
-  request title into it lets the author break out of the string literal and run
-  arbitrary code. The sink is JavaScript, not a shell. The action is pinned to a full
-  commit SHA so that only the injection is labeled.
+  request title into it lets the author break out of the string literal and run arbitrary
+  code. The sink is JavaScript, not a shell. The action is pinned to a full commit SHA so
+  that only the injection is labeled.
 references:
+  - https://github.com/actions/github-script/blob/main/README.md
   - https://www.sourcery.ai/vulnerabilities/yaml-github-actions-security-github-script-injection
 provenance: synthetic-minimal
 status: proposed
 author: Aliu2211
 reviewer: null
 added_in: "0.1.0"
-notes: A non-shell sink. Found as a false negative in the author's own challenge scanner, which only modeled run steps.
+notes: >-
+  A non-shell sink. Found as a false negative in the author's own challenge scanner, which
+  only modeled run steps. The action's own README says expressions are evaluated before
+  the script is passed to the action, so their result is evaluated as JavaScript, and
+  recommends passing values through env and process.env. The shell experiment in
+  tools/verify-expressions does not cover this JavaScript sink.

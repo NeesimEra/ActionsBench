@@ -1,0 +1,19 @@
+id: AB-NEG-0008
+title: "Checkout credentials not persisted before an artifact upload"
+is_negative: true
+expected: []
+rationale: >-
+  Checkout runs with persist-credentials: false, so the step removes the token from the
+  local git config when it finishes (checkout 4.2.2: removeAuth runs when
+  persistCredentials is false) and nothing sensitive is in the uploaded workspace even
+  with hidden files included. Clean twin of AB-ART-0001, pinned to the same checkout
+  version so that the two differ only in persist-credentials.
+references:
+  - https://docs.zizmor.sh/audits/
+  - https://github.com/actions/upload-artifact/blob/043fb46d1a93c77aae656e7c1c64a875d1fc6a0a/action.yml
+  - https://github.com/actions/checkout/blob/11bd71901bbe5b1630ceea73d27597364c9af683/src/git-auth-helper.ts
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"

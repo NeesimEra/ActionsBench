@@ -1,0 +1,24 @@
+id: AB-PIN-0002
+title: "Action referenced by a branch"
+is_negative: false
+expected:
+  - weakness_class: unpinned-dependency
+    file: .github/workflows/branch-ref.yml
+    line: 13
+    evidence: "actions/checkout@main"
+rationale: >-
+  A branch ref moves on every push to that branch, so the workflow runs whatever is on the
+  branch at that moment, which is weaker even than a tag. Only this weakness is labeled:
+  the job is read-only and checkout does not persist credentials, so no other weakness is
+  intended.
+references:
+  - https://arxiv.org/html/2601.14455v2
+  - https://docs.zizmor.sh/audits/
+  - https://docs.github.com/en/actions/reference/security/secure-use
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The paper's example for this class is an action pinned to @main.

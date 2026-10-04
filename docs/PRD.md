@@ -148,7 +148,7 @@ Precision cannot be measured without negatives. The corpus must include:
 
 - **Adapters per scanner** convert native output (SARIF or JSON where available) to normalized findings: class, file, line.
 - **Scope declaration per tool.** Each tool declares the classes it claims to cover. Results outside claimed scope are reported as coverage gaps, not as failures. This matters because, for example, actionlint is a correctness linter and not primarily a security scanner.
-- **Matching rule:** a finding matches an expected finding when class and file match and the line is within the same step (exact tolerance to be decided during the spike).
+- **Matching rule:** a finding matches an expected finding when class and file match and both lines are in the same region: the same step, the same job outside its steps, or the same top-level key. Decided on 2026-10-04 from real scanner output (ADR 0003). Exact-line matching with an optional tolerance remains available for a strict comparison.
 - **Metrics:** per-class precision, recall and F1; a coverage matrix (tool by class); a disagreement report listing cases where tools differ from each other or from the label; runtime per tool.
 - **Reproducibility:** scanner versions recorded and pinned; runs executable with one command, ideally containerized.
 
@@ -286,7 +286,7 @@ Stop or pivot if any of these hold after the spike:
 4. **Harness language:** decided as Python for now, with reasoning and reversibility in [ADR 0001](adr/0001-python-and-minimal-dependencies.md). Revisit if distribution as a single binary becomes important.
 5. **Maintainer outreach timing:** recommended before any public result. Confirm at gate C.
 6. **IEEE challenge data:** the terms for reusing competition data are unknown. Do not include any until checked.
-7. **Taxonomy verification:** confirm the 10 classes and their definitions against the paper itself.
+7. **Taxonomy verification:** done on 2026-10-04. The paper defines exactly ten classes, with the definitions in the schema. Two observations: the classes are defined by grouping scanner rules, so they are broader than their prose, and hardening-gap is the absence of security tooling, which needs an anchoring rule before it can be labeled (see corpus/README.md).
 8. **Prior-art re-check:** the search for an existing labeled workflow benchmark was shallow.
 
 ---
@@ -309,3 +309,5 @@ Stop or pivot if any of these hold after the spike:
 | 0.1 | 2026-10-04 | Initial draft. |
 | 0.1.1 | 2026-10-04 | Scaffold added. Case status gains `proposed`; findings input gains `cases_run` ("not run is not clean"); hosted service and frontend added as a non-goal; harness language decided (ADR 0001); name checked for collisions. |
 | 0.1.2 | 2026-10-04 | Licenses chosen (MIT code, CC BY 4.0 corpus) and the repository approved for public release by the owner; gate B visibility and license items closed. |
+| 0.1.3 | 2026-10-04 | Matching rule decided: same step, job or top-level key instead of a line tolerance (ADR 0003). Taxonomy verified against the paper. |
+| 0.1.4 | 2026-10-04 | First pre-release (v0.1.0) cut with gate C waived by the owner: 44 cases, two scanner adapters, labels evidence-audited but not independently reviewed. |

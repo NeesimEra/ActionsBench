@@ -1,0 +1,18 @@
+id: AB-NEG-0013
+title: "Reusable workflow pinned to a full commit SHA"
+is_negative: true
+expected: []
+rationale: >-
+  The reusable workflow is referenced by a full 40-character commit SHA, which cannot be
+  moved. Clean twin of AB-PIN-0003.
+references:
+  - https://arxiv.org/html/2601.14455v2
+  - https://docs.zizmor.sh/audits/
+  - https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The SHA and the repository are placeholders, as in AB-SEC-0001.

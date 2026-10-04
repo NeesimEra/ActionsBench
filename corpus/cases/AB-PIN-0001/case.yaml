@@ -1,0 +1,25 @@
+id: AB-PIN-0001
+title: "Action referenced by a mutable tag"
+is_negative: false
+expected:
+  - weakness_class: unpinned-dependency
+    file: .github/workflows/tag-ref.yml
+    line: 13
+    evidence: "actions/checkout@v4"
+rationale: >-
+  A tag such as v4 can be moved to different code by whoever controls the action's
+  repository, so the workflow can silently start running something else. Only a full
+  commit SHA is immutable. Only this weakness is labeled: the job is read-only and
+  checkout does not persist credentials, so no other weakness is intended.
+references:
+  - https://arxiv.org/html/2601.14455v2
+  - https://docs.zizmor.sh/audits/
+  - https://docs.github.com/en/actions/reference/security/secure-use
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The paper's definition of this class names floating tags as the substitution risk, and
+  zizmor's unpinned-uses audit documents this exact pattern.

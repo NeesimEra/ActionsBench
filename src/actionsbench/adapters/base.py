@@ -1,0 +1,83 @@
+"""The contract between the runner and a scanner.
+
+An adapter knows four things about one tool: how to invoke it on a directory, which exit
+codes mean "it ran", how to turn its output into normalized findings, and which weakness
+classes it is judged on. Everything else (isolation, timeouts, the not-run rule, writing the
+findings file) is the runner's job, so adapters stay small and reviewable.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Protocol
+
+from actionsbench.models import Finding
+from actionsbench.taxonomy import WeaknessClass
+
+
+class ScannerOutputError(Exception):
+    """The tool ran but its output could not be understood for this case."""
+
+
+class ScannerNotFoundError(RuntimeError):
+    """The scanner executable could not be started at all."""
+
+
+class ScannerVersionError(RuntimeError):
+    """The installed scanner is not the version the adapter is pinned to."""
+
+
+@dataclass(slots=True)
+class ScannerOutput:
+    findings: list[Finding] = field(default_factory=list)
+    # Rule IDs the adapter has no mapping for. They are surfaced, never dropped silently.
+    unmapped_rule_ids: set[str] = field(default_factory=set)
+    # Rule IDs of results that had no usable file and line.
+    locationless: list[str] = field(default_factory=list)
+    # The tool version as reported by the tool's own output, when it reports one.
+    reported_version: str | None = None
+
+
+class ScannerAdapter(Protocol):
+    name: str
+    # The pinned version the adapter was written against. The runner fails a case whose output
+    # reports a different version, so results always name the version they came from.
+    expected_version: str | None
+    # Classes the tool is judged on. This is the intersection of what the tool claims to cover
+    # and what has a reviewed rule mapping; it grows as mappings are reviewed.
+    scope: frozenset[WeaknessClass]
+    ok_exit_codes: frozenset[int]
+    raw_suffix: str
+
+    @property
+    def label(self) -> str:
+        """Directory-safe identifier of the tool, its pinned version and its configuration."""
+        ...
+
+    @property
+    def configuration(self) -> str | None:
+        """Canonical text of every setting that changes the tool's verdict, or None.
+
+        Written into every result so a score always says which configuration produced it.
+        """
+        ...
+
+    def probe_version(self) -> str | None:
+        """Ask the tool for its version once, before any case runs.
+
+        Return None if the tool reports its version inside its normal output instead. May raise
+        ScannerNotFoundError if the executable cannot be started.
+        """
+        ...
+
+    def prepare(self, scan_dir: Path) -> None:
+        """Make the isolated copy acceptable to the tool (for example add a project marker).
+
+        Runs on the temporary copy only, never on the corpus.
+        """
+        ...
+
+    def command(self, scan_dir: Path) -> list[str]: ...
+
+    def parse(self, stdout: str, *, case_id: str, scan_dir: Path) -> ScannerOutput: ...

@@ -1,0 +1,17 @@
+id: AB-NEG-0006
+title: "Single named secret passed to a reusable workflow"
+is_negative: true
+expected: []
+rationale: >-
+  Only the secret the called workflow needs is passed, by name. That is the least-authority
+  alternative to secrets: inherit and the clean twin of AB-SEC-0001.
+references:
+  - https://docs.zizmor.sh/audits/
+  - https://arxiv.org/html/2601.14455v2
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The called workflow reference is a placeholder, as in AB-SEC-0001.

@@ -1,0 +1,31 @@
+id: AB-ART-0002
+title: "Archive downloaded and unpacked without verifying its integrity"
+is_negative: false
+expected:
+  - weakness_class: artifact-integrity
+    file: .github/workflows/unverified-download.yml
+    line: 14
+    evidence: "curl -sSL -o tool.tar.gz"
+rationale: >-
+  The step downloads an archive from the network and unpacks it without checking a
+  checksum or signature, so a tampered or substituted download is used silently. This is
+  the study's own example for the class: downloading artifacts without checksum
+  verification.
+references:
+  - https://arxiv.org/html/2601.14455v2
+  - https://owasp.github.io/www-project-top-10-ci-cd-security-risks/CICD-SEC-09-Improper-Artifact-Integrity-Validation
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  Neither zizmor nor actionlint has a rule for this pattern. actionlint is not judged on
+  the artifact-integrity class at all, so the case is uncovered for it. zizmor is judged
+  on the class through its artipacked rule only, so this case counts as a miss for zizmor
+  even though no zizmor rule targets the pattern. That is the class-level scope limitation
+  (docs/rule-mappings.md, Limits), recorded here so it is not read as a failure of a rule
+  that exists. The case is here so that the corpus defines the class itself, not only what
+  today's tools happen to detect. The label rests on the study's example and on OWASP's
+  CICD-SEC-9, which names improper artifact integrity validation and cites the Codecov
+  incident, where a customer detected tampering by comparing hashes.

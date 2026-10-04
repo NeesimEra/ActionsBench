@@ -3,9 +3,11 @@
 Corpus versions are immutable once released. A new version adds or amends cases; it never
 silently rewrites old ones. Each case records the version that introduced it in `added_in`.
 
-## Unreleased (0.1.0)
+## 0.1.0 (2026-10-04)
 
-Seed set of 9 cases (7 positive, 2 negative), all `proposed`:
+Seed set of 44 cases (26 positive, 18 negative), all `proposed`.
+
+Injection (first batch):
 
 - AB-INJ-0001: untrusted value wrapped in `format()`
 - AB-INJ-0002: `contains(...) && untrusted value`
@@ -16,3 +18,35 @@ Seed set of 9 cases (7 positive, 2 negative), all `proposed`:
 - AB-INJ-0007: composite action sink with a tainted input and shallow indentation
 - AB-NEG-0001: untrusted value passed through an environment variable
 - AB-NEG-0002: `contains()` used as a boolean condition only
+
+Other classes (second batch, each positive has a clean twin):
+
+- AB-PIN-0001, AB-PIN-0002: action referenced by a tag, by a branch
+- AB-PRM-0001: `permissions: write-all`
+- AB-TRG-0001: `pull_request_target` checking out and building the pull request head
+- AB-SEC-0001: `secrets: inherit` to a reusable workflow
+- AB-KVC-0001: action pinned inside a published advisory's vulnerable range
+- AB-RUN-0001: retired `ubuntu-18.04` runner image
+- AB-CTL-0001: constant `if` condition
+- AB-ART-0001: checkout credentials uploaded in an artifact
+- AB-NEG-0003 to 0009: clean twins for the above
+
+Third batch (harder variants and more than one positive per class, each with a clean twin):
+
+- AB-INJ-0008: untrusted value on a deep line of a multi-line script
+- AB-INJ-0009, AB-INJ-0010: issue title, review comment body
+- AB-PIN-0003: reusable workflow referenced by a tag
+- AB-PRM-0002: workflow-level `contents: write`
+- AB-SEC-0002: hardcoded container registry password
+- AB-SEC-0003: `toJSON(secrets)` in a step's environment
+- AB-KVC-0002: `shivammathur/setup-php` 2.37.0, inside GHSA-pqwm-q9pv-ph8r's vulnerable range
+- AB-RUN-0002: retired `macos-10.15` runner image
+- AB-ART-0002: archive downloaded and unpacked without an integrity check
+- AB-NEG-0010 to 0018: clean twins and probes (a `pull_request_target` trigger with nothing untrusted,
+  a multi-line script via the environment, safe contexts, a pinned reusable workflow, credentials
+  from secrets, one named secret, patched setup-php, `macos-latest`, a verified download)
+
+Before this release an evidence audit checked the facts behind every label (docs/evidence-audit.md). It
+corrected AB-ART-0001 and AB-NEG-0008, whose first draft pinned a checkout version where the described
+weakness does not exist (they now pin 4.2.2), and it demonstrated the injection cases with GitHub's own
+expression engine. No label has been independently reviewed: every case is still `proposed`.

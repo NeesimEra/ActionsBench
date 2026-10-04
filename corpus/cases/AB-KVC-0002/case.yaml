@@ -1,0 +1,25 @@
+id: AB-KVC-0002
+title: "Action pinned to a version inside a second published advisory's range"
+is_negative: false
+expected:
+  - weakness_class: known-vulnerable-component
+    file: .github/workflows/vulnerable-setup-php.yml
+    line: 13
+    evidence: "shivammathur/setup-php@accd6127cb78bee3e8082180cb391013d204ef9f"
+rationale: >-
+  The SHA is the commit of shivammathur/setup-php 2.37.0, inside the advisory's vulnerable
+  range (>= 2.25.0, < 2.37.1) for command injection in repository-derived PHP version
+  resolution. The patched version is 2.37.1.
+references:
+  - https://github.com/advisories/GHSA-pqwm-q9pv-ph8r
+  - https://docs.zizmor.sh/audits/
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  Pinned by SHA so that only the known-vulnerable component is labeled. Detecting it needs
+  advisory data, which zizmor only uses in online mode, so an offline run is expected to
+  be unable to see it. The advisory's range and patched version were read from GitHub's
+  API and both commits were resolved from the repository.

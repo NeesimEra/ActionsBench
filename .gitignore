@@ -18,3 +18,9 @@ results/
 .DS_Store
 .idea/
 .vscode/
+
+# Pinned scanner binaries installed by scripts/
+.tools/
+
+# Node tooling under tools/
+node_modules/

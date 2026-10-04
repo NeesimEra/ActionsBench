@@ -1,5 +1,5 @@
 id: AB-INJ-0007
-title: Composite action sink with shallow indentation, tainted through an input
+title: "Composite action sink with shallow indentation, tainted through an input"
 is_negative: false
 expected:
   - weakness_class: injection
@@ -7,11 +7,13 @@ expected:
     line: 10
     evidence: "${{ inputs.title }}"
 rationale: >-
-  The caller passes the pull request title as an input and the composite action
-  expands it into a run step, so the title reaches the shell. The step list sits at
-  the same indentation as its parent key, which is valid YAML and tests whether a
-  scanner parses structure instead of relying on fixed indentation. Reasoned from the
-  data flow; no independent source was found, so this label is proposed.
+  The caller passes the pull request title as an input and the composite action expands it
+  into a run step, so the title reaches the shell. The step list sits at the same
+  indentation as its parent key, which is valid YAML and tests whether a scanner parses
+  structure instead of relying on fixed indentation. Demonstrated on 2026-10-04: GitHub's
+  published expression engine evaluates the expression to a string that contains the
+  attacker's text, and running the resulting script in bash executes it (tools/verify-
+  expressions, docs/evidence-audit.md).
 references:
   - https://docs.github.com/en/actions/reference/security/secure-use
 provenance: synthetic-minimal
@@ -19,4 +21,9 @@ status: proposed
 author: Aliu2211
 reviewer: null
 added_in: "0.1.0"
-notes: The source is the caller's with input at .github/workflows/caller.yml line 15. By convention the label is anchored at the sink.
+notes: >-
+  The source is the caller's with input at .github/workflows/caller.yml line 15. By
+  convention the label is anchored at the sink. GitHub's secure-use page does not cover
+  untrusted values passed through composite action inputs explicitly; the mechanism (the
+  expression is expanded into the script text) is the same one it describes for inline
+  scripts.

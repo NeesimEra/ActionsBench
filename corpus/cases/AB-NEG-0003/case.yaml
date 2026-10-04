@@ -1,0 +1,17 @@
+id: AB-NEG-0003
+title: "Action pinned to a full commit SHA"
+is_negative: true
+expected: []
+rationale: >-
+  The action is referenced by a full 40-character commit SHA, which cannot be moved, with
+  the tag recorded in a comment. This is the clean twin of AB-PIN-0001 and AB-PIN-0002; a
+  scanner reporting an unpinned dependency here is wrong.
+references:
+  - https://docs.zizmor.sh/audits/
+  - https://arxiv.org/html/2601.14455v2
+  - https://docs.github.com/en/actions/reference/security/secure-use
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"

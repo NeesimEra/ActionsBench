@@ -1,0 +1,13 @@
+name: Review comment
+on:
+  pull_request_review_comment:
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Announce
+        run: echo "Comment ${{ github.event.comment.body }}"

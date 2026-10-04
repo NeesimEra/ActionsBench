@@ -1,0 +1,39 @@
+id: AB-ART-0001
+title: "Checkout credentials uploaded in a workflow artifact"
+is_negative: false
+expected:
+  - weakness_class: artifact-integrity
+    file: .github/workflows/artipacked.yml
+    line: 13
+    evidence: "actions/checkout@"
+rationale: >-
+  actions/checkout persists the job token by default. At the pinned version (4.2.2) it
+  writes the token into the workspace's local git config, .git/config, and the upload step
+  sets include-hidden-files: true, so the token ends up inside the artifact where anyone
+  who can download it can read it. This is the pattern zizmor calls artipacked.
+references:
+  - https://docs.zizmor.sh/audits/
+  - https://github.com/sparkrew/github-actions-security
+  - https://github.com/actions/upload-artifact/blob/043fb46d1a93c77aae656e7c1c64a875d1fc6a0a/action.yml
+  - https://github.com/actions/checkout/blob/main/CHANGELOG.md
+  - https://github.com/actions/checkout/blob/11bd71901bbe5b1630ceea73d27597364c9af683/src/git-auth-helper.ts
+  - https://github.com/actions/checkout/blob/3d3c42e5aac5ba805825da76410c181273ba90b1/src/git-auth-helper.ts
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The version matters. From checkout 6.0.0 the token is stored in a separate file under
+  RUNNER_TEMP and .git/config only holds an includeIf path to it (changelog entry 'Persist
+  creds to a separate file'; compare git-auth-helper.ts at 4.2.2 and 7.0.1), so the same
+  workflow on a newer checkout would not put the token in the workspace. An earlier
+  version of this case pinned 7.0.1 and described a weakness that does not exist there;
+  the evidence audit found this and the case was corrected on 2026-10-04. zizmor flags a
+  checkout without persist-credentials: false regardless of version (observed), so at a
+  newer checkout that finding is arguably a false alarm. The label follows the paper's
+  rule mapping, which files artipacked under artifact integrity; the class's prose is
+  about unvalidated artifacts, so the fit is debatable. include-hidden-files is set
+  explicitly because it defaults to false (checked in the action's metadata at the pinned
+  SHA); without it .git would not be uploaded. The label is anchored at the checkout step,
+  where the credentials are persisted.

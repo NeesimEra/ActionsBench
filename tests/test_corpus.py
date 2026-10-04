@@ -160,3 +160,40 @@ def test_require_valid_corpus_raises_with_all_problems(make_case: CaseWriter) ->
     with pytest.raises(CorpusError) as excinfo:
         require_valid_corpus(corpus_root)
     assert len(excinfo.value.problems) == 2
+
+
+def test_symbolic_links_are_rejected(make_case: CaseWriter) -> None:
+    case_dir = make_case()
+    (case_dir / ".github" / "link.yml").symlink_to(case_dir / "case.yaml")
+    assert any("symbolic links are not allowed" in m for m in _messages(case_dir))
+
+
+def test_a_workflow_that_is_not_valid_yaml_is_rejected(make_case: CaseWriter) -> None:
+    # An unquoted value containing a colon and a space is a classic mistake: the whole file is
+    # invalid, scanners reject it, and the case would be scored as a tool failure.
+    broken = (
+        "name: t\non: push\njobs:\n  j:\n    runs-on: ubuntu-latest\n    steps:\n"
+        '      - run: echo "note: echo hi"\n'
+    )
+    case_dir = make_case(workflow=broken)
+    messages = _messages(case_dir)
+    assert any("wf.yml is not valid YAML" in m and "line 7" in m for m in messages)
+
+
+def test_valid_yaml_workflows_still_load(make_case: CaseWriter) -> None:
+    case, problems = load_case(make_case())
+    assert problems == []
+    assert case is not None
+
+
+def test_non_yaml_files_under_github_are_not_parsed(make_case: CaseWriter) -> None:
+    case_dir = make_case()
+    (case_dir / ".github" / "notes.md").write_text("title: [unclosed\n", encoding="utf-8")
+    case, problems = load_case(case_dir)
+    assert problems == []
+    assert case is not None
+
+
+def test_every_workflow_in_the_real_corpus_parses(real_corpus: Path) -> None:
+    _, problems = load_corpus(real_corpus)
+    assert [str(p) for p in problems if "not valid YAML" in p.message] == []

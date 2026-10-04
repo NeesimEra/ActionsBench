@@ -1,0 +1,25 @@
+id: AB-RUN-0002
+title: "Job targets a retired macOS runner image"
+is_negative: false
+expected:
+  - weakness_class: runner-compatibility
+    file: .github/workflows/retired-macos.yml
+    line: 10
+    evidence: "runs-on: macos-10.15"
+rationale: >-
+  GitHub announced on 2022-07-20 that the macOS 10.15 runner image would be removed by
+  2022-08-30, with scheduled brownouts before that, so a job that still targets it cannot
+  be reliably run. That matches the class definition: a construct that cannot be reliably
+  resolved or supported.
+references:
+  - https://github.blog/changelog/2022-07-20-github-actions-the-macos-10-15-actions-runner-image-is-being-deprecated-and-will-be-removed-by-8-30-22/
+  - https://arxiv.org/html/2601.14455v2
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The runner-images tracking issue originally said the image would be fully unsupported by
+  2022-12-01; the changelog is the later and more specific source. actionlint's documented
+  list of available labels does not include macos-10.15.

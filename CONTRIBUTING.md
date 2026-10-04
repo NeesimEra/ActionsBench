@@ -79,9 +79,30 @@ request or issue if you disagree.
 
 ## Adding a scanner adapter
 
-Not open yet. Per-tool adapters are added in the M0 spike (plan.md), after each tool's
-real output has been checked. In the meantime, any scanner can be scored by producing a
-findings file that matches
+Two adapters exist so far (zizmor and actionlint). Add another only after checking the tool's
+real output:
+
+1. Run the tool by hand on an isolated copy of a case's `.github/` and read its raw output.
+   Record the version and the exact flags that make the run deterministic.
+2. Add `src/actionsbench/adapters/<tool>.py` implementing the contract in `adapters/base.py`:
+   the command, accepted exit codes, a parser, a pinned version, and a rule map. Use `prepare`
+   if the tool needs something in the isolated copy (actionlint needs a project marker) and
+   `probe_version` if the tool does not print its version in its output. If the tool is a
+   binary, add a pinned installer under `scripts/` that verifies a checksum.
+   If any setting changes the tool's verdict (zizmor's persona is one), expose it through
+   `from_options`, pass it to the tool explicitly, and report it in `configuration`; the
+   baseline is the tool's default made explicit.
+3. Map only rules whose meaning you have reviewed against a benchmark class. Everything else
+   stays unmapped and is reported by the runner. Record each decision, mapped or deliberately not
+   mapped, in [docs/rule-mappings.md](docs/rule-mappings.md), including where you disagree with
+   the source study. Never map a rule just because it fired on a labeled case. Set `scope` to the classes that have a
+   reviewed mapping, not to everything the tool claims.
+4. Add unit tests with a trimmed real output sample, and an opt-in integration test
+   (`pytest -m integration`) that runs the real tool.
+5. Register it in `adapters/__init__.py` and say in the pull request which rules you mapped and
+   why.
+
+Any scanner can also be scored without an adapter by producing a findings file that matches
 [findings.schema.json](src/actionsbench/schemas/findings.schema.json).
 
 ## License

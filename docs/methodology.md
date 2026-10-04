@@ -62,6 +62,20 @@ real repositories are never included.
 Every case carries a written `rationale` and at least one `reference`. If a label was
 reasoned from first principles and no independent source exists, the rationale says so.
 
+### Three different levels of confidence
+
+1. **`proposed`**: one person has labeled it.
+2. **Evidence-audited**: the facts the label rests on were checked against primary sources, and where
+   possible demonstrated, and the result is recorded per case in [evidence-audit.md](evidence-audit.md).
+   This is not a status in `case.yaml`; it is a property of the record. It raises confidence in the
+   facts (is this context attacker-controlled, does this advisory range hold, was this runner image
+   retired) and found real defects, but it is not independent: the author, or the assistant that
+   wrote the case, cannot be the independent reviewer of it.
+3. **`agreed`**: a person other than the author checked the label. Judgements such as the choice of
+   class or where a case sits on a definitional boundary can only be settled this way.
+
+Quote results with the level that applies.
+
 ## 4. Matching a finding to a label
 
 A scanner finding is normalized to: case ID, weakness class, file, line, and optionally the
@@ -69,10 +83,24 @@ tool's rule ID. A finding matches an expected finding when:
 
 - the weakness class is equal,
 - the file is equal, and
-- the lines are within `line_tolerance`.
+- both lines are in the same **region** of that file.
 
-`line_tolerance` defaults to 0. That default is a placeholder; the right value (or a
-step-level rule) is a decision for the M0 spike.
+A region is the smallest of: a step (`jobs.<job>.steps[i]`, or `runs.steps[i]` in a composite
+action), a job outside its steps (this also covers a reusable-workflow call, whose `uses:` and
+`secrets:` lines belong together), or a top-level key such as `on` or `permissions`. Boundaries come
+from YAML node positions, not from indentation (`src/actionsbench/regions.py`).
+
+Why a region and not a line: scanners anchor one construct at different lines, so "which line" is a
+tool convention and the construct is the unit that matters. Observed: zizmor reports a privileged
+trigger at the `on:` line, a reusable-workflow call at its `uses:` line and a step at its header,
+and actionlint reports a multi-line script at the `script:` key. Each is a different line of the
+same construct as the label. Neighbouring constructs stay distinct: a finding in the next step, or
+in `permissions` instead of `on`, does not match.
+
+If the labeled file cannot be parsed as a single YAML mapping, matching falls back to exact line
+equality; nothing is guessed. Exact-line matching with an optional tolerance remains available for a
+strict comparison (`actionsbench score --match line [--tolerance N]`), and every result states which
+rule produced it. The decision and its costs are in ADR 0003.
 
 Matching is **one-to-one**: a finding can satisfy at most one expected finding. A scanner
 that reports the same line twice gets one true positive and one false positive, so
@@ -93,6 +121,32 @@ Each report therefore declares a `scope`, the classes the tool claims to cover:
 
 The scope is declared by whoever produces the report. Published results should state where
 each scope came from (the tool's documentation, or the tool's authors).
+
+### 5.1 Configuration is part of the result
+
+A tool's settings can change its verdict, so every result records them. The findings file has an
+optional `configuration` string, adapters fill it in, `run` and `score` print it, and the result
+directory name includes it. Results from different configurations are different results; they are
+never merged or averaged. A findings file with no configuration is accepted and shown as "not
+recorded".
+
+Each adapter's **baseline** is the tool's default configuration made explicit, because that is how
+the tool is normally run. Any other configuration is run on purpose (`--config KEY=VALUE`) and
+reported next to the baseline, never in place of it.
+
+Observed with zizmor 1.30.1 on the 25-case corpus (2026-10-04, online audits off; the same personas
+behave the same way on the 44-case corpus, where `pedantic` and `auditor` also flag the two safe
+contexts in AB-NEG-0012 and `regular` also suppresses workflow-level `contents: write`):
+
+| Persona | Injection (TP / FP / FN) | `write-all` (AB-PRM-0001) | Other effects |
+|---|---|---|---|
+| regular (baseline) | 7 / 0 / 0 | not reported (suppressed) | none on clean cases |
+| pedantic | 7 / 0 / 0 | reported at the labeled line | adds `anonymous-definition` and `concurrency-limits` to every case, including clean ones |
+| auditor | 7 / 0 / 0 | reported at the labeled line | same additions as pedantic |
+
+The persona does not change the injection result here. It changes whether an excessive-permission
+label is detected at all, and how noisy clean cases look. A score for that class would therefore
+need its configuration stated beside it.
 
 ## 6. Not run is not clean
 
@@ -119,10 +173,43 @@ be reproduced and compared.
 
 ## 9. Known limitations
 
-- The taxonomy is the study's 10 classes as summarized in the PRD. It has not yet been
-  verified against the paper (PRD, open question 7).
 - Labels are only as good as their review. Until a case is `agreed`, treat it as a claim.
-- The line-tolerance rule and the exact scope declarations are unresolved until the spike.
+- Region matching is coarser than a line and rests on two tools and four anchoring cases (ADR 0003
+  records the costs and says when to revisit it). Scope declarations are reviewed per adapter and
+  recorded in [rule-mappings.md](rule-mappings.md).
+- **A tool's configuration changes its verdict.** It is now recorded with every result (section
+  5.1), but the choice of baseline configuration is still a judgement. For zizmor the baseline is the
+  default `regular` persona, made explicit; `pedantic` and `auditor` are run and reported separately.
+- The ten classes were checked against the source study (2026-10-04): there are exactly ten, with
+  the definitions used here. The study defines them by grouping scanner rules, so in practice
+  they are broader than their prose, and the study's rule mapping lives in a repository that
+  declares no license; this project reads it but does not copy it, and every mapping in an
+  adapter is reviewed independently.
+- **Mapped scope** (review record: [rule-mappings.md](rule-mappings.md)). zizmor is judged on six
+  classes (injection, unpinned-dependency, excessive-permission, privileged-trigger,
+  secrets-exposure, artifact-integrity) and actionlint on four (injection, control-flow,
+  runner-compatibility, secrets-exposure), each through a small number of reviewed rules. Known-vulnerable-component
+  is out of scope for zizmor because it needs online mode, which the adapter disables for
+  determinism. Hardening-gap has no cases. Out of scope means "uncovered", never "missed".
+- **Class-level scope can overstate coverage, and now visibly does.** Some mappings cover only part
+  of a broad class. actionlint's only secrets check is for hardcoded credentials, so the cases for
+  `secrets: inherit` and `toJSON(secrets)` count as misses for it; zizmor is judged on
+  artifact-integrity through `artipacked` alone, so the unverified-download case (AB-ART-0002) counts
+  as a miss although no zizmor rule targets that pattern. Both are honest statements of what the
+  tool detects, but a per-class recall figure reads as "how good is this tool at the class", which it
+  is not. Read the per-case disagreements, not only the totals; a per-pattern notion of coverage is a
+  candidate improvement.
+- **Anchoring differences are the main source of strict-score disagreement.** Every anchoring
+  difference observed is a different line of the same construct, one or two lines apart (section 4
+  lists them; a long `run: |` block reported at its `run:` key is two lines above the labeled
+  interpolation). Under exact-line matching each costs one false positive plus one false negative;
+  region matching, the default, removes them. A one-line tolerance would not (ADR 0003). The labels
+  were not changed to suit a tool.
+- actionlint needs a project marker (an empty `.git` directory) in the isolated copy, and its
+  external linters (shellcheck, pyflakes) are disabled so results do not depend on the machine.
+- Early results are recorded in `status.md`. They are one run each over hand-built cases with a
+  single reviewer, so they are a pipeline check and an early signal, not a ranking. Per-class
+  numbers, never a single score, are the output.
 - The SARIF parser has been checked against real zizmor 1.30.1 output only (rule IDs are
   prefixed, for example `zizmor/template-injection`, and paths are case-relative on an
   isolated copy). Other tools still have to be checked one at a time.

@@ -1,0 +1,26 @@
+id: AB-KVC-0001
+title: "Action pinned to a version with a published advisory"
+is_negative: false
+expected:
+  - weakness_class: known-vulnerable-component
+    file: .github/workflows/vulnerable-download.yml
+    line: 13
+    evidence: "actions/download-artifact@eaceaf801fd36c7dee90939fad912460b18a1ffe"
+rationale: >-
+  The SHA is the commit of actions/download-artifact v4.1.2, inside the advisory's
+  vulnerable range (>= 4.0.0, < 4.1.3) for arbitrary file write through artifact extraction.
+  The advisory's patched version is 4.1.3.
+references:
+  - https://github.com/advisories/GHSA-cxww-7g56-2vh6
+  - https://docs.zizmor.sh/audits/
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  Pinned by SHA on purpose so that only the known-vulnerable component is labeled. Detecting
+  this needs advisory data: zizmor's known-vulnerable-actions audit requires online mode,
+  which the runner disables for determinism, so an offline scan is expected to be unable to
+  see it. Only the advisory ID is cited because a CVE ID could not be confirmed through
+  GitHub's API.

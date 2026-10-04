@@ -1,0 +1,11 @@
+name: Inherit secrets
+on:
+  push:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    uses: example-org/shared-workflows/.github/workflows/deploy.yml@0123456789abcdef0123456789abcdef01234567
+    secrets: inherit

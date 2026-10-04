@@ -1,0 +1,13 @@
+name: Retired macOS runner
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-10.15
+    steps:
+      - name: Build
+        run: echo "building"

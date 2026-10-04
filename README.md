@@ -2,8 +2,10 @@
 
 A labeled benchmark and evaluation harness for GitHub Actions workflow security scanners.
 
-> **Status: pre-alpha.** The corpus is a 9-case seed set and every label is still
-> `proposed` (one reviewer). Nothing here is a result yet. It is public early so the
+> **Status: initial pre-release (0.1.0).** The corpus is a small hand-built set (44 cases) and every label is still
+> `proposed` (one author). The facts behind them were audited against primary sources
+> ([docs/evidence-audit.md](docs/evidence-audit.md)), but no label has been independently reviewed.
+> Nothing here is a result yet. It is public early so the
 > labels can be challenged, not because it is finished.
 
 ## Why this exists
@@ -33,13 +35,18 @@ Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 uv sync
 uv run actionsbench validate      # check every case in corpus/cases
 uv run actionsbench stats         # cases per weakness class
-uv run actionsbench score findings.json
+uv run actionsbench run --tool zizmor      # needs uvx; add --config persona=auditor for another setting
+sh scripts/install-actionlint.sh           # pinned, checksum-verified download into .tools/
+uv run actionsbench run --tool actionlint
+uv run actionsbench score results/zizmor-1.30.1-regular/findings.json
 ```
 
-`score` takes a normalized findings file (schema:
-[findings.schema.json](src/actionsbench/schemas/findings.schema.json)), so any scanner can
-be scored today by producing that file. Built-in scanner adapters come later (see
-[plan.md](plan.md)).
+`run` executes a scanner that has a reviewed adapter (so far zizmor and actionlint, each scored
+on the injection class only) and writes a findings file; raw output goes to `results/` (gitignored).
+`score` takes any normalized findings file (schema:
+[findings.schema.json](src/actionsbench/schemas/findings.schema.json)), so a scanner
+without an adapter can still be scored by producing that file. More adapters are planned
+(see [plan.md](plan.md)).
 
 Run the commands from the repository root, or pass `--corpus` explicitly.
 
@@ -48,7 +55,8 @@ Run the commands from the repository root, or pass `--corpus` explicitly.
 - A tool is judged only on the weakness classes it declares in `scope`. Anything outside
   that scope is reported as a coverage gap, never as a miss or a false alarm.
 - Cases the tool did not run on are excluded, not counted as clean.
-- Matching is one-to-one (class, file, line within a tolerance), so duplicate findings do
+- Matching is one-to-one (class, file, and the same step, job or top-level key; use
+  `--match line` for exact lines), so duplicate findings do
   not inflate recall.
 - Results are per class. There is no overall score on purpose.
 
@@ -61,7 +69,7 @@ Details: [docs/methodology.md](docs/methodology.md).
 | `corpus/cases/` | The labeled cases. Each case directory is a fake repository root plus a `case.yaml`. |
 | `src/actionsbench/` | Corpus loader and validator, SARIF parser, scorer, CLI. |
 | `src/actionsbench/schemas/` | JSON Schemas for `case.yaml` and the findings file (the public contracts). |
-| `docs/` | PRD, methodology, architecture decision records. |
+| `docs/` | PRD, methodology, rule mappings (the review record), architecture decision records. |
 | `plan.md`, `status.md` | The work plan with human gates, and an append-only progress log. |
 
 ## A note on the corpus

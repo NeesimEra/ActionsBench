@@ -1,0 +1,16 @@
+id: AB-NEG-0018
+title: "Archive downloaded and verified against a checksum before unpacking"
+is_negative: true
+expected: []
+rationale: >-
+  The step verifies the archive against a SHA-256 checksum before unpacking it. Clean twin
+  of AB-ART-0002.
+references:
+  - https://arxiv.org/html/2601.14455v2
+provenance: synthetic-minimal
+status: proposed
+author: Aliu2211
+reviewer: null
+added_in: "0.1.0"
+notes: >-
+  The checksum is a placeholder value.

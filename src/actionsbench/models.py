@@ -76,3 +76,5 @@ class ScannerReport:
     scope: frozenset[WeaknessClass]
     cases_run: frozenset[str]
     findings: tuple[Finding, ...]
+    # Settings that change the tool's verdict (for example a zizmor persona). Part of the result.
+    configuration: str | None = None
