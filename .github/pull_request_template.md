@@ -1,9 +1,13 @@
+<!-- This pull request must target `dev`. Only the maintainer's release pull request
+     from `dev` goes to `main`; the `PR target` check fails anything else. -->
+
 ## What changed
 
 <!-- One or two sentences. -->
 
 ## Checklist
 
+- [ ] This pull request targets `dev`
 - [ ] `uv run ruff check . && uv run ruff format --check . && uv run mypy && uv run pytest` pass
 - [ ] `uv run actionsbench validate` passes
 
