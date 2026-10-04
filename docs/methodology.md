@@ -94,6 +94,30 @@ Each report therefore declares a `scope`, the classes the tool claims to cover:
 The scope is declared by whoever produces the report. Published results should state where
 each scope came from (the tool's documentation, or the tool's authors).
 
+### 5.1 Configuration is part of the result
+
+A tool's settings can change its verdict, so every result records them. The findings file has an
+optional `configuration` string, adapters fill it in, `run` and `score` print it, and the result
+directory name includes it. Results from different configurations are different results; they are
+never merged or averaged. A findings file with no configuration is accepted and shown as "not
+recorded".
+
+Each adapter's **baseline** is the tool's default configuration made explicit, because that is how
+the tool is normally run. Any other configuration is run on purpose (`--config KEY=VALUE`) and
+reported next to the baseline, never in place of it.
+
+Observed with zizmor 1.30.1 on the 25-case corpus (2026-10-04, online audits off):
+
+| Persona | Injection (TP / FP / FN) | `write-all` (AB-PRM-0001) | Other effects |
+|---|---|---|---|
+| regular (baseline) | 7 / 0 / 0 | not reported (suppressed) | none on clean cases |
+| pedantic | 7 / 0 / 0 | reported at the labeled line | adds `anonymous-definition` and `concurrency-limits` to every case, including clean ones |
+| auditor | 7 / 0 / 0 | reported at the labeled line | same additions as pedantic |
+
+The persona does not change the injection result here. It changes whether an excessive-permission
+label is detected at all, and how noisy clean cases look. A score for that class would therefore
+need its configuration stated beside it.
+
 ## 6. Not run is not clean
 
 A report lists `cases_run`, the cases the tool was actually run on. Cases outside that list
@@ -121,13 +145,9 @@ be reproduced and compared.
 
 - Labels are only as good as their review. Until a case is `agreed`, treat it as a claim.
 - The line-tolerance rule and the exact scope declarations are unresolved until the spike.
-- **A tool's configuration changes its verdict, and results do not yet record which configuration
-  produced them.** zizmor has personas. At its default `regular` persona it suppresses
-  `permissions: write-all` ("3 suppressed" on AB-PRM-0001); at `pedantic` or `auditor` it reports
-  `excessive-permissions` at exactly the labeled line with high confidence. The adapter runs the
-  default persona, so any future score for that class would depend on a choice the findings file
-  does not state. Fixing this means making the configuration explicit in the adapter and the
-  findings contract; it is tracked in `status.md`.
+- **A tool's configuration changes its verdict.** It is now recorded with every result (section
+  5.1), but the choice of baseline configuration is still a judgement. For zizmor the baseline is the
+  default `regular` persona, made explicit; `pedantic` and `auditor` are run and reported separately.
 - The ten classes were checked against the source study (2026-10-04): there are exactly ten, with
   the definitions used here. The study defines them by grouping scanner rules, so in practice
   they are broader than their prose, and the study's rule mapping lives in a repository that

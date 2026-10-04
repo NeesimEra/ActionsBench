@@ -33,10 +33,10 @@ Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 uv sync
 uv run actionsbench validate      # check every case in corpus/cases
 uv run actionsbench stats         # cases per weakness class
-uv run actionsbench run --tool zizmor      # needs uvx
+uv run actionsbench run --tool zizmor      # needs uvx; add --config persona=auditor for another setting
 sh scripts/install-actionlint.sh           # pinned, checksum-verified download into .tools/
 uv run actionsbench run --tool actionlint
-uv run actionsbench score results/zizmor-1.30.1/findings.json
+uv run actionsbench score results/zizmor-1.30.1-regular/findings.json
 ```
 
 `run` executes a scanner that has a reviewed adapter (so far zizmor and actionlint, each scored
