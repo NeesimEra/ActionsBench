@@ -67,15 +67,30 @@ class FakeAdapter:
     raw_suffix = "sarif"
 
     def __init__(
-        self, script: str, *, expected_version: str | None = "9.9", launcher: str | None = None
+        self,
+        script: str,
+        *,
+        expected_version: str | None = "9.9",
+        launcher: str | None = None,
+        probed_version: str | None = None,
+        marker: str | None = None,
     ) -> None:
         self._script = script
         self._launcher = launcher or sys.executable
         self.expected_version = expected_version
+        self.probed_version = probed_version
+        self.marker = marker
 
     @property
     def label(self) -> str:
         return "fake-9.9"
+
+    def probe_version(self) -> str | None:
+        return self.probed_version
+
+    def prepare(self, scan_dir: Path) -> None:
+        if self.marker:
+            (scan_dir / self.marker).mkdir()
 
     def command(self, scan_dir: Path) -> list[str]:
         return [self._launcher, "-c", self._script, str(scan_dir)]
@@ -92,3 +107,13 @@ class FakeAdapter:
             locationless=parsed.locationless,
             reported_version=document["runs"][0]["tool"]["driver"].get("version"),
         )
+
+
+# Fails (exit 4) unless the prepare hook ran first and left its marker directory behind.
+NEEDS_MARKER = r"""
+import json, pathlib, sys
+if not (pathlib.Path(sys.argv[1]) / ".marker").is_dir():
+    sys.exit(4)
+print(json.dumps({"version": "2.1.0", "runs": [{"tool": {"driver": {"name": "fake",
+      "version": "9.9"}}, "results": []}]}))
+"""
