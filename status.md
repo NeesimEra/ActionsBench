@@ -605,3 +605,26 @@ party. Partly yes, and this entry says exactly how far. The record is
 **Not done / next**
 
 - poutine adapter; decide the hardening-gap class and per-pattern coverage; put the experiment in CI if wanted.
+
+---
+
+## 2026-10-04: Release decision (v0.1.0)
+
+**Decision (owner, in chat):** waive gate C (sharing results with scanner maintainers before publishing) and
+cut the initial release. Recorded here because plan.md says gates are crossed only on explicit approval.
+Starting this release the owner has accepted the provisional gate A go: the evidence supports it, and the
+label judgement calls remain un-reviewed (see the evidence audit).
+
+**What is being released, and how it is framed**
+
+- Version `0.1.0` (the `v*` ruleset has no bypass, so the tag cannot be deleted or moved afterwards).
+- Published as a GitHub **pre-release**. That was my call, not the owner's, because the project's own bar for
+  "official" (PRD M1: 150 to 200 cases, independent review, three scanners) is not met and every label is
+  `proposed`. It is a toggle on the release page and can be flipped to a normal release later.
+- Not published to PyPI: not asked for, and no trusted-publishing workflow exists. The release carries the
+  wheel, the sdist, a corpus archive and a checksum file instead.
+- The release notes state the limits first: one author, evidence-audited but not independently reviewed,
+  maintainers not consulted, one run per tool, results are not a ranking, and an invitation to challenge any
+  label or mapping through the issue templates.
+
+**Checked before tagging:** see the next entry, which records the verification and the release itself.
