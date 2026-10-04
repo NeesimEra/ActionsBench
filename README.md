@@ -66,7 +66,7 @@ Details: [docs/methodology.md](docs/methodology.md).
 | `corpus/cases/` | The labeled cases. Each case directory is a fake repository root plus a `case.yaml`. |
 | `src/actionsbench/` | Corpus loader and validator, SARIF parser, scorer, CLI. |
 | `src/actionsbench/schemas/` | JSON Schemas for `case.yaml` and the findings file (the public contracts). |
-| `docs/` | PRD, methodology, architecture decision records. |
+| `docs/` | PRD, methodology, rule mappings (the review record), architecture decision records. |
 | `plan.md`, `status.md` | The work plan with human gates, and an append-only progress log. |
 
 ## A note on the corpus
