@@ -21,6 +21,29 @@ Commit messages follow [Conventional Commits](https://www.conventionalcommits.or
 (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, with a scope when useful, for
 example `feat(corpus): add AB-INJ-0008`). Keep unrelated changes in separate commits.
 
+## Branches and pull requests
+
+- **`dev` is the default branch and the only target for pull requests.** Branch from `dev`
+  (for example `feat/...`, `fix/...`, `docs/...`) and open the pull request against `dev`. It
+  is squash-merged, and the pull request title becomes the commit title, so write it as a
+  Conventional Commit.
+- **`main` is the released state.** It changes only through a release pull request from `dev`,
+  merged with a merge commit by a maintainer. Release tags (`v*`) are created on `main` and are
+  immutable.
+- The required check **PR target** fails any pull request whose base is not `dev`, except the
+  release pull request from `dev` into `main`. If it fails, change the base branch of your pull
+  request to `dev`; the check re-runs on its own.
+- Direct pushes to `dev` and `main` are blocked. Both CI checks must pass.
+
+Reasoning and trade-offs: [ADR 0004](docs/adr/0004-branching-model.md).
+
+### Releasing (maintainers)
+
+1. Update `corpus/CHANGELOG.md` on `dev` through a normal pull request.
+2. Open a pull request from `dev` to `main` titled `release: vX.Y.Z` and merge it with a merge
+   commit.
+3. Tag the merge commit `vX.Y.Z` on `main`. Tags cannot be moved or deleted.
+
 ## Adding a case
 
 Read [docs/methodology.md](docs/methodology.md) first. In short:
