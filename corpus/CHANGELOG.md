@@ -3,7 +3,7 @@
 Corpus versions are immutable once released. A new version adds or amends cases; it never
 silently rewrites old ones. Each case records the version that introduced it in `added_in`.
 
-## Unreleased (0.1.0)
+## 0.1.0 (2026-10-04)
 
 Seed set of 44 cases (26 positive, 18 negative), all `proposed`.
 
@@ -45,3 +45,8 @@ Third batch (harder variants and more than one positive per class, each with a c
 - AB-NEG-0010 to 0018: clean twins and probes (a `pull_request_target` trigger with nothing untrusted,
   a multi-line script via the environment, safe contexts, a pinned reusable workflow, credentials
   from secrets, one named secret, patched setup-php, `macos-latest`, a verified download)
+
+Before this release an evidence audit checked the facts behind every label (docs/evidence-audit.md). It
+corrected AB-ART-0001 and AB-NEG-0008, whose first draft pinned a checkout version where the described
+weakness does not exist (they now pin 4.2.2), and it demonstrated the injection cases with GitHub's own
+expression engine. No label has been independently reviewed: every case is still `proposed`.
