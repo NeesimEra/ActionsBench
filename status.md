@@ -130,3 +130,41 @@ history before publication.
 - The ruleset has no bypass actors, so even an admin must change the ruleset itself to push
   around it.
 - Not yet observed: Dependabot's first pull requests.
+
+---
+
+## 2026-10-04: `dev` branch and the branch flow
+
+**Decision (owner, in chat):** add a `dev` branch; all pull requests reference it.
+
+**Done** (design and trade-offs in [ADR 0004](docs/adr/0004-branching-model.md))
+
+- `dev` created and made the **default branch**. `main` is the released state and carries the
+  `v*` tags.
+- New workflow `branch-flow.yml` with the required check **PR target**: it fails any pull
+  request whose base is not `dev`, except the `dev` to `main` release pull request from this
+  repository. It re-runs when a base branch is edited.
+- Rulesets, no bypass actors:
+  - `protect-dev`: pull request required, squash only, linear history, up-to-date branch,
+    the two CI checks and `PR target` required, no force-push, no deletion.
+  - `protect-main` (now targets `refs/heads/main` explicitly instead of the default branch):
+    pull request required, merge commits only, the same three checks required, no force-push,
+    no deletion, up-to-date requirement off.
+- Repository allows squash and merge commits; the rulesets restrict which one applies per
+  branch. CI also runs on pushes to `dev`. Dependabot targets `dev`.
+
+**Verified (by doing it)**
+
+- A pull request into `dev` ran all three required checks and was squash-merged.
+- A direct push and a force-push to `dev` were both rejected; remote `dev` was unchanged.
+- A pull request targeting `main` from a branch other than `dev` failed `PR target`, showed a
+  blocked merge state and could not be merged. After retargeting it to `dev`, the check
+  re-ran on its own and passed. The throwaway pull request (#3) was closed unmerged.
+
+**Limits**
+
+- Visitors land on `dev`, which can be ahead of the latest release. The README says `main`
+  and the tags are the released state.
+- Each release adds one merge commit to `main`, so `main` is not strictly linear. Squashing
+  release pull requests would make `dev` and `main` diverge (ADR 0004).
+- The check is enforced by the rulesets, which a repository admin can still edit.
