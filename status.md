@@ -773,3 +773,25 @@ PyPI pending publisher before the release. `CITATION.cff` and the changelog now 
   equal the CI artifact's, and those same files plus SHA256SUMS are attached to the GitHub release.
 - This follow-up adds install instructions and the DOI to the README and `CITATION.cff`. The Zenodo archive is of
   the tag, so it does not contain the DOI line (it cannot, and that is expected).
+
+---
+
+## 2026-10-06: web platform deferred
+
+**Decision (owner, in chat):** a hosted platform (submit a scanner, run it on our servers, public leaderboard) is
+marked for later. It is not planned, and nothing was built.
+
+**Why not now**
+
+- No label has been independently reviewed, so a leaderboard would present unreviewed numbers as results, which the
+  methodology rules out.
+- Running submitted scanners or accepting uploads needs sandboxing, abuse handling and authentication: a large attack
+  surface for a security benchmark, plus hosting and dispute handling that one maintainer cannot carry.
+- It does not address the actual bottleneck, which is independent label review and more cases.
+
+**Revisit when** several scanner maintainers ask to submit results, labels have had independent review, and the owner
+accepts the security and maintenance load. Until then results come in as a findings file through a pull request.
+
+**Not deferred, undecided:** a static corpus explorer and per-class result pages on GitHub Pages (generated from the
+repository, no backend, no accounts). Suggested trigger: the first outside reviewer, or contributors asking for it.
+Result pages only after independent review. Not started.
