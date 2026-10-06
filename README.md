@@ -2,7 +2,7 @@
 
 A labeled benchmark and evaluation harness for GitHub Actions workflow security scanners.
 
-> **Status: initial release (0.1.0, pre-1.0).** The corpus is a small hand-built set (44 cases) and every label is still
+> **Status: initial release (0.1.1, pre-1.0).** The corpus is a small hand-built set (44 cases) and every label is still
 > `proposed` (one author). The facts behind them were audited against primary sources
 > ([docs/evidence-audit.md](https://github.com/NeesimEra/ActionsBench/blob/main/docs/evidence-audit.md)), but no label has been independently reviewed.
 > Nothing here is a result yet. It is public early so the
@@ -27,7 +27,19 @@ It is not a scanner, and it does not rank tools. It reports per-class evidence.
 
 Full motivation, scope and risks: [docs/PRD.md](https://github.com/NeesimEra/ActionsBench/blob/main/docs/PRD.md).
 
-## Quickstart
+## Install
+
+```bash
+pip install actionsbench      # or: uv tool install actionsbench
+actionsbench validate         # works from any directory: the corpus is bundled
+```
+
+The package bundles the corpus, so it can validate and score without a clone. Archived releases have a
+DOI on [Zenodo](https://doi.org/10.5281/zenodo.23175473) (this version; the concept DOI
+[10.5281/zenodo.23175472](https://doi.org/10.5281/zenodo.23175472) always resolves to the latest). The
+code is MIT and the corpus is CC BY 4.0.
+
+## Quickstart (from a clone)
 
 Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 

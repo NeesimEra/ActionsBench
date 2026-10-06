@@ -759,3 +759,17 @@ not a failure; the logged digests were identical.
 
 Zenodo is enabled for the repository (an active `release` webhook to Zenodo is present). The owner confirmed the
 PyPI pending publisher before the release. `CITATION.cff` and the changelog now carry the release date 2026-10-06.
+
+---
+
+## 2026-10-06: 0.1.1 released to GitHub, Zenodo and PyPI
+
+- GitHub release v0.1.1 on `main` commit 4f1413f (merge commit of the release PR). Tag created by the release.
+- Zenodo record 10.5281/zenodo.23175473 (concept DOI 10.5281/zenodo.23175472), created automatically; it says
+  CC-BY-4.0 and resource type "software" (CITATION.cff says dataset; Zenodo did not take that from it).
+- PyPI `actionsbench` 0.1.1 published by the Publish workflow (run 37397568957) after the owner approved the
+  `pypi` environment. Verified: the project page shows the license `MIT AND CC-BY-4.0` and the project URLs; a fresh
+  install from PyPI printed `actionsbench 0.1.1` and `OK: 44 case(s) valid.` from an empty directory; PyPI's hashes
+  equal the CI artifact's, and those same files plus SHA256SUMS are attached to the GitHub release.
+- This follow-up adds install instructions and the DOI to the README and `CITATION.cff`. The Zenodo archive is of
+  the tag, so it does not contain the DOI line (it cannot, and that is expected).
