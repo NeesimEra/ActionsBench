@@ -746,3 +746,16 @@ from 0.1.0 (the diff against the tag is empty).
   name is free on both today but a pending publisher does not reserve it.
 - Zenodo: log in with GitHub, get the organization to approve access if asked, and switch the repository on.
 - Then: TestPyPI dry run, release pull request, GitHub release, approve the `pypi` deployment.
+
+---
+
+## 2026-10-06: TestPyPI dry run passed; release date set
+
+Dry run (Actions run 37396382131, dispatched on `dev`, `testpypi` deployment approved by the owner): build and
+wheel check passed, trusted publishing uploaded the wheel and sdist with no stored token, and a fresh install
+from TestPyPI printed `actionsbench 0.1.1` and `OK: 44 case(s) valid.` from an empty directory. TestPyPI's hashes
+match the CI build artifact. The `digest-mismatch: error` line in the download step is the action's input setting,
+not a failure; the logged digests were identical.
+
+Zenodo is enabled for the repository (an active `release` webhook to Zenodo is present). The owner confirmed the
+PyPI pending publisher before the release. `CITATION.cff` and the changelog now carry the release date 2026-10-06.
