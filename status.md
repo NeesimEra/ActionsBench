@@ -628,3 +628,134 @@ label judgement calls remain un-reviewed (see the evidence audit).
   label or mapping through the issue templates.
 
 **Checked before tagging:** see the next entry, which records the verification and the release itself.
+
+---
+
+## 2026-10-04: v0.1.0 released (initial pre-release)
+
+**Done**
+
+- Tag `v0.1.0` on `main` at `5139507f30fde0929cc993dccbfb98c5ffbc2ae8`, a merge commit of `dev` with identical
+  content, published as a GitHub **pre-release**: https://github.com/NeesimEra/ActionsBench/releases/tag/v0.1.0
+- Assets: the wheel, the sdist, a corpus-only archive (with its CC BY 4.0 license, changelog and
+  `CITATION.cff`) and `SHA256SUMS`. Not published to PyPI.
+- The release notes lead with the limits (one author, evidence-audited but not independently reviewed,
+  maintainers not consulted, one run per tool, not a ranking) and invite challenges through the issue templates.
+  Their results table was generated from the release commit.
+
+**Verified (by running it) before and after tagging**
+
+- On a fresh clone of the release content: locked install, ruff, format, mypy, 195 unit tests, corpus
+  validation (44 cases), `--version` 0.1.0, a built wheel installed into a clean environment, the checksum-verified
+  actionlint install, the 5 integration tests against the real zizmor (three personas) and actionlint, and the
+  expression experiment (13 of 13). `CITATION.cff` validates against schema 1.2.0 and all 33 relative links
+  resolve.
+- After tagging: the tag points at the release commit, the release is a pre-release and not a draft, the assets
+  downloaded back from GitHub verify against `SHA256SUMS` and are byte-identical to the files built before upload,
+  and the release notes contain no attribution text.
+- The tag ruleset (`immutable-release-tags`) is active, but its enforcement was deliberately **not** tested:
+  the only test is a deletion or move, and a failed protection would have destroyed the release tag.
+
+**Decisions and records**
+
+- Gate C was waived by the owner and the provisional gate A go was accepted (see the previous entry).
+- No attribution lines are to be added anywhere in the repository (owner instruction). Commits never had
+  any trailer on any branch; the footer had been added to 14 pull request descriptions and was removed from all
+  of them.
+- `dev` is one commit behind `main` (the release merge commit), as designed in ADR 0004.
+
+**Not done / next**
+
+- poutine adapter; independent review of the labels; hardening-gap and per-pattern coverage; whether to publish
+  to PyPI (needs a trusted-publishing workflow); putting the expression experiment in CI.
+- The documentation says in three places that the author, or the assistant that wrote the cases, cannot be the
+  independent reviewer. That is a truthful statement about independence, left as written pending the owner's call
+  on whether to reword it.
+
+---
+
+## 2026-10-04: v0.1.0 is now a normal release
+
+**Decision (owner, in chat):** "release it now", after the release had been published as a GitHub pre-release.
+Read as: remove the pre-release flag. PyPI was not touched and was not asked for.
+
+**Done**
+
+- The GitHub release was changed from a pre-release to a normal release and marked as the repository's latest.
+  The tag, the release commit and the assets are unchanged; the assets were downloaded again and still match
+  `SHA256SUMS`.
+- The release title and notes no longer say "pre-release". The limits are still the first thing in the notes,
+  because the release itself has not changed: every label is `proposed`, none has been independently reviewed,
+  the maintainers were not consulted, and the results are one run per tool and not a ranking. The notes now
+  frame it as a 0.x initial release that does not yet meet the project's own bar for a mature one
+  (150 to 200 cases, independent review, a third scanner).
+- This change updates the README status line and the citation abstract on `dev` so that nothing in the
+  repository contradicts the release page.
+
+**Note**
+
+- The files inside the `v0.1.0` tag are immutable and still say "pre-release" in the README status line, the
+  citation abstract, the PRD revision log and an earlier part of this log. That is accurate history: the tag was
+  cut when the release was a pre-release. The release page and `dev` are the current statement.
+
+**Not done / next**
+
+- PyPI (needs a trusted-publishing workflow and an account decision), the poutine adapter, and independent
+  review of the labels.
+
+---
+
+## 2026-10-04: PyPI and Zenodo preparation (version 0.1.1)
+
+**Decision (owner, in chat):** "lets add the zenodo and pypi", after choosing between them. Nothing has been
+published to either yet: both need web steps that only the owner can do (see docs/publishing.md), and a PyPI
+version or a Zenodo DOI cannot be undone.
+
+**Why 0.1.1 and not 0.1.0:** the 0.1.0 wheel does not contain the corpus (so `pip install` would give a tool
+that finds no data), and the 0.1.0 tag is permanent, so its content cannot change. Zenodo also archives releases
+published after it is enabled. The first PyPI and Zenodo version is therefore 0.1.1. The corpus is unchanged
+from 0.1.0 (the diff against the tag is empty).
+
+**Done**
+
+- The wheel now bundles the corpus (44 cases with their `.github/` files) and both licenses, with the license
+  expression `MIT AND CC-BY-4.0`, project URLs and classifiers. The CLI uses `./corpus/cases` if it exists and
+  otherwise the bundled copy.
+- `scripts/check_wheel.py` checks a built wheel the way a user receives it: contents, then a clean-environment
+  install and `actionsbench validate` from an empty directory. It runs in CI. I proved it fails on a bad wheel by
+  pointing it at the 0.1.0 wheel, which it rejected with four distinct errors.
+- `.github/workflows/publish.yml`: builds and checks the distributions, then publishes through trusted
+  publishing with no stored token. Build and publish are separate jobs; PyPI publishing runs only on a published
+  release and only after the tag matches the package version; the manual dispatch can only reach TestPyPI.
+  zizmor reports no findings at any persona.
+- GitHub environments `pypi` (release tags `v*` only) and `testpypi` (branches `dev` and `main` only), both
+  requiring the owner's approval before a job runs. Read back from GitHub after creation.
+- README links made absolute so PyPI's rendering of the README has no dead links. `CITATION.cff` now has type
+  dataset and one license, because both Zenodo and the format take a single license string and Zenodo reads
+  `CITATION.cff` as the metadata source; it names the corpus license and the abstract states that the code is
+  MIT. That is a judgement call and can be changed.
+
+**Verified (by running it)**
+
+- 200 unit tests, ruff and mypy pass; the built wheel installs into a clean environment and validates 44 cases
+  from an empty directory.
+
+**Not done / needs the owner**
+
+- PyPI and TestPyPI: create the accounts and the pending publishers (exact values in docs/publishing.md). The
+  name is free on both today but a pending publisher does not reserve it.
+- Zenodo: log in with GitHub, get the organization to approve access if asked, and switch the repository on.
+- Then: TestPyPI dry run, release pull request, GitHub release, approve the `pypi` deployment.
+
+---
+
+## 2026-10-06: TestPyPI dry run passed; release date set
+
+Dry run (Actions run 37396382131, dispatched on `dev`, `testpypi` deployment approved by the owner): build and
+wheel check passed, trusted publishing uploaded the wheel and sdist with no stored token, and a fresh install
+from TestPyPI printed `actionsbench 0.1.1` and `OK: 44 case(s) valid.` from an empty directory. TestPyPI's hashes
+match the CI build artifact. The `digest-mismatch: error` line in the download step is the action's input setting,
+not a failure; the logged digests were identical.
+
+Zenodo is enabled for the repository (an active `release` webhook to Zenodo is present). The owner confirmed the
+PyPI pending publisher before the release. `CITATION.cff` and the changelog now carry the release date 2026-10-06.

@@ -1,19 +1,21 @@
 cff-version: 1.2.0
 message: "If you use ActionsBench, please cite it as below and state the corpus version you used."
 title: "ActionsBench: a labeled benchmark for GitHub Actions workflow security scanners"
-type: software
+type: dataset
 authors:
   - family-names: Tijani
     given-names: Aliu
-version: 0.1.0
-date-released: 2026-10-04
+version: 0.1.1
+date-released: 2026-10-06
+license: CC-BY-4.0
 repository-code: "https://github.com/NeesimEra/ActionsBench"
 url: "https://github.com/NeesimEra/ActionsBench"
 abstract: >-
   A labeled corpus of minimized GitHub Actions workflows, each tagged with the weakness it contains or marked
-  clean, and a harness that scores workflow security scanners against it per weakness class. The code is MIT
-  licensed and the corpus is CC BY 4.0. Version 0.1.0 is an initial pre-release: 44 hand-built cases, all labels
-  proposed by one author and audited against primary sources but not independently reviewed.
+  clean, and a harness that scores workflow security scanners against it per weakness class. The corpus is
+  licensed CC BY 4.0, which is the license named here, and the harness code is licensed MIT; both licenses
+  ship with the package. Version 0.1.1 is an initial release (pre-1.0) of 44 hand-built cases: all labels are
+  proposed by one author and audited against primary sources, but not independently reviewed.
 keywords:
   - github-actions
   - security

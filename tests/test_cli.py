@@ -6,7 +6,7 @@ from typing import Any
 
 import pytest
 
-from actionsbench.cli import main
+from actionsbench.cli import default_corpus, main
 from actionsbench.corpus import require_valid_corpus
 from actionsbench.taxonomy import WeaknessClass
 from tests import fakes
@@ -285,3 +285,46 @@ def test_tolerance_without_line_matching_is_an_error(
     path = _offset_findings_file(tmp_path)
     assert main(["score", str(path), "--corpus", str(real_corpus), "--tolerance", "1"]) == 1
     assert "--tolerance only applies with --match line" in capsys.readouterr().err
+
+
+# ---- where the corpus comes from when --corpus is not given
+
+
+def test_a_corpus_in_the_working_directory_wins(tmp_path: Path) -> None:
+    local = tmp_path / "local"
+    packaged = tmp_path / "packaged"
+    local.mkdir()
+    packaged.mkdir()
+    assert default_corpus(local=local, packaged=packaged) == local
+
+
+def test_the_bundled_corpus_is_used_when_there_is_no_local_one(tmp_path: Path) -> None:
+    packaged = tmp_path / "packaged"
+    packaged.mkdir()
+    assert default_corpus(local=tmp_path / "missing", packaged=packaged) == packaged
+
+
+def test_the_local_path_is_reported_when_neither_exists(tmp_path: Path) -> None:
+    local = tmp_path / "missing"
+    assert default_corpus(local=local, packaged=tmp_path / "also-missing") == local
+
+
+def test_validate_falls_back_to_the_bundled_corpus_from_an_empty_directory(
+    real_corpus: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    monkeypatch.chdir(tmp_path)  # no corpus/cases here
+    monkeypatch.setattr("actionsbench.cli._packaged_corpus", lambda: real_corpus)
+    assert main(["validate"]) == 0
+    assert "OK:" in capsys.readouterr().out
+
+
+def test_validate_names_the_expected_path_when_no_corpus_exists_anywhere(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr("actionsbench.cli._packaged_corpus", lambda: tmp_path / "nope")
+    assert main(["validate"]) == 1
+    assert "corpus/cases" in capsys.readouterr().err

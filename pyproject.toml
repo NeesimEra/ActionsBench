@@ -4,24 +4,37 @@ build-backend = "hatchling.build"
 
 [project]
 name = "actionsbench"
-version = "0.1.0"
+version = "0.1.1"
 description = "A labeled benchmark and evaluation harness for GitHub Actions workflow security scanners."
 readme = "README.md"
 requires-python = ">=3.11"
 authors = [{ name = "Aliu Tijani" }]
 keywords = ["github-actions", "security", "benchmark", "static-analysis", "ci"]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security",
     "Typing :: Typed",
 ]
-license = "MIT"
-license-files = ["LICENSE"]
+# The wheel carries the harness (MIT) and the labeled corpus (CC BY 4.0); both licenses ship with it.
+license = "MIT AND CC-BY-4.0"
+license-files = ["LICENSE", "corpus/LICENSE"]
 dependencies = [
     "pyyaml>=6.0",
     "jsonschema>=4.21",
 ]
+
+[project.urls]
+Homepage = "https://github.com/NeesimEra/ActionsBench"
+Repository = "https://github.com/NeesimEra/ActionsBench"
+Issues = "https://github.com/NeesimEra/ActionsBench/issues"
+Changelog = "https://github.com/NeesimEra/ActionsBench/blob/main/corpus/CHANGELOG.md"
 
 [project.scripts]
 actionsbench = "actionsbench.cli:main"
@@ -38,6 +51,26 @@ dev = [
 [tool.hatch.build.targets.wheel]
 packages = ["src/actionsbench"]
 
+# Ship the labeled corpus inside the wheel so that `pip install actionsbench` is usable on its own.
+# The CLI falls back to this copy when there is no corpus/cases in the working directory.
+[tool.hatch.build.targets.wheel.force-include]
+"corpus" = "actionsbench/_corpus"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/corpus",
+    "/docs",
+    "/scripts",
+    "/README.md",
+    "/LICENSE",
+    "/CITATION.cff",
+    "/CONTRIBUTING.md",
+    "/SECURITY.md",
+    "/pyproject.toml",
+]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
@@ -49,6 +82,8 @@ select = ["E", "F", "I", "B", "UP", "SIM", "S", "C4", "PT", "RET", "RUF"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101"]
+# The scripts run fixed commands (uv, the installed entry point) with fixed arguments on purpose.
+"scripts/**" = ["S603", "S607"]
 
 [tool.mypy]
 python_version = "3.11"

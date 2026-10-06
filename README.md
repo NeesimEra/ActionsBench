@@ -2,9 +2,9 @@
 
 A labeled benchmark and evaluation harness for GitHub Actions workflow security scanners.
 
-> **Status: initial pre-release (0.1.0).** The corpus is a small hand-built set (44 cases) and every label is still
+> **Status: initial release (0.1.0, pre-1.0).** The corpus is a small hand-built set (44 cases) and every label is still
 > `proposed` (one author). The facts behind them were audited against primary sources
-> ([docs/evidence-audit.md](docs/evidence-audit.md)), but no label has been independently reviewed.
+> ([docs/evidence-audit.md](https://github.com/NeesimEra/ActionsBench/blob/main/docs/evidence-audit.md)), but no label has been independently reviewed.
 > Nothing here is a result yet. It is public early so the
 > labels can be challenged, not because it is finished.
 
@@ -25,7 +25,7 @@ ActionsBench provides the missing piece:
 
 It is not a scanner, and it does not rank tools. It reports per-class evidence.
 
-Full motivation, scope and risks: [docs/PRD.md](docs/PRD.md).
+Full motivation, scope and risks: [docs/PRD.md](https://github.com/NeesimEra/ActionsBench/blob/main/docs/PRD.md).
 
 ## Quickstart
 
@@ -44,9 +44,9 @@ uv run actionsbench score results/zizmor-1.30.1-regular/findings.json
 `run` executes a scanner that has a reviewed adapter (so far zizmor and actionlint, each scored
 on the injection class only) and writes a findings file; raw output goes to `results/` (gitignored).
 `score` takes any normalized findings file (schema:
-[findings.schema.json](src/actionsbench/schemas/findings.schema.json)), so a scanner
+[findings.schema.json](https://github.com/NeesimEra/ActionsBench/blob/main/src/actionsbench/schemas/findings.schema.json)), so a scanner
 without an adapter can still be scored by producing that file. More adapters are planned
-(see [plan.md](plan.md)).
+(see [plan.md](https://github.com/NeesimEra/ActionsBench/blob/main/plan.md)).
 
 Run the commands from the repository root, or pass `--corpus` explicitly.
 
@@ -60,7 +60,7 @@ Run the commands from the repository root, or pass `--corpus` explicitly.
   not inflate recall.
 - Results are per class. There is no overall score on purpose.
 
-Details: [docs/methodology.md](docs/methodology.md).
+Details: [docs/methodology.md](https://github.com/NeesimEra/ActionsBench/blob/main/docs/methodology.md).
 
 ## Repository layout
 
@@ -77,20 +77,20 @@ Details: [docs/methodology.md](docs/methodology.md).
 The cases contain deliberately vulnerable workflows. They are inert: GitHub only runs
 workflows under the repository root's `.github/workflows/`, and these live inside
 `corpus/cases/`. Payloads are benign placeholders. Never copy them into a real repository.
-See [SECURITY.md](SECURITY.md).
+See [SECURITY.md](https://github.com/NeesimEra/ActionsBench/blob/main/SECURITY.md).
 
 ## Contributing
 
 Labels are claims, and they are meant to be challenged. See
-[CONTRIBUTING.md](CONTRIBUTING.md) for adding cases, challenging a label, and the
+[CONTRIBUTING.md](https://github.com/NeesimEra/ActionsBench/blob/main/CONTRIBUTING.md) for adding cases, challenging a label, and the
 development setup.
 
 All pull requests target the `dev` branch. `main` and the `v*` tags are the released
-state (see [ADR 0004](docs/adr/0004-branching-model.md)).
+state (see [ADR 0004](https://github.com/NeesimEra/ActionsBench/blob/main/docs/adr/0004-branching-model.md)).
 
 ## License
 
-- **Code** (`src/`, `tests/`, tooling): [MIT](LICENSE).
+- **Code** (`src/`, `tests/`, tooling): [MIT](https://github.com/NeesimEra/ActionsBench/blob/main/LICENSE).
 - **Corpus** (`corpus/`, the labeled cases and their labels):
-  [CC BY 4.0](corpus/LICENSE). Reuse is welcome with attribution; please cite ActionsBench
+  [CC BY 4.0](https://github.com/NeesimEra/ActionsBench/blob/main/corpus/LICENSE). Reuse is welcome with attribution; please cite ActionsBench
   and the corpus version you used.
