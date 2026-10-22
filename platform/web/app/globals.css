@@ -1,0 +1,129 @@
+/* ActionsBench platform: flat, typographic, evidence-first. No gradients, no rank tables. */
+:root {
+  --bg: #faf9f7;
+  --ink: #22211e;
+  --muted: #6f6a61;
+  --line: #e4e0da;
+  --accent: #8a4a06;
+  --note-bg: #f3f0ea;
+  --bad-bg: #fdf2e7;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.6 Georgia, "Iowan Old Style", "Times New Roman", serif;
+}
+
+header, main, footer {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+header {
+  display: flex;
+  gap: 1.5rem;
+  align-items: baseline;
+  border-bottom: 1px solid var(--line);
+  padding: 1.25rem;
+}
+
+.site a {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+}
+
+nav { margin-left: auto; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 0.85rem; }
+nav a { color: var(--ink); margin-left: 1rem; text-decoration: none; border-bottom: 1px solid transparent; }
+nav a:hover { border-bottom-color: var(--ink); }
+
+main { padding: 1.5rem 1.25rem 3rem; }
+
+h1, h2, h3 {
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+h1 { font-size: 1.5rem; margin: 0.6rem 0 0.5rem; }
+h2 { font-size: 1.05rem; margin: 2rem 0 0.4rem; color: var(--accent); }
+
+.lede { font-size: 1.05rem; max-width: 46rem; }
+.muted { color: var(--muted); font-weight: 400; }
+.meta, footer { font-size: 0.85rem; color: var(--muted); font-family: ui-sans-serif, system-ui, sans-serif; }
+ul.meta { padding-left: 1.1rem; }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.75rem 0 1.5rem;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.88rem;
+}
+th { text-align: left; font-weight: 600; border-bottom: 2px solid var(--ink); padding: 0.4rem 0.6rem; }
+td { border-bottom: 1px solid var(--line); padding: 0.4rem 0.6rem; vertical-align: top; }
+tbody tr:hover { background: var(--note-bg); }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code {
+  font: 0.85em ui-monospace, "SF Mono", Menlo, monospace;
+  background: var(--note-bg);
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+pre {
+  font: 0.8rem/1.5 ui-monospace, "SF Mono", Menlo, monospace;
+  background: var(--note-bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0.9rem;
+  overflow-x: auto;
+}
+
+.pill {
+  display: inline-block;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.72rem;
+  padding: 0.05rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--muted);
+  vertical-align: middle;
+}
+.pill.neg { background: var(--note-bg); }
+.pill.ai-reviewed { border-color: var(--accent); color: var(--accent); }
+.pill.agreed { border-color: #1c7c43; color: #1c7c43; }
+.pill.disputed { background: var(--bad-bg); }
+
+.note {
+  background: var(--note-bg);
+  border-left: 3px solid var(--accent);
+  padding: 0.6rem 0.9rem;
+}
+.problem {
+  background: var(--bad-bg);
+  border-left: 3px solid #a13c0d;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+}
+.problems p {
+  background: var(--bad-bg);
+  border-left: 3px solid #a13c0d;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  overflow-wrap: anywhere;
+}
+
+footer {
+  border-top: 1px solid var(--line);
+  padding: 1rem 1.25rem 2.5rem;
+}
