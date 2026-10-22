@@ -1062,3 +1062,37 @@ sink. ADR 0006 records that choice and its consequences.
   provenance, and comprehensive wheel checks for non-YAML fixture files.
 - Recommended commit order remains scoring fixes, AI-review infrastructure, audited corpus
   revisions, then poutine support. No files were staged or committed; no release was made.
+
+---
+
+## 2026-10-22: Committed and pushed the reviewed session; opened PR 28
+
+**Done**
+
+- The accumulated 84-file diff became four Conventional Commits on branch
+  `feat/reviewed-corpus-and-adapters`, each verified in an isolated checkout snapshot
+  (unit tests, lint, format, strict types, corpus validation) before committing:
+  1. `fix(scoring): make matching bounded and stack-safe` (152 insertions / 24 deletions)
+  2. `feat(corpus): distinguish AI review from human agreement`
+  3. `fix(corpus): revise fixtures and labels per audited review` (66 files)
+  4. `feat(adapters): add poutine 1.1.6 adapter with checksum-verified installer`
+- The branch was pushed with its working tree clean; PR 28 opened against `dev`
+  with a per-commit summary, verification, and a release note (no version, tag, DOI or
+  PyPI artifact changed in the PR).
+
+**PR reviews (all Dependabot, targeting dev; all approved with evidence)**
+
+- #26 ruff 0.16.10→0.17.0: rerun lint/format with 0.17.0 on the feature tip — clean.
+- #27 types-jsonschema 20260518→20261006: strict mypy rerun on the feature tip — clean.
+- #25 setup-uv 10.3.0, #23 upload-artifact v7.0.2, #24 download-artifact v8.0.2: each
+  referenced SHA was resolved via the GitHub API and confirmed to be the tagged release
+  commit.
+- Sequencing advised: merge Dependabot PRs first; they touch only `uv.lock`/CI workflow
+  files, so they do not conflict with the feature branch.
+
+**Not changed**
+
+- No label, anchor, or fixture was modified for any scanner or PR outcome; no merge,
+  tag, release, or publication was performed. The corpus remains 44 `ai-reviewed`, 0
+  `agreed`.
+
