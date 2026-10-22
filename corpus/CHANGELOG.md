@@ -3,7 +3,11 @@
 Corpus versions are immutable once released. A new version adds or amends cases; it never
 silently rewrites old ones. Each case records the version that introduced it in `added_in`.
 
-## Unreleased
+## 0.2.0
+
+Prepared for release; the date is set when the dry run passes. This version extends the case
+schema: older validators reject it. It amends existing cases (fixtures, anchors, labels and
+their provenance); no case was added or removed, so every case remains `added_in: 0.1.0`.
 
 - Wheels now bundle the dated label-audit record next to the corpus
   (`actionsbench/_corpus/docs/ai-label-audit-2026-10-22.md`), so installed users can

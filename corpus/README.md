@@ -61,7 +61,7 @@ clean case that looks risky but is safe.
 | AB-ART-0002 | An archive downloaded and unpacked without an integrity check |
 | AB-NEG-0001 to 0018 | Clean twins and probes. 0001 to 0009: environment-variable indirection, boolean-only `contains()`, a pinned action, no token permission for constant echo, a `pull_request` head checkout, a single named secret, the patched action version, credentials not persisted, and a nonconstant condition. 0010 to 0018: `pull_request_target` with nothing untrusted (a definitional split), a multi-line script via the environment, safe number/hash syntax, a pinned reusable workflow, credentials from secrets, one key consumed by a benign HMAC step, patched setup-php, `macos-latest`, and fail-closed checksum gating with a placeholder digest |
 
-In this unreleased development tree, all 44 labels are `ai-reviewed`; none remains `proposed`.
+In 0.2.0, all 44 labels are `ai-reviewed`; none remains `proposed`.
 No label is `agreed` through independent human review. See the
 [2026-10-22 agent audit](../docs/ai-label-audit-2026-10-22.md) for all dispositions,
 including two repaired workflow-reachability blockers and a revised advisory negative. Released 0.1.1
