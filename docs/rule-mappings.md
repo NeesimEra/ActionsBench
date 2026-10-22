@@ -1,7 +1,8 @@
 # Rule mappings
 
 How each scanner's findings are mapped to benchmark classes, and why. This is the review record
-behind `RULE_MAP` in `adapters/zizmor.py` and `KIND_MAP` in `adapters/actionlint.py`.
+behind `RULE_MAP` in `adapters/zizmor.py` and `adapters/poutine.py`, and `KIND_MAP` in
+`adapters/actionlint.py`.
 
 **Policy.** A rule is mapped only if:
 
@@ -19,7 +20,8 @@ disagrees with it, that is noted below.
 **Scope.** A tool's scope is the set of mapped classes the tool can actually detect in the
 configuration it was run in. A class outside scope is reported as *uncovered*, never as *missed*.
 
-Reviewed on 2026-10-04. Reviewer: the corpus author (single reviewer; see "Limits").
+zizmor and actionlint reviewed on 2026-10-04; poutine on 2026-10-22. These are maintainer-side
+mapping reviews, not independent label reviews (see "Limits").
 
 ---
 
@@ -38,7 +40,7 @@ Documentation read: <https://docs.zizmor.sh/audits/>.
 | `secrets-inherit` | secrets-exposure | Flags `secrets: inherit`, which violates least authority. | AB-SEC-0001 | yes |
 | `hardcoded-container-credentials` | secrets-exposure | Flags a literal password in container or service credentials (documentation example: `password: hackme`). | AB-SEC-0002 | yes |
 | `overprovisioned-secrets` | secrets-exposure | Flags expanding the whole secrets context, as in `toJSON(secrets)`, where a named secret would do. | AB-SEC-0003 | yes |
-| `artipacked` | artifact-integrity | Flags persisted checkout credentials that can leak through artifacts. **Debatable:** the class's prose is about unvalidated artifacts; the mapping, like the corpus label, follows the source study. | AB-ART-0001 | yes |
+| `artipacked` | artifact-integrity | Flags persisted checkout credentials. ADR 0006 explicitly retains the study's confidentiality-related class exception. The case is now anchored at upload, so a checkout-anchored detection is a cross-step mismatch, not a false alarm on a clean workflow. | AB-ART-0001 | yes |
 
 ### Deliberately not mapped
 
@@ -56,6 +58,18 @@ Documentation read: <https://docs.zizmor.sh/audits/>.
 injection, unpinned-dependency, excessive-permission, privileged-trigger, secrets-exposure,
 artifact-integrity. Out of scope: known-vulnerable-component (needs online mode), control-flow and
 runner-compatibility (no reviewed rule), hardening-gap (no cases).
+
+### Revised artifact anchor (2026-10-22)
+
+The owner chose to retain the study-compatible artifact-integrity exception for credential
+confidentiality, but anchor AB-ART-0001 at its actual upload sink (line 15). Zizmor 1.30.1
+reports checkout at line 12, a different step. With region matching its artifact class now
+scores **0 TP / 1 FP / 2 FN** at all three personas, rather than the historical **1/0/1**.
+One FP/FN pair is this anchor mismatch; the other FN is unverified archive consumption,
+which no mapped rule targets. This is not evidence of a false alarm on a negative workflow.
+At line tolerance 3 the checkout finding matches across steps; region matching deliberately
+does not. The mapping and matching algorithm are unchanged; do not compare these counts to
+released corpus counts without stating the corpus revision.
 
 ---
 
@@ -83,6 +97,68 @@ Documentation read: <https://github.com/rhysd/actionlint/blob/main/docs/checks.m
 ### Scope
 
 injection, control-flow, runner-compatibility, secrets-exposure. Everything else is uncovered.
+
+---
+
+## poutine 1.1.6 (local analysis)
+
+Primary sources read at the pinned tag, not the moving default branch:
+[README](https://github.com/boostsecurityio/poutine/blob/v1.1.6/README.md),
+[rule documentation](https://github.com/boostsecurityio/poutine/tree/v1.1.6/docs/content/en/rules),
+[rule source](https://github.com/boostsecurityio/poutine/tree/v1.1.6/opa/rego/rules),
+[local analysis](https://github.com/boostsecurityio/poutine/blob/v1.1.6/analyze/analyze.go), and
+[SARIF formatter](https://github.com/boostsecurityio/poutine/blob/v1.1.6/formatters/sarif/sarif.go).
+
+All 44 cases were scanned in isolated copies before implementing the adapter. Exit code is 0
+with or without findings (no `--fail-on-violation`). Rule IDs have no prefix, paths are
+case-relative, and the driver reports `semanticVersion`, not `version`. No git setup or token
+is needed. An explicit empty config prevents auto-discovery of `.github/poutine.yml` from
+changing the run; `--disable-version-check` disables the upstream update check and telemetry.
+Local analysis uses a static reputation client and bundled rule data, not a remote scan.
+
+### Mapped
+
+| Rule | Class | Why | Exercised by |
+|---|---|---|---|
+| `injection` | injection | Documents attacker-controlled expression interpolation into bash or JavaScript, recommending environment variables instead. | AB-INJ-0005, 0006, 0008, 0009, 0010 |
+| `job_all_secrets` | secrets-exposure | Documents exposing the entire secrets object through `toJSON(secrets)` or dynamic keys. | AB-SEC-0003 |
+| `untrusted_checkout_exec` | privileged-trigger | Detects executing untrusted checked-out code under privileged events, rather than flagging the trigger alone. | AB-TRG-0001 |
+
+### Deliberately not mapped
+
+| Rule | Reason |
+|---|---|
+| `github_action_from_unverified_creator_used` | Creator verification is not proof of a vulnerable component. It fires on both the vulnerable and patched setup-php cases; neither finding establishes the labeled advisory. |
+| `pr_runs_on_self_hosted` | Documents exposure of self-hosted runners to pull requests, not retired hosted runner compatibility. Its finding on AB-RUN-0002 does not justify mapping it to that label. |
+| `unpinnable_action` | Concerns mutable transitive components of known unpinnable actions, not a general check for mutable `uses:` references. No exercising case for this rule here. |
+| `if_always_true` | Documents extra characters around expressions. AB-CTL-0001 instead uses a literal true condition and does not exercise that documented pattern. |
+| `unverified_script_exec` | Potential artifact-integrity mapping, but no current case exercises the detected script-execution pattern. AB-ART-0002 downloads and extracts an archive, rather than executing a fetched script. |
+| `known_vulnerability_in_build_component` | Its pinned rule checks semantic-version references against bundled advisories. The corpus pins vulnerable components by commit SHA; this rule does not exercise those cases. |
+| `default_permissions_on_risky_events`, other rules | No exercising case and reviewed mapping for this configuration. Unmapped findings remain visible. |
+
+### Scope and matching limitations
+
+Scope is injection, secrets-exposure and privileged-trigger. Everything else is uncovered.
+
+With the unchanged default region rule, the observed TP/FP/FN counts are injection **5/0/5**,
+secrets-exposure **0/1/3**, privileged-trigger **0/1/1**. These are pipeline observations over
+proposed labels, not a ranking. Two detections are mismatches because of cross-region anchors:
+
+- `job_all_secrets` points at the job header (AB-SEC-0003 line 9), while the label points at the
+  step's `toJSON(secrets)` expression (line 14).
+- `untrusted_checkout_exec` points at the build command (AB-TRG-0001 line 19 in the revised
+  fixture, originally line 18), while the label points
+  at the privileged trigger (line 3).
+
+Each costs one FP and one FN under current matching, despite flagging the declared pattern.
+No mapped-class findings occurred on negative cases. Do not interpret these two FPs as false
+alarms on clean workflows. The third tool supplies evidence to revisit matching (ADR 0003);
+this adapter does not broaden regions, move anchors, or change labels to improve its score.
+
+The later [agent label audit](ai-label-audit-2026-10-22.md) found AB-TRG-0001's pinned
+checkout blocked the intended fork checkout, and AB-INJ-0007 lacked local-action provisioning.
+Both were repaired and cleared by targeted static agent re-review; they are now `ai-reviewed`.
+The observed scanner counts above remain unchanged and are not live execution evidence.
 
 ---
 

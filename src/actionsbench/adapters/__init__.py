@@ -7,12 +7,14 @@ from collections.abc import Callable, Mapping
 
 from actionsbench.adapters.actionlint import ActionlintAdapter
 from actionsbench.adapters.base import ScannerAdapter
+from actionsbench.adapters.poutine import PoutineAdapter
 from actionsbench.adapters.zizmor import ZizmorAdapter
 
 AdapterFactory = Callable[[Mapping[str, str]], ScannerAdapter]
 
 ADAPTERS: dict[str, AdapterFactory] = {
     "actionlint": ActionlintAdapter.from_options,
+    "poutine": PoutineAdapter.from_options,
     "zizmor": ZizmorAdapter.from_options,
 }
 

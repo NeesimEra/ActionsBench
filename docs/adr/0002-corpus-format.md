@@ -27,6 +27,8 @@ untrusted input in CI.
 - **Status lifecycle:** `proposed` (one reviewer), `agreed` (an independent reviewer),
   `disputed`. `agreed` requires a reviewer different from the author. This extends the PRD,
   which listed only agreed and disputed.
+  [ADR 0005](0005-ai-assisted-label-review.md) later adds `ai-reviewed` with agent provenance
+  and a dated evidence record, without redefining independent human `agreed`.
 - **Path safety.** A label's `file` must be relative and resolve inside the case directory.
 - **Validation reports every problem**, not only the first, so a contributor sees the full
   list in one CI run.

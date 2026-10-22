@@ -1,14 +1,26 @@
 id: AB-NEG-0015
-title: "One named secret passed to a step"
+title: "One named signing secret consumed by an HMAC step"
 is_negative: true
 expected: []
 rationale: >-
-  Only the single secret the step could need is passed, by name, which is the form zizmor
-  recommends over toJSON(secrets). Clean twin of AB-SEC-0003.
+  The step receives only SIGNING_KEY by name and actually consumes it to compute an HMAC
+  of a fixed build message. The key is read from the environment, not interpolated into
+  script source, supplied as a command-line argument or printed; only the authentication
+  tag is output. Missing or empty keys fail closed. This is a negative for unnecessary
+  blanket-secret exposure in AB-SEC-0003, not proof of a complete production signing
+  protocol. The job requests no repository token permissions.
 references:
   - https://docs.zizmor.sh/audits/
+  - https://docs.python.org/3/library/hmac.html
+  - https://docs.github.com/en/actions/security-for-github-actions/security-guides/using-secrets-in-github-actions
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd7f21ffewiQ16lnv744ZmR
+review_record: docs/ai-label-audit-2026-10-22.md#boundary-case-re-review
 added_in: "0.1.0"
+notes: >-
+  A repository signing secret is assumed only for the intended signing operation. Ordinary
+  fork pull requests do not receive that secret and will fail the explicit empty-key check;
+  successful signing is not claimed for such runs. The fixed message and tag output are
+  benign placeholders. No signing script, secret or workflow was executed during review.

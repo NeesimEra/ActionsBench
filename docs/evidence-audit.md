@@ -3,6 +3,12 @@
 **Date:** 2026-10-04. **Scope:** all 44 cases in the corpus. **Method:** desk research against primary
 sources, plus one experiment, with nobody else involved.
 
+**Historical record:** the conclusions below describe the 2026-10-04 desk audit, not current
+review status. The [2026-10-22 agent audit](ai-label-audit-2026-10-22.md) identifies additional
+reachability defects, rationale concerns and source uncertainty, and records which cases
+now qualify for the separate `ai-reviewed` status. Earlier “demonstrated” sink checks do
+not prove end-to-end workflow execution. Neither audit supplies independent human agreement.
+
 ## What this is, and what it is not
 
 For each case this audit checks the *facts the label rests on*: is the context attacker-controlled, does the

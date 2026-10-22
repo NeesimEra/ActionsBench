@@ -126,8 +126,9 @@ Each case is a small workflow (plus any referenced local actions or reusable wor
 | rationale | Why the label is correct, in plain language. |
 | reference | Link to GitHub's security-hardening guidance, an advisory, or an incident. |
 | provenance | Synthetic-minimal, or derived from a fixed public advisory (see 5.3). |
-| status | `proposed` (one reviewer so far), `agreed` (an independent reviewer confirmed), or `disputed`. |
+| status | `proposed` (author claim), `ai-reviewed` (separate agent evidence review), `agreed` (independent human confirmed), or `disputed`. |
 | reviewers | Who labeled and who independently reviewed. |
+| review_record | Dated evidence record; required for `ai-reviewed`. Agent reviewer identities use `ai:` and do not count as independent human review. |
 | added_in | Corpus version that introduced the case. |
 
 ### 5.3 Provenance rules
@@ -154,7 +155,8 @@ Precision cannot be measured without negatives. The corpus must include:
 
 ### 5.6 Label review process
 
-- Two reviewers per case: an author and an independent reviewer.
+- Two human reviewers per agreed case: an author and an independent reviewer. Separately,
+  `ai-reviewed` records agent evidence review without satisfying this milestone (ADR 0005).
 - Every case carries a written rationale and a reference.
 - Cases may be marked disputed. Anyone can challenge a label through an issue, and the outcome is recorded.
 - Scanner maintainers are invited to review labels before results are published.
@@ -311,3 +313,4 @@ Stop or pivot if any of these hold after the spike:
 | 0.1.2 | 2026-10-04 | Licenses chosen (MIT code, CC BY 4.0 corpus) and the repository approved for public release by the owner; gate B visibility and license items closed. |
 | 0.1.3 | 2026-10-04 | Matching rule decided: same step, job or top-level key instead of a line tolerance (ADR 0003). Taxonomy verified against the paper. |
 | 0.1.4 | 2026-10-04 | First pre-release (v0.1.0) cut with gate C waived by the owner: 44 cases, two scanner adapters, labels evidence-audited but not independently reviewed. |
+| 0.2.0 | 2026-10-22 | All 44 labels moved to `ai-reviewed` by a parallel four-session agent audit (ADR 0005); artifact-class anchors corrected against the study, disclosed not compensated (ADR 0006); fixture reachability and advisory-pin repairs; poutine adapter added (three scanners total); matching made maximum-cardinality and stack-safe; wheels ship the audit record with every fixture file checked. |

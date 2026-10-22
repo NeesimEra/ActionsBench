@@ -4,8 +4,8 @@ Needs `uvx` and network access to download the pinned release. It is excluded fr
 purpose: CI should not depend on a download, and a tool-side change should not fail unrelated
 pull requests. Run it when changing the adapter, the rule map, or the corpus.
 
-The tables below are observations (2026-10-04, 44 hand-built cases, one reviewer), pinned so that
-a change in the adapter, the rule map, the labels or zizmor itself is noticed. Cells are
+The tables below are observations (44 hand-built cases, updated for ADR 0006 on 2026-10-22),
+pinned so changes in the adapter, rule map, labels or zizmor itself are noticed. Cells are
 (TP, FP, FN). Each disagreement is explained in docs/rule-mappings.md or status.md.
 """
 
@@ -44,8 +44,9 @@ def _expected_region(persona: str) -> dict[W, tuple[int, int, int]]:
         # AB-NEG-0010: zizmor flags the trigger itself, the class definition needs untrusted data
         W.PRIVILEGED_TRIGGER: (1, 1, 0),
         W.SECRETS_EXPOSURE: (3, 0, 0),
-        # AB-ART-0002 is a miss only because the class is judged through artipacked alone
-        W.ARTIFACT_INTEGRITY: (1, 0, 1),
+        # ADR 0006: checkout is flagged, not the labeled upload sink (cross-step mismatch).
+        # AB-ART-0002 also remains a miss: no mapped rule targets unverified extraction.
+        W.ARTIFACT_INTEGRITY: (0, 1, 2),
     }
 
 
@@ -80,6 +81,17 @@ def test_zizmor_on_the_corpus(persona: str, real_corpus: Path, tmp_path: Path) -
     assert one_line == {**expected, W.SECRETS_EXPOSURE: (2, 1, 1)}
     two_lines = score(cases, result.report, matching="line", line_tolerance=2)
     assert _cells(two_lines) == expected
+
+    # At tolerance three, line matching crosses the checkout/upload boundary that region
+    # matching deliberately preserves. Do not widen regions to improve this count.
+    three_lines = score(cases, result.report, matching="line", line_tolerance=3)
+    assert _cells(three_lines)[W.ARTIFACT_INTEGRITY] == (1, 0, 1)
+    artifact_findings = [
+        f
+        for f in result.report.findings
+        if f.case_id == "AB-ART-0001" and f.weakness_class is W.ARTIFACT_INTEGRITY
+    ]
+    assert [f.line for f in artifact_findings] == [12]
 
     # Rules without a reviewed mapping must be surfaced, not hidden.
     assert "zizmor/self-repository" in result.unmapped_rules

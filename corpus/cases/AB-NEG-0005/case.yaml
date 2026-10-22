@@ -9,9 +9,10 @@ rationale: >-
 references:
   - https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd7f21ffewiQ16lnv744ZmR
+review_record: docs/ai-label-audit-2026-10-22.md#trust-and-secrets
 added_in: "0.1.0"
 notes: >-
   A scanner that reports a privileged trigger here is wrong: the trigger is not privileged.

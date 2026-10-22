@@ -2,9 +2,10 @@
 
 A labeled benchmark and evaluation harness for GitHub Actions workflow security scanners.
 
-> **Status: initial release (0.1.0, pre-1.0).** The corpus is a small hand-built set (44 cases) and every label is still
-> `proposed` (one author). The facts behind them were audited against primary sources
-> ([docs/evidence-audit.md](https://github.com/NeesimEra/ActionsBench/blob/main/docs/evidence-audit.md)), but no label has been independently reviewed.
+> **Status: initial release (0.1.1, pre-1.0); 0.2.0 in preparation.** The corpus is a small hand-built set
+> (44 cases). Version 0.2.0 carries all 44 labels as `ai-reviewed` following a
+> [parallel agent audit](docs/ai-label-audit-2026-10-22.md), plus a third scanner adapter (poutine).
+> No label has independent human review. Published 0.1.1 still contains the original 44 `proposed` labels.
 > Nothing here is a result yet. It is public early so the
 > labels can be challenged, not because it is finished.
 
@@ -27,7 +28,19 @@ It is not a scanner, and it does not rank tools. It reports per-class evidence.
 
 Full motivation, scope and risks: [docs/PRD.md](https://github.com/NeesimEra/ActionsBench/blob/main/docs/PRD.md).
 
-## Quickstart
+## Install
+
+```bash
+pip install actionsbench      # or: uv tool install actionsbench
+actionsbench validate         # works from any directory: the corpus is bundled
+```
+
+The package bundles the corpus, so it can validate and score without a clone. Archived releases have a
+DOI on [Zenodo](https://doi.org/10.5281/zenodo.23175473) (this version; the concept DOI
+[10.5281/zenodo.23175472](https://doi.org/10.5281/zenodo.23175472) always resolves to the latest). The
+code is MIT and the corpus is CC BY 4.0.
+
+## Quickstart (from a clone)
 
 Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 
@@ -38,17 +51,24 @@ uv run actionsbench stats         # cases per weakness class
 uv run actionsbench run --tool zizmor      # needs uvx; add --config persona=auditor for another setting
 sh scripts/install-actionlint.sh           # pinned, checksum-verified download into .tools/
 uv run actionsbench run --tool actionlint
+sh scripts/install-poutine.sh              # pinned, checksum-verified download into .tools/
+uv run actionsbench run --tool poutine
 uv run actionsbench score results/zizmor-1.30.1-regular/findings.json
 ```
 
-`run` executes a scanner that has a reviewed adapter (so far zizmor and actionlint, each scored
-on the injection class only) and writes a findings file; raw output goes to `results/` (gitignored).
+`run` executes a scanner that has a reviewed adapter (zizmor, scored on six weakness classes;
+actionlint, four; poutine, three) and writes a findings file; raw output goes to `results/` (gitignored).
 `score` takes any normalized findings file (schema:
 [findings.schema.json](https://github.com/NeesimEra/ActionsBench/blob/main/src/actionsbench/schemas/findings.schema.json)), so a scanner
 without an adapter can still be scored by producing that file. More adapters are planned
 (see [plan.md](https://github.com/NeesimEra/ActionsBench/blob/main/plan.md)).
 
-Run the commands from the repository root, or pass `--corpus` explicitly.
+Poutine runs local analysis with an explicit empty config and its version check disabled.
+Its job- and execution-step anchors expose limits of region matching; see the
+[mapping review](https://github.com/NeesimEra/ActionsBench/blob/main/docs/rule-mappings.md#poutine-116-local-analysis).
+
+Run the commands from the repository root, or pass `--corpus` explicitly. The poutine adapter
+and `ai-reviewed` status described here land in 0.2.0; PyPI 0.1.1 does not include them.
 
 ## How scoring works
 

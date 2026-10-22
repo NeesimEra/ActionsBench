@@ -116,12 +116,27 @@ def _check_semantics(case_dir: Path, raw: dict[str, Any]) -> list[Problem]:
             )
         )
 
+    reviewer = raw["reviewer"]
     if raw["status"] == Status.AGREED and (
-        raw["reviewer"] is None or raw["reviewer"] == raw["author"]
+        reviewer is None or not reviewer.strip() or reviewer == raw["author"]
     ):
         problems.append(
             Problem(location, "status 'agreed' needs a reviewer different from the author")
         )
+
+    if raw["status"] == Status.AGREED and reviewer is not None and reviewer.startswith("ai:"):
+        problems.append(
+            Problem(location, "status 'agreed' is reserved for independent human review")
+        )
+    if raw["status"] == Status.AI_REVIEWED:
+        if reviewer == raw["author"] or not reviewer.removeprefix("ai:").strip():
+            problems.append(
+                Problem(location, "status 'ai-reviewed' needs a separate agent reviewer")
+            )
+        if not raw["review_record"].strip():
+            problems.append(
+                Problem(location, "status 'ai-reviewed' needs a nonblank review record")
+            )
 
     if not (case_dir / ".github").is_dir():
         problems.append(Problem(location, "case has no .github/ directory to scan"))
@@ -180,6 +195,7 @@ def _build_case(case_dir: Path, raw: dict[str, Any]) -> Case:
         reviewer=raw["reviewer"],
         added_in=raw["added_in"],
         notes=raw.get("notes"),
+        review_record=raw.get("review_record"),
     )
 
 

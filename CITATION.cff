@@ -5,8 +5,10 @@ type: dataset
 authors:
   - family-names: Tijani
     given-names: Aliu
-version: 0.1.1
-date-released: 2026-10-06
+version: 0.2.0
+date-released: 2026-10-22
+# The version DOI is added after the release creates the next Zenodo record, as 0.1.1's
+# was (its record DOI 10.5281/zenodo.23175473; concept DOI 10.5281/zenodo.23175472).
 license: CC-BY-4.0
 repository-code: "https://github.com/NeesimEra/ActionsBench"
 url: "https://github.com/NeesimEra/ActionsBench"
@@ -14,8 +16,9 @@ abstract: >-
   A labeled corpus of minimized GitHub Actions workflows, each tagged with the weakness it contains or marked
   clean, and a harness that scores workflow security scanners against it per weakness class. The corpus is
   licensed CC BY 4.0, which is the license named here, and the harness code is licensed MIT; both licenses
-  ship with the package. Version 0.1.1 is an initial release (pre-1.0) of 44 hand-built cases: all labels are
-  proposed by one author and audited against primary sources, but not independently reviewed.
+  ship with the package. Version 0.2.0 (pre-1.0) holds 44 hand-built cases: every label was proposed by one
+  author and then reviewed by separate AI agent sessions against primary sources, which is the `ai-reviewed`
+  status recorded with a dated per-case review record. No label has independent human review yet.
 keywords:
   - github-actions
   - security

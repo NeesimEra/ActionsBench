@@ -5,9 +5,16 @@ from __future__ import annotations
 import re
 
 from actionsbench.corpus import load_schema
+from actionsbench.models import Status
 from actionsbench.taxonomy import CLASS_CODES, NEGATIVE_CODE, WeaknessClass
 
 ALL_CLASSES = {c.value for c in WeaknessClass}
+
+
+def test_case_schema_status_enum_matches_model() -> None:
+    assert set(load_schema("case.schema.json")["properties"]["status"]["enum"]) == {
+        status.value for status in Status
+    }
 
 
 def test_every_class_has_a_unique_code() -> None:
