@@ -8,15 +8,20 @@ expected:
     evidence: "if: ${{ true }}"
 rationale: >-
   The step is named 'Publish only from main', which states an intended safeguard, but its
-  condition is the constant true, so the safeguard never restricts anything. The paper's
-  definition covers flawed conditions that are always true.
+  condition is the constant true, so it imposes no main-branch restriction. GitHub still
+  applies the implicit success() status check; true is not equivalent to always(). The
+  paper's definition covers flawed always-true safeguards. This synthetic step only
+  echoes a message, so the label illustrates an ineffective branch guard rather than
+  demonstrating an actual unauthorized publication.
 references:
   - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
   - https://arxiv.org/html/2601.14455v2
+  - https://docs.github.com/en/actions/reference/workflows-and-actions/expressions#status-check-functions
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd3299ffe5p1Jg66UI4O0Z5
+review_record: docs/ai-label-audit-2026-10-22.md#rationale-correction-re-review
 added_in: "0.1.0"
 notes: >-
   The pattern follows the constant-condition example in actionlint's documentation. The

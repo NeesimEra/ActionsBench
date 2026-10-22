@@ -16,9 +16,10 @@ rationale: >-
 references:
   - https://docs.github.com/en/actions/reference/security/secure-use
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbdab14ffeq3bus49D4yfV2g
+review_record: docs/ai-label-audit-2026-10-22.md#injection
 added_in: "0.1.0"
 notes: >-
   Found as a false negative in the author's own challenge scanner, which treated format()

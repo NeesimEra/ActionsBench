@@ -114,6 +114,77 @@ def test_agreed_status_with_independent_reviewer_is_valid(make_case: CaseWriter)
     assert case.reviewer == "bob"
 
 
+@pytest.mark.parametrize("reviewer", [None, "", " ", "ai:opencode:session"])
+def test_agreed_status_requires_a_named_human_reviewer(
+    make_case: CaseWriter, reviewer: str | None
+) -> None:
+    assert _messages(make_case(status="agreed", reviewer=reviewer))
+
+
+def test_ai_reviewed_status_preserves_reviewer_and_record(make_case: CaseWriter) -> None:
+    case, problems = load_case(
+        make_case(
+            status="ai-reviewed", reviewer="ai:opencode:session", review_record="docs/audit.md"
+        )
+    )
+    assert problems == []
+    assert case is not None
+    assert case.status is Status.AI_REVIEWED
+    assert case.reviewer == "ai:opencode:session"
+    assert case.review_record == "docs/audit.md"
+
+
+@pytest.mark.parametrize("reviewer", [None, "bob", "", "ai:", "ai: "])
+def test_ai_reviewed_status_needs_an_agent_identity(
+    make_case: CaseWriter, reviewer: str | None
+) -> None:
+    assert _messages(
+        make_case(status="ai-reviewed", reviewer=reviewer, review_record="docs/audit.md")
+    )
+
+
+def test_ai_reviewed_status_rejects_self_review(make_case: CaseWriter) -> None:
+    messages = _messages(
+        make_case(
+            status="ai-reviewed",
+            author="ai:writer",
+            reviewer="ai:writer",
+            review_record="docs/audit.md",
+        )
+    )
+    assert any("separate agent reviewer" in message for message in messages)
+
+
+def test_ai_reviewed_status_requires_review_record(make_case: CaseWriter) -> None:
+    assert _messages(make_case(status="ai-reviewed", reviewer="ai:opencode:session"))
+
+
+@pytest.mark.parametrize("record", [None, "", " "])
+def test_ai_reviewed_status_rejects_empty_review_record(
+    make_case: CaseWriter, record: str | None
+) -> None:
+    assert _messages(
+        make_case(status="ai-reviewed", reviewer="ai:opencode:session", review_record=record)
+    )
+
+
+def test_current_ai_reviewed_cases_have_matching_audit_dispositions(real_corpus: Path) -> None:
+    repo = real_corpus.parents[1]
+    for case in require_valid_corpus(real_corpus):
+        if case.status is not Status.AI_REVIEWED:
+            continue
+        assert case.review_record is not None
+        record, anchor = case.review_record.split("#", maxsplit=1)
+        text = (repo / record).read_text(encoding="utf-8")
+        assert case.reviewer is not None
+        assert case.reviewer in text
+        assert f"| {case.id} | ai-reviewed |" in text
+        assert any(
+            line.startswith("## ") and line[3:].lower().replace(" ", "-") == anchor
+            for line in text.splitlines()
+        )
+
+
 def test_unknown_weakness_class_is_rejected_by_schema(make_case: CaseWriter) -> None:
     expected: list[dict[str, Any]] = [
         {

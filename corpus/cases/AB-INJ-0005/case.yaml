@@ -7,16 +7,22 @@ expected:
     line: 13
     evidence: "github.event.head_commit.author.name"
 rationale: >-
-  The author name of a pushed commit is set by whoever made the commit and is not
-  validated, so expanding it into a run step lets that person inject shell commands.
-  Public lists of untrusted contexts include head_commit.author.name.
+  A commit's author name is contributor-supplied metadata, not a trustworthy identity.
+  Git strips some identity characters but does not make the remaining name safe as shell
+  source. Expanding head_commit.author.name into this run step permits shell injection.
+  The workflow runs on push: the crafted commit must reach a pushed revision in the
+  workflow repository. Arbitrary fork users cannot directly trigger that base-repository
+  push merely by opening a pull request. Public lists of untrusted contexts include
+  head_commit.author.name.
 references:
   - https://www.synacktiv.com/en/publications/github-actions-exploitation-untrusted-input
   - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+  - https://git-scm.com/docs/git-commit
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbdab14ffeq3bus49D4yfV2g
+review_record: docs/ai-label-audit-2026-10-22.md#rationale-correction-re-review
 added_in: "0.1.0"
 notes: >-
   head_commit.author.name is in actionlint's documented list of untrusted properties

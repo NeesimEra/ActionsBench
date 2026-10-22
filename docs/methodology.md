@@ -32,6 +32,13 @@ the interpreter, such as the `run:` line or the `script:` line, not at the line 
 data enters. When the source is elsewhere (for example a caller's `with:` input), the
 case's `notes` says where.
 
+For non-injection classes the sink is the relevant operation or declaration, not necessarily
+an interpreter: artifact exposure anchors at upload, and unverified archive consumption at
+extraction. Persisted checkout credentials in AB-ART-0001 remain under artifact-integrity
+as an explicit study-compatibility exception for credential confidentiality. The anchor is
+the upload, not checkout; cross-step reports do not match merely because they concern the
+same path. See [ADR 0006](adr/0006-artifact-boundaries-and-least-authority-negatives.md).
+
 **One purpose per case.** A case labels one weakness, or is a clean negative. To keep it
 that way, every `uses:` is pinned to a full commit SHA and the workflow sets `permissions:`,
 unless the case is about exactly that. Otherwise unrelated weaknesses (an unpinned action,
@@ -56,13 +63,14 @@ real repositories are never included.
 | Status | Meaning |
 |---|---|
 | `proposed` | One person has labeled it. The label is a claim, not yet independently checked. |
-| `agreed` | An independent reviewer, different from the author, checked the label. |
+| `ai-reviewed` | A separate agent session checked the label and supporting evidence; no unresolved concern identified in its recorded scope. Not independent human review. |
+| `agreed` | An independent human reviewer, different from the author, checked the label. |
 | `disputed` | A challenge could not be resolved. The case stays, marked, with the argument recorded. |
 
 Every case carries a written `rationale` and at least one `reference`. If a label was
 reasoned from first principles and no independent source exists, the rationale says so.
 
-### Three different levels of confidence
+### Different levels of confidence
 
 1. **`proposed`**: one person has labeled it.
 2. **Evidence-audited**: the facts the label rests on were checked against primary sources, and where
@@ -71,10 +79,23 @@ reasoned from first principles and no independent source exists, the rationale s
    facts (is this context attacker-controlled, does this advisory range hold, was this runner image
    retired) and found real defects, but it is not independent: the author, or the assistant that
    wrote the case, cannot be the independent reviewer of it.
-3. **`agreed`**: a person other than the author checked the label. Judgements such as the choice of
+3. **`ai-reviewed`**: a separate agent session challenged the workflow, rationale, references,
+   class and anchor. Its dated record states sources, scope, findings and limitations. The
+   `reviewer` uses an `ai:` identity and `review_record` links the evidence. Cases with unresolved
+   factual, rationale or classification concerns stay `proposed` pending resolution and re-review.
+   Separate sessions are not independent humans and may share model biases. This status does
+   not satisfy human-review milestones or justify rankings. See [ADR 0005](adr/0005-ai-assisted-label-review.md).
+4. **`agreed`**: a person other than the author checked the label. Judgements such as the choice of
    class or where a case sits on a definitional boundary can only be settled this way.
 
 Quote results with the level that applies.
+
+The [2026-10-22 agent audit](ai-label-audit-2026-10-22.md) covers all 44 cases: after two
+reachability fixes, a revised advisory negative, ten rationale corrections, four boundary
+resolutions and targeted re-review, all 44 qualify as `ai-reviewed`; none remains `proposed`.
+No case is `agreed`. Review metadata is not read by
+scanners, does not alter matching, and does not exclude proposed cases from scoring. Revert
+a materially changed case to `proposed` until its new contents have been reviewed.
 
 ## 4. Matching a finding to a label
 
@@ -105,6 +126,10 @@ rule produced it. The decision and its costs are in ADR 0003.
 Matching is **one-to-one**: a finding can satisfy at most one expected finding. A scanner
 that reports the same line twice gets one true positive and one false positive, so
 duplicates cannot inflate recall.
+
+Only lines within the file can share a region; a finding past the end of the file cannot
+match the final construct. Matching maximizes the number of matched pairs, preferring
+nearby candidates but reassigning them when needed to avoid losing a valid match.
 
 ## 5. Scope
 
@@ -161,6 +186,9 @@ Per weakness class: true positives, false positives, false negatives, precision,
 plus the coverage counts above. Precision, recall and F1 are undefined (`null`) when their
 denominator is zero. They are never reported as 0 or 1 by default.
 
+F1 is computed as `2TP / (2TP + FP + FN)`. It is zero when there are errors but no true
+positives, and undefined only when TP, FP and FN are all zero.
+
 There is **no overall score**. Results are per class so the output cannot be read as a
 leaderboard, and so a tool's strengths and gaps stay visible.
 
@@ -174,7 +202,7 @@ be reproduced and compared.
 ## 9. Known limitations
 
 - Labels are only as good as their review. Until a case is `agreed`, treat it as a claim.
-- Region matching is coarser than a line and rests on two tools and four anchoring cases (ADR 0003
+- Region matching is coarser than a line and was originally based on two tools and four anchoring cases (ADR 0003
   records the costs and says when to revisit it). Scope declarations are reviewed per adapter and
   recorded in [rule-mappings.md](rule-mappings.md).
 - **A tool's configuration changes its verdict.** It is now recorded with every result (section
@@ -190,7 +218,19 @@ be reproduced and compared.
   secrets-exposure, artifact-integrity) and actionlint on four (injection, control-flow,
   runner-compatibility, secrets-exposure), each through a small number of reviewed rules. Known-vulnerable-component
   is out of scope for zizmor because it needs online mode, which the adapter disables for
-  determinism. Hardening-gap has no cases. Out of scope means "uncovered", never "missed".
+  determinism. Poutine local analysis is judged on three classes: injection, secrets-exposure,
+  privileged-trigger. Hardening-gap has no cases. Out of scope means "uncovered", never "missed".
+- **Cross-region anchors remain mismatches.** Poutine 1.1.6 detects the all-secrets and
+  untrusted-checkout patterns but reports the job header and execution step respectively,
+  rather than the labeled step expression and trigger. Each currently incurs one FP and
+  one FN; this is a matching limitation, not a false alarm on a clean case. See the mapping
+  review for exact locations. The third tool supplies evidence for revisiting ADR 0003,
+  but no matching or label change is made for it here.
+- **Sink correction exposes another cross-step mismatch.** Under ADR 0006, AB-ART-0001
+  anchors at upload (line 15), not credential persistence. Zizmor reports checkout (line 12)
+  and therefore incurs an FP/FN pair despite flagging the persistence risk. The class is
+  retained as an explicit study-compatible confidentiality exception. No tool-specific
+  match is introduced; the mapping review records the resulting 0/1/2 artifact counts.
 - **Class-level scope can overstate coverage, and now visibly does.** Some mappings cover only part
   of a broad class. actionlint's only secrets check is for hardcoded credentials, so the cases for
   `secrets: inherit` and `toJSON(secrets)` count as misses for it; zizmor is judged on
@@ -199,20 +239,22 @@ be reproduced and compared.
   tool detects, but a per-class recall figure reads as "how good is this tool at the class", which it
   is not. Read the per-case disagreements, not only the totals; a per-pattern notion of coverage is a
   candidate improvement.
-- **Anchoring differences are the main source of strict-score disagreement.** Every anchoring
-  difference observed is a different line of the same construct, one or two lines apart (section 4
-  lists them; a long `run: |` block reported at its `run:` key is two lines above the labeled
-  interpolation). Under exact-line matching each costs one false positive plus one false negative;
-  region matching, the default, removes them. A one-line tolerance would not (ADR 0003). The labels
-  were not changed to suit a tool.
+- **Within-region anchoring differs from cross-region anchoring.** Early observations were
+  one or two lines inside the same construct (for example a long run block's key versus
+  interpolation). Region matching removes those exact-line mismatches, while a one-line
+  tolerance does not remove all of them. Later poutine observations and the corrected
+  artifact upload sink cross constructs and remain mismatches. Labels were corrected for
+  source/sink semantics, not to suit a tool.
 - actionlint needs a project marker (an empty `.git` directory) in the isolated copy, and its
   external linters (shellcheck, pyflakes) are disabled so results do not depend on the machine.
 - Early results are recorded in `status.md`. They are one run each over hand-built cases with a
-  single reviewer, so they are a pipeline check and an early signal, not a ranking. Per-class
+  single human author, so they are a pipeline check and an early signal, not a ranking. Later
+  agent evidence review does not supply independent human agreement. Per-class
   numbers, never a single score, are the output.
-- The SARIF parser has been checked against real zizmor 1.30.1 output only (rule IDs are
+- The SARIF parser has been checked against real zizmor 1.30.1 output (rule IDs are
   prefixed, for example `zizmor/template-injection`, and paths are case-relative on an
-  isolated copy). Other tools still have to be checked one at a time.
+  isolated copy) and poutine 1.1.6 (unprefixed rule IDs, `driver.semanticVersion`). Other
+  tools still have to be checked one at a time.
 - Scanners report findings outside the labeled weakness, for example zizmor's
   `self-repository` note on a composite-action call. Whether such a rule maps to a
   benchmark class, or is deliberately left unmapped, is a per-tool judgement made when an

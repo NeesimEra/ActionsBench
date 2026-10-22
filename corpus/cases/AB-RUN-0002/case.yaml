@@ -7,19 +7,26 @@ expected:
     line: 10
     evidence: "runs-on: macos-10.15"
 rationale: >-
-  GitHub announced on 2022-07-20 that the macOS 10.15 runner image would be removed by
-  2022-08-30, with scheduled brownouts before that, so a job that still targets it cannot
-  be reliably run. That matches the class definition: a construct that cannot be reliably
-  resolved or supported.
+  GitHub's 2022-07-20 announcement initially targeted removal of the macOS 10.15 image by
+  2022-08-30. On 2022-08-18 the maintainers postponed retirement to 2022-12-01; their
+  2023-02-10 update confirmed the image had been unsupported since that date. It is not a
+  currently supported GitHub-hosted runner label. This matches runner-compatibility under
+  the hosted-runner assumption, not a claim that a private self-hosted runner cannot reuse
+  the same custom label.
 references:
   - https://github.blog/changelog/2022-07-20-github-actions-the-macos-10-15-actions-runner-image-is-being-deprecated-and-will-be-removed-by-8-30-22/
   - https://arxiv.org/html/2601.14455v2
+  - https://github.com/actions/runner-images/issues/5583#issuecomment-1219501124
+  - https://github.com/actions/runner-images/issues/5583#issuecomment-1426004850
+  - https://docs.github.com/en/actions/reference/runners/github-hosted-runners
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd5d11ffeEqL0ISzKVeCn2R
+review_record: docs/ai-label-audit-2026-10-22.md#rationale-correction-re-review
 added_in: "0.1.0"
 notes: >-
-  The runner-images tracking issue originally said the image would be fully unsupported by
-  2022-12-01; the changelog is the later and more specific source. actionlint's documented
-  list of available labels does not include macos-10.15.
+  The July changelog records the initial deadline, not the final schedule. The later
+  maintainer updates establish the postponement and unsupported date. The 2026-10-22
+  audit corrected an earlier rationale that reversed that chronology. actionlint's
+  documented list of available labels does not include macos-10.15.

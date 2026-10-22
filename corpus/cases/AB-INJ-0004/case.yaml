@@ -9,14 +9,19 @@ expected:
 rationale: >-
   Git accepts branch names containing shell metacharacters such as "$(...)", so a branch
   named by an attacker becomes shell code when github.ref_name is expanded into a run
-  step. Published advisories describe exactly this pattern.
+  step. This workflow runs on push: the attacker must be able to introduce a chosen ref
+  into the workflow repository, not merely open a fork pull request. The cited advisory
+  documents the related github.ref mechanism with that ref-creation threat model.
 references:
   - https://github.com/stacklok/toolhive/security/advisories/GHSA-g976-wp3r-q8c6
   - https://www.kenmuse.com/blog/the-hidden-danger-in-git-ref-names/
+  - https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#github-context
+  - https://git-scm.com/docs/git-check-ref-format
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbdab14ffeq3bus49D4yfV2g
+review_record: docs/ai-label-audit-2026-10-22.md#rationale-correction-re-review
 added_in: "0.1.0"
 notes: >-
   The cited advisory concerns github.ref, not github.ref_name; ref_name is the short form

@@ -1,16 +1,20 @@
 id: AB-NEG-0004
-title: "Workflow token limited to read access"
+title: "Echo-only job requests no token permissions"
 is_negative: true
 expected: []
 rationale: >-
-  The workflow explicitly grants only contents: read, which is what the job needs. This is
-  the clean twin of AB-PRM-0001; a scanner reporting excessive permissions here is wrong.
+  The echo-only job performs no repository or API operation, so it requests permissions: {}.
+  No token scope is granted for an operation that does not need one. This is the clean twin
+  of AB-PRM-0001's unnecessary write-all grant, without relying on read-only access being
+  the minimum required for this particular job. It does not claim that no GITHUB_TOKEN
+  exists or that all unrelated risks are absent.
 references:
   - https://docs.zizmor.sh/audits/
   - https://arxiv.org/html/2601.14455v2
   - https://docs.github.com/en/actions/reference/security/secure-use
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd7f21ffewiQ16lnv744ZmR
+review_record: docs/ai-label-audit-2026-10-22.md#boundary-case-re-review
 added_in: "0.1.0"

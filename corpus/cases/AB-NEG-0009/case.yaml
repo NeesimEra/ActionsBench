@@ -3,12 +3,17 @@ title: "Step guarded by a real condition"
 is_negative: true
 expected: []
 rationale: >-
-  The step is gated by a condition that compares the ref to main, so the intended safeguard
-  actually restricts when it runs. This is the clean twin of AB-CTL-0001.
+  The step compares github.ref with refs/heads/main, so the condition is nonconstant and
+  rejects ordinary unrelated branches and tags. GitHub string equality is case-insensitive:
+  a ref differing only in letter case also matches. This is a negative for the constant
+  condition defect in AB-CTL-0001, not certification of an exact case-sensitive branch
+  authorization boundary. The step only echoes text; it does not publish anything.
 references:
   - https://raw.githubusercontent.com/rhysd/actionlint/main/docs/checks.md
+  - https://docs.github.com/en/actions/reference/workflows-and-actions/expressions#operators
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd3299ffe5p1Jg66UI4O0Z5
+review_record: docs/ai-label-audit-2026-10-22.md#rationale-correction-re-review
 added_in: "0.1.0"

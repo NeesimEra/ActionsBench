@@ -1,16 +1,25 @@
 id: AB-NEG-0018
-title: "Archive downloaded and verified against a checksum before unpacking"
+title: "Archive extraction gated on a checksum check"
 is_negative: true
 expected: []
 rationale: >-
-  The step verifies the archive against a SHA-256 checksum before unpacking it. Clean twin
-  of AB-ART-0002.
+  The step runs sha256sum -c before tar. A mismatch or unreadable input returns nonzero;
+  under GitHub's default Linux bash -e shell, that failure stops the step before extraction.
+  The URL and expected digest are illustrative placeholders, so this does not establish
+  an authentic checksum, an available release, or a successful legitimate download. The
+  negative tests fail-closed integrity-check enforcement, paired with AB-ART-0002.
 references:
   - https://arxiv.org/html/2601.14455v2
+  - https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idstepsshell
+  - https://www.gnu.org/software/coreutils/manual/html_node/cksum-common-options.html
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd3299ffe5p1Jg66UI4O0Z5
+review_record: docs/ai-label-audit-2026-10-22.md#rationale-correction-re-review
 added_in: "0.1.0"
 notes: >-
-  The checksum is a placeholder value.
+  The checksum is a placeholder value, not a verified digest of any published archive.
+  sha256sum is the last command in its pipeline, so its nonzero result stops the default
+  shell even without pipefail. No download, checksum command or extraction was executed
+  to verify this fixture; the claim is based on documented command and shell behavior.

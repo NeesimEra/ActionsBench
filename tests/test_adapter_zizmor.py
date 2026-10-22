@@ -189,7 +189,7 @@ def test_run_with_no_results_is_valid() -> None:
 
 
 def test_registry() -> None:
-    assert set(ADAPTERS) == {"actionlint", "zizmor"}
+    assert set(ADAPTERS) == {"actionlint", "poutine", "zizmor"}
     assert isinstance(get_adapter("zizmor"), ZizmorAdapter)
     assert get_adapter("zizmor", {"persona": "auditor"}).label.endswith("-auditor")
     with pytest.raises(ValueError, match="unknown scanner"):

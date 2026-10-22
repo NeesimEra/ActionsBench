@@ -15,8 +15,9 @@ class Provenance(StrEnum):
 
 
 class Status(StrEnum):
-    # One reviewer so far: the label is the author's claim, not yet independently checked.
+    # Agent review is recorded separately from independent human agreement.
     PROPOSED = "proposed"
+    AI_REVIEWED = "ai-reviewed"
     AGREED = "agreed"
     DISPUTED = "disputed"
 
@@ -50,6 +51,7 @@ class Case:
     reviewer: str | None
     added_in: str
     notes: str | None = None
+    review_record: str | None = None
 
 
 @dataclass(frozen=True, slots=True)

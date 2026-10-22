@@ -3,17 +3,20 @@ title: "Checkout credentials not persisted before an artifact upload"
 is_negative: true
 expected: []
 rationale: >-
-  Checkout runs with persist-credentials: false, so the step removes the token from the
-  local git config when it finishes (checkout 4.2.2: removeAuth runs when
-  persistCredentials is false) and nothing sensitive is in the uploaded workspace even
-  with hidden files included. Clean twin of AB-ART-0001, pinned to the same checkout
-  version so that the two differ only in persist-credentials.
+  Checkout runs with persist-credentials: false. At checkout 4.2.2, its normal cleanup
+  removes checkout authentication from local git config before the upload step, even
+  though hidden files are included. This negative concerns checkout-token persistence,
+  not proof that an arbitrary checked-out repository contains no other sensitive files.
+  Cleanup failures are not demonstrated or ruled out; this assumes successful normal
+  cleanup. It is the clean twin of AB-ART-0001 at the same checkout version.
 references:
   - https://docs.zizmor.sh/audits/
   - https://github.com/actions/upload-artifact/blob/043fb46d1a93c77aae656e7c1c64a875d1fc6a0a/action.yml
   - https://github.com/actions/checkout/blob/11bd71901bbe5b1630ceea73d27597364c9af683/src/git-auth-helper.ts
+  - https://github.com/actions/checkout/blob/11bd71901bbe5b1630ceea73d27597364c9af683/src/git-source-provider.ts
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd3299ffe5p1Jg66UI4O0Z5
+review_record: docs/ai-label-audit-2026-10-22.md#rationale-correction-re-review
 added_in: "0.1.0"

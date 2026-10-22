@@ -4,13 +4,16 @@ is_negative: false
 expected:
   - weakness_class: artifact-integrity
     file: .github/workflows/artipacked.yml
-    line: 13
-    evidence: "actions/checkout@"
+    line: 15
+    evidence: "uses: actions/upload-artifact@"
 rationale: >-
   actions/checkout persists the job token by default. At the pinned version (4.2.2) it
   writes the token into the workspace's local git config, .git/config, and the upload step
-  sets include-hidden-files: true, so the token ends up inside the artifact where anyone
-  who can download it can read it. This is the pattern zizmor calls artipacked.
+  sets include-hidden-files: true, so a successful upload includes that credential file.
+  A permitted artifact reader could recover the stored token value; usable access before
+  token expiry or any actual theft is not demonstrated. This is the artipacked pattern.
+  It is a confidentiality exposure retained under artifact-integrity as an explicit
+  study-compatibility exception, not a claim that token disclosure is an integrity failure.
 references:
   - https://docs.zizmor.sh/audits/
   - https://github.com/sparkrew/github-actions-security
@@ -19,9 +22,10 @@ references:
   - https://github.com/actions/checkout/blob/11bd71901bbe5b1630ceea73d27597364c9af683/src/git-auth-helper.ts
   - https://github.com/actions/checkout/blob/3d3c42e5aac5ba805825da76410c181273ba90b1/src/git-auth-helper.ts
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd3299ffe5p1Jg66UI4O0Z5
+review_record: docs/ai-label-audit-2026-10-22.md#boundary-case-re-review
 added_in: "0.1.0"
 notes: >-
   The version matters. From checkout 6.0.0 the token is stored in a separate file under
@@ -30,10 +34,15 @@ notes: >-
   workflow on a newer checkout would not put the token in the workspace. An earlier
   version of this case pinned 7.0.1 and described a weakness that does not exist there;
   the evidence audit found this and the case was corrected on 2026-10-04. zizmor flags a
-  checkout without persist-credentials: false regardless of version (observed), so at a
-  newer checkout that finding is arguably a false alarm. The label follows the paper's
-  rule mapping, which files artipacked under artifact integrity; the class's prose is
-  about unvalidated artifacts, so the fit is debatable. include-hidden-files is set
+  checkout without persist-credentials: false regardless of version (observed); its docs
+  describe lower-severity residual persistence findings for checkout 6 and later. Such a
+  finding alone does not establish workspace-artifact leakage at those versions, nor does
+  that narrower limitation establish that the scanner's broader warning is wrong.
+  The label follows the paper's
+  rule mapping, which files artipacked under artifact integrity. The owner explicitly
+  retained this exception in ADR 0006. include-hidden-files is set
   explicitly because it defaults to false (checked in the action's metadata at the pinned
-  SHA); without it .git would not be uploaded. The label is anchored at the checkout step,
-  where the credentials are persisted.
+  SHA); without it .git would not be uploaded. The label now anchors at upload line 15,
+  the exposure sink, rather than checkout persistence. A scanner anchored at checkout
+  therefore remains a cross-step mismatch under region matching; labels are not moved
+  to improve that scanner's score. No live artifact upload was executed.
