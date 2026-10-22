@@ -1096,3 +1096,39 @@ sink. ADR 0006 records that choice and its consequences.
   tag, release, or publication was performed. The corpus remains 44 `ai-reviewed`, 0
   `agreed`.
 
+---
+
+## 2026-10-22: Closed the remaining review suggestions after the merges
+
+**Context**
+
+- `dev` is now `6f51d2c`: the Dependabot PRs (#23-#27, approved with local reruns and
+  SHA verification) and the feature PR #28 are all merged; the local feature branch was
+  deleted. Only the three nonblocking review suggestions remained open.
+
+**Done**
+
+- Behavioral installer tests (tests/test_install_poutine.py): scripts/install-poutine.sh
+  runs end to end without network, with a fixture curl on PATH serving files the test
+  generates. One test installs the stub tool after a verified checksum; two prove a
+  checksum mismatch and a missing manifest entry abort before extraction or execution
+  (execution is observable through the stub's marker file); one covers the version
+  argument validation. A mutation run with the checksum guard deleted failed exactly the
+  mismatch test, so the guard is now covered.
+- Wheels bundle docs/ai-label-audit-2026-10-22.md as actionsbench/_corpus/docs/ (added
+  to the wheel force-include), so a case's review_record becomes readable offline.
+  scripts/check_wheel.py now (a) requires every file of every packaged case, replacing
+  the old case.yaml-plus-some-YAML rule under which a missing build.mk would have
+  passed, and (b) requires the audit record to mention every packaged case. Both
+  positive and negative paths of the check were verified, including that build.mk is
+  present in the wheel today.
+- Documented both in the corpus changelog's Unreleased section (no release made).
+
+**Verified**
+
+- 283 unit tests plus six separate integration tests with all three scanners pass;
+  lint, format and strict mypy pass; all 44 cases validate; the wheel builds and works
+  from an empty directory.
+- Nothing was merged, tagged, released, or published on this follow-up branch.
+
+
