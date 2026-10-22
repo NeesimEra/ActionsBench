@@ -8,7 +8,9 @@ expected:
     evidence: "actions/checkout@main"
 rationale: >-
   A branch ref moves on every push to that branch, so the workflow runs whatever is on the
-  branch at that moment, which is weaker even than a tag. Only this weakness is labeled:
+  branch at that moment instead of an immutable commit. Tags can also be moved, so this
+  label does not rely on a categorical security ranking between branches and tags.
+  Only this weakness is labeled:
   the job is read-only and checkout does not persist credentials, so no other weakness is
   intended.
 references:
@@ -16,9 +18,10 @@ references:
   - https://docs.zizmor.sh/audits/
   - https://docs.github.com/en/actions/reference/security/secure-use
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd7f21ffewiQ16lnv744ZmR
+review_record: docs/ai-label-audit-2026-10-22.md#rationale-correction-re-review
 added_in: "0.1.0"
 notes: >-
   The paper's example for this class is an action pinned to @main.

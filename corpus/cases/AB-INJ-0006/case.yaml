@@ -15,9 +15,10 @@ references:
   - https://github.com/actions/github-script/blob/main/README.md
   - https://www.sourcery.ai/vulnerabilities/yaml-github-actions-security-github-script-injection
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbdab14ffeq3bus49D4yfV2g
+review_record: docs/ai-label-audit-2026-10-22.md#injection
 added_in: "0.1.0"
 notes: >-
   A non-shell sink. Found as a false negative in the author's own challenge scanner, which

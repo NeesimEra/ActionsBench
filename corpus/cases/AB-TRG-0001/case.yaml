@@ -7,23 +7,34 @@ expected:
     line: 3
     evidence: "pull_request_target"
 rationale: >-
-  pull_request_target runs in the context of the base repository, with its secrets and a
-  token that may have write access, while this job checks out and runs code from the pull
-  request head, which the pull request author controls. This is the well-known 'pwn request'
-  pattern.
+  pull_request_target runs in the base repository's trusted context. This job explicitly
+  opts out of checkout v7.0.1's fork protection, checks out the contributor-controlled
+  pull request head, and runs its .github/build.mk recipe. A fork author can replace the
+  benign recipe with arbitrary commands executed in that trusted context. The workflow
+  limits its token to contents: read, does not reference repository secrets, and does not
+  persist checkout credentials; it does not demonstrate write-token access or secret theft.
+  The weakness is executing untrusted code under the privileged event, including its
+  read-only default-branch cache access, not the trigger alone. No cache write or poisoning
+  is demonstrated. This is the 'pwn request' pattern.
 references:
   - https://securitylab.github.com/resources/github-actions-preventing-pwn-requests/
   - https://docs.zizmor.sh/audits/
   - https://arxiv.org/html/2601.14455v2
+  - https://github.com/actions/checkout/blob/3d3c42e5aac5ba805825da76410c181273ba90b1/src/unsafe-pr-checkout-helper.ts
+  - https://github.com/actions/checkout/blob/3d3c42e5aac5ba805825da76410c181273ba90b1/action.yml
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd7f21ffewiQ16lnv744ZmR
+review_record: docs/ai-label-audit-2026-10-22.md#targeted-re-review
 added_in: "0.1.0"
 notes: >-
   Anchored at the trigger line, which is where the privileged context is declared; the
-  untrusted checkout is at line 15 and the build that runs its code is at line 18. Scanners
-  may anchor at the trigger or at the checkout, which is evidence for the line-tolerance
-  decision. Note that zizmor's dangerous-triggers audit flags the trigger itself, while the
-  paper's definition is the combination with untrusted data, so AB-NEG-0005 and a future
-  pull_request_target-without-checkout negative probe that difference.
+  untrusted checkout is at line 15 and the build that runs its code is at line 19. Scanners
+  may anchor at the trigger, checkout or execution step, exposing the cross-region matching
+  limitation recorded in the methodology. Note that zizmor's dangerous-triggers audit flags the trigger itself, while the
+  paper's definition is the combination with untrusted data, so AB-NEG-0005 and the
+  trigger-only AB-NEG-0010 probe that difference. The 2026-10-22 audit found the original
+  fixture was blocked by checkout's guard; this unreleased revision deliberately opts in.
+  The included build recipe is benign and exists to make the execution target explicit.
+  No live workflow or exploit was executed to verify it.

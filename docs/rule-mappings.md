@@ -19,7 +19,8 @@ disagrees with it, that is noted below.
 **Scope.** A tool's scope is the set of mapped classes the tool can actually detect in the
 configuration it was run in. A class outside scope is reported as *uncovered*, never as *missed*.
 
-Reviewed on 2026-10-04. Reviewer: the corpus author (single reviewer; see "Limits").
+zizmor and actionlint reviewed on 2026-10-04. These are maintainer-side mapping reviews,
+not independent label reviews (see "Limits").
 
 ---
 
@@ -38,7 +39,7 @@ Documentation read: <https://docs.zizmor.sh/audits/>.
 | `secrets-inherit` | secrets-exposure | Flags `secrets: inherit`, which violates least authority. | AB-SEC-0001 | yes |
 | `hardcoded-container-credentials` | secrets-exposure | Flags a literal password in container or service credentials (documentation example: `password: hackme`). | AB-SEC-0002 | yes |
 | `overprovisioned-secrets` | secrets-exposure | Flags expanding the whole secrets context, as in `toJSON(secrets)`, where a named secret would do. | AB-SEC-0003 | yes |
-| `artipacked` | artifact-integrity | Flags persisted checkout credentials that can leak through artifacts. **Debatable:** the class's prose is about unvalidated artifacts; the mapping, like the corpus label, follows the source study. | AB-ART-0001 | yes |
+| `artipacked` | artifact-integrity | Flags persisted checkout credentials. ADR 0006 explicitly retains the study's confidentiality-related class exception. The case is now anchored at upload, so a checkout-anchored detection is a cross-step mismatch, not a false alarm on a clean workflow. | AB-ART-0001 | yes |
 
 ### Deliberately not mapped
 
@@ -56,6 +57,18 @@ Documentation read: <https://docs.zizmor.sh/audits/>.
 injection, unpinned-dependency, excessive-permission, privileged-trigger, secrets-exposure,
 artifact-integrity. Out of scope: known-vulnerable-component (needs online mode), control-flow and
 runner-compatibility (no reviewed rule), hardening-gap (no cases).
+
+### Revised artifact anchor (2026-10-22)
+
+The owner chose to retain the study-compatible artifact-integrity exception for credential
+confidentiality, but anchor AB-ART-0001 at its actual upload sink (line 15). Zizmor 1.30.1
+reports checkout at line 12, a different step. With region matching its artifact class now
+scores **0 TP / 1 FP / 2 FN** at all three personas, rather than the historical **1/0/1**.
+One FP/FN pair is this anchor mismatch; the other FN is unverified archive consumption,
+which no mapped rule targets. This is not evidence of a false alarm on a negative workflow.
+At line tolerance 3 the checkout finding matches across steps; region matching deliberately
+does not. The mapping and matching algorithm are unchanged; do not compare these counts to
+released corpus counts without stating the corpus revision.
 
 ---
 

@@ -59,9 +59,13 @@ clean case that looks risky but is safe.
 | AB-KVC-0002 | `shivammathur/setup-php` pinned inside a second advisory's vulnerable range |
 | AB-RUN-0002 | The retired `macos-10.15` runner image |
 | AB-ART-0002 | An archive downloaded and unpacked without an integrity check |
-| AB-NEG-0001 to 0018 | Clean twins and probes. 0001 to 0009:  environment-variable indirection, boolean-only `contains()`, a pinned action, read-only permissions, a `pull_request` head checkout, a single named secret, the patched action version, credentials not persisted, and a real condition. 0010 to 0018: `pull_request_target` with nothing untrusted (a definitional split), a multi-line script via the environment, safe contexts (the pull request number and the commit SHA), a pinned reusable workflow, credentials from secrets, one named secret, the patched setup-php, `macos-latest`, and a checksum-verified download |
+| AB-NEG-0001 to 0018 | Clean twins and probes. 0001 to 0009: environment-variable indirection, boolean-only `contains()`, a pinned action, no token permission for constant echo, a `pull_request` head checkout, a single named secret, the patched action version, credentials not persisted, and a nonconstant condition. 0010 to 0018: `pull_request_target` with nothing untrusted (a definitional split), a multi-line script via the environment, safe number/hash syntax, a pinned reusable workflow, credentials from secrets, one key consumed by a benign HMAC step, patched setup-php, `macos-latest`, and fail-closed checksum gating with a placeholder digest |
 
-Every label is `proposed`: one reviewer, not yet independently checked.
+In this unreleased development tree, all 44 labels are `ai-reviewed`; none remains `proposed`.
+No label is `agreed` through independent human review. See the
+[2026-10-22 agent audit](../docs/ai-label-audit-2026-10-22.md) for all dispositions,
+including two repaired workflow-reachability blockers and a revised advisory negative. Released 0.1.1
+still has 44 `proposed` labels.
 
 ## Classes not covered yet
 

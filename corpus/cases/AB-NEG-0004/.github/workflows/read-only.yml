@@ -1,9 +1,8 @@
-name: Read-only permissions
+name: No token permissions needed
 on:
   pull_request:
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   build:

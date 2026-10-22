@@ -57,7 +57,9 @@ Read [docs/methodology.md](docs/methodology.md) first. In short:
    set `permissions:` unless the case is about exactly that, so that only the intended
    weakness is labeled.
 3. Anchor each expected finding at the **sink**: the line where untrusted data reaches the
-   interpreter. Put a short `evidence` substring that appears on that line.
+   interpreter, or the relevant exposure/consumption operation for non-injection classes
+   (artifact upload or archive extraction; see ADR 0006). Put a short `evidence` substring
+   that appears on that line.
 4. Write a `rationale` a reviewer can check, and add `references`. If you reasoned the
    label from first principles and found no independent source, say so in the rationale.
 5. Leave `status: proposed` and `reviewer: null`. A separate agent session may support

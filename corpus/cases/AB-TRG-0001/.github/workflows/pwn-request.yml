@@ -13,6 +13,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          allow-unsafe-pr-checkout: true # Deliberately unsafe benchmark fixture; never run.
           persist-credentials: false
       - name: Build
-        run: make build
+        run: make -f .github/build.mk build

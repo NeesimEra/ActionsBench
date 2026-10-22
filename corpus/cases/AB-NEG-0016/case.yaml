@@ -8,7 +8,8 @@ rationale: >-
 references:
   - https://github.com/advisories/GHSA-pqwm-q9pv-ph8r
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd5d11ffeEqL0ISzKVeCn2R
+review_record: docs/ai-label-audit-2026-10-22.md#advisories-and-runners
 added_in: "0.1.0"

@@ -14,9 +14,10 @@ references:
   - https://github.com/advisories/GHSA-cxww-7g56-2vh6
   - https://docs.zizmor.sh/audits/
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd5d11ffeEqL0ISzKVeCn2R
+review_record: docs/ai-label-audit-2026-10-22.md#advisories-and-runners
 added_in: "0.1.0"
 notes: >-
   Pinned by SHA on purpose so that only the known-vulnerable component is labeled. Detecting

@@ -78,6 +78,13 @@ block was made from reasoning; it is now shown with real tool output.
 
 ## Consequences
 
+**2026-10-22 evidence update:** poutine's job/execution anchors and ADR 0006's corrected
+artifact upload sink expose cross-region mismatches. Zizmor's artifact finding stays at
+checkout line 12 while the label is upload line 15; region counts change to 0/1/2. The
+earlier same-region/two-line observations above describe the original corpus anchors,
+not a guarantee for revised cases. The matcher remains unchanged and these mismatches
+are disclosed rather than bridged by tool-specific exceptions.
+
 - A tool is only criticized for what it claims to do. The cost is that the scope
   declaration becomes part of the result and must be sourced and stated when published.
 - Results are harder to summarize in one line. That is intended.

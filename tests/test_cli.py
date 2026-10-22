@@ -222,11 +222,12 @@ def test_run_rejects_malformed_config(
 
 
 OFFSET_FINDINGS = {
-    # the four anchoring differences observed from real zizmor 1.30.1 and actionlint 1.7.12:
-    # (case, file, line the tool reports); each label is on a different line of the same construct
+    # Three observed tool offsets, plus a hypothetical upload-header offset after ADR 0006.
+    # Each label is on a different line of the same construct; real zizmor anchors artifact
+    # exposure at checkout instead, which is covered as a mismatch in integration tests.
     "AB-TRG-0001": ("privileged-trigger", ".github/workflows/pwn-request.yml", 2),
     "AB-SEC-0001": ("secrets-exposure", ".github/workflows/inherit.yml", 10),
-    "AB-ART-0001": ("artifact-integrity", ".github/workflows/artipacked.yml", 12),
+    "AB-ART-0001": ("artifact-integrity", ".github/workflows/artipacked.yml", 14),
     "AB-INJ-0006": ("injection", ".github/workflows/github-script.yml", 15),
 }
 

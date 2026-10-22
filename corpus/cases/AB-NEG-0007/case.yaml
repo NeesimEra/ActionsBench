@@ -1,15 +1,32 @@
 id: AB-NEG-0007
-title: "Action pinned to the patched version"
+title: "Action pinned beyond both cited advisory patch thresholds"
 is_negative: true
 expected: []
 rationale: >-
-  The SHA is the commit of actions/download-artifact v4.1.3, the advisory's patched version.
-  This is the clean twin of AB-KVC-0001; reporting a known vulnerable component here is
-  wrong.
+  The SHA resolves to actions/download-artifact v4.1.8, outside the affected range
+  (>= 4.0.0, < 4.1.3) in GHSA-cxww-7g56-2vh6. Its lockfile and shipped bundle contain
+  @actions/artifact 2.1.8. That is above both the related GHSA-6q32-hq47-5qq3 advisory's
+  structured first-patched version (2.1.2) and its prose recommendation (2.1.7).
+  This is a negative for affected-version inclusion under these two cited advisories,
+  paired with AB-KVC-0001. It does not certify that all dependencies are vulnerability-free
+  or that any finding about this workflow would be wrong.
 references:
   - https://github.com/advisories/GHSA-cxww-7g56-2vh6
+  - https://github.com/advisories/GHSA-6q32-hq47-5qq3
+  - https://github.com/actions/download-artifact/releases/tag/v4.1.8
+  - https://github.com/actions/download-artifact/blob/fa0a91b85d4f404e444e00e005971372dc801d16/package-lock.json
+  - https://github.com/actions/download-artifact/blob/fa0a91b85d4f404e444e00e005971372dc801d16/dist/index.js
 provenance: synthetic-minimal
-status: proposed
+status: ai-reviewed
 author: Aliu2211
-reviewer: null
+reviewer: ai:opencode:ses_e9cbd5d11ffeEqL0ISzKVeCn2R
+review_record: docs/ai-label-audit-2026-10-22.md#artifact-advisory-re-review
 added_in: "0.1.0"
+notes: >-
+  The 2026-10-22 audit held the original v4.1.3 pin because advisory metadata and
+  extraction-source evidence disagreed. This unreleased revision uses a later release
+  rather than adjudicating whether the old version is exploitable. The shipped v4.1.8
+  bundle uses unzip-stream.Extract instead of the old custom Parse/Transform callback;
+  no live artifact extraction or exploit was run. The workflow supplies no artifact
+  producer, so successful artifact availability is not asserted. It tests component
+  inclusion, not end-to-end artifact consumption or a universal clean bill of health.

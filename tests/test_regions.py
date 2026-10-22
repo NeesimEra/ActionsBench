@@ -142,13 +142,13 @@ def _region_pair(case: str, workflow: str, label_line: int, tool_line: int) -> b
         ("AB-TRG-0001", "workflows/pwn-request.yml", 3, 2),
         # zizmor reports the call's `uses:` line; the label is `secrets: inherit`.
         ("AB-SEC-0001", "workflows/inherit.yml", 11, 10),
-        # zizmor reports the step header; the label is the step's `uses:` line.
-        ("AB-ART-0001", "workflows/artipacked.yml", 13, 12),
+        # A hypothetical upload-header finding shares the revised upload sink's region.
+        ("AB-ART-0001", "workflows/artipacked.yml", 15, 14),
         # actionlint reports the `script:` key; the label is the line inside the script.
         ("AB-INJ-0006", "workflows/github-script.yml", 16, 15),
     ],
 )
-def test_the_four_observed_anchoring_differences_are_all_the_same_region(
+def test_offsets_within_the_same_construct_share_a_region(
     case: str, file: str, label_line: int, tool_line: int
 ) -> None:
     assert _region_pair(case, file, label_line, tool_line)
@@ -157,8 +157,8 @@ def test_the_four_observed_anchoring_differences_are_all_the_same_region(
 @pytest.mark.parametrize(
     ("case", "file", "label_line", "other_line"),
     [
-        # the checkout step versus the upload step that follows it
-        ("AB-ART-0001", "workflows/artipacked.yml", 13, 15),
+        # the revised upload sink versus zizmor's observed checkout-header anchor
+        ("AB-ART-0001", "workflows/artipacked.yml", 15, 12),
         # the trigger versus the permissions block
         ("AB-TRG-0001", "workflows/pwn-request.yml", 3, 6),
         # the step's `uses:` versus the job it lives in

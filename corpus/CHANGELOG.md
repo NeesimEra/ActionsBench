@@ -3,6 +3,33 @@
 Corpus versions are immutable once released. A new version adds or amends cases; it never
 silently rewrites old ones. Each case records the version that introduced it in `added_in`.
 
+## Unreleased
+
+- Added `ai-reviewed`, distinct from independent human `agreed`, with agent reviewer identity
+  and a required `review_record`. This extends the case schema; older validators will reject it.
+- Four agent sessions audited all 44 cases on 2026-10-22. Promoted 27 supported cases;
+  initially held 17 pending factual, rationale or classification concerns. See
+  [the audit record](../docs/ai-label-audit-2026-10-22.md).
+- Repaired AB-INJ-0007's missing local-action checkout and AB-TRG-0001's blocked fork-head
+  checkout. The latter explicitly opts into unsafe checkout and provides a benign build
+  recipe. Targeted agent re-review cleared both. Expected classes, sink anchors and
+  evidence substrings are unchanged.
+- Replaced AB-NEG-0007's ambiguous v4.1.3 pin with v4.1.8, bundling artifact 2.1.8 above
+  both conflicting toolkit advisory patch thresholds. Narrowed the negative to the two
+  cited advisories and obtained targeted agent approval; no claim is made that the old pin
+  is newly proven vulnerable.
+- Corrected factual rationale scope for AB-INJ-0004/0005, AB-NEG-0012, AB-PIN-0002,
+  AB-SEC-0001, AB-RUN-0002, AB-CTL-0001 and AB-NEG-0008/0009/0018. Targeted agents cleared
+  all ten without changing workflows, expected findings, anchors or evidence.
+- Resolved the final four boundary cases under ADR 0006: retain the explicit artipacked
+  class exception but anchor at upload, anchor unverified archive consumption at tar,
+  remove the echo-only negative's unused read permission, and give its named-secret peer
+  an actual benign HMAC use. Targeted reviewers cleared all four. All 44 cases are now
+  `ai-reviewed`, none human-agreed. Zizmor artifact counts change from 1/0/1 to 0/1/2
+  because its checkout anchor no longer matches the upload sink; this is disclosed, not
+  compensated for with tool-specific matching.
+- No release tag, DOI archive, or published 0.1.1 corpus was changed.
+
 ## 0.1.1 (2026-10-06)
 
 The corpus is unchanged from 0.1.0: the same 44 cases with the same labels. This release changes how it is
