@@ -58,10 +58,24 @@
       "items": { "type": "string", "pattern": "^https?://" }
     },
     "provenance": { "enum": ["synthetic-minimal", "derived-from-advisory"] },
-    "status": { "enum": ["proposed", "agreed", "disputed"] },
+    "status": { "enum": ["proposed", "ai-reviewed", "agreed", "disputed"] },
     "author": { "type": "string", "minLength": 1 },
     "reviewer": { "type": ["string", "null"] },
     "added_in": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
-    "notes": { "type": "string" }
-  }
+    "notes": { "type": "string" },
+    "review_record": {
+      "description": "Repository-relative path or URL to the dated review evidence and disposition. Required for ai-reviewed labels; not a claim of independent human review.",
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "ai-reviewed" } }, "required": ["status"] },
+      "then": {
+        "required": ["review_record"],
+        "properties": { "reviewer": { "type": "string", "pattern": "^ai:.+" } }
+      }
+    }
+  ]
 }

@@ -55,6 +55,18 @@ def test_stats(real_corpus: Path, capsys: pytest.CaptureFixture[str]) -> None:
     assert "(negative)" in out
 
 
+def test_stats_reports_agent_review_separately(
+    make_case: CaseWriter, capsys: pytest.CaptureFixture[str]
+) -> None:
+    case_dir = make_case(
+        status="ai-reviewed", reviewer="ai:opencode:session", review_record="docs/audit.md"
+    )
+    assert main(["stats", "--corpus", str(case_dir.parent)]) == 0
+    out = capsys.readouterr().out
+    assert "status: ai-reviewed=1" in out
+    assert "agreed=" not in out
+
+
 def test_score_with_a_perfect_scanner(
     real_corpus: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:

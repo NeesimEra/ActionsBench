@@ -126,8 +126,9 @@ Each case is a small workflow (plus any referenced local actions or reusable wor
 | rationale | Why the label is correct, in plain language. |
 | reference | Link to GitHub's security-hardening guidance, an advisory, or an incident. |
 | provenance | Synthetic-minimal, or derived from a fixed public advisory (see 5.3). |
-| status | `proposed` (one reviewer so far), `agreed` (an independent reviewer confirmed), or `disputed`. |
+| status | `proposed` (author claim), `ai-reviewed` (separate agent evidence review), `agreed` (independent human confirmed), or `disputed`. |
 | reviewers | Who labeled and who independently reviewed. |
+| review_record | Dated evidence record; required for `ai-reviewed`. Agent reviewer identities use `ai:` and do not count as independent human review. |
 | added_in | Corpus version that introduced the case. |
 
 ### 5.3 Provenance rules
@@ -154,7 +155,8 @@ Precision cannot be measured without negatives. The corpus must include:
 
 ### 5.6 Label review process
 
-- Two reviewers per case: an author and an independent reviewer.
+- Two human reviewers per agreed case: an author and an independent reviewer. Separately,
+  `ai-reviewed` records agent evidence review without satisfying this milestone (ADR 0005).
 - Every case carries a written rationale and a reference.
 - Cases may be marked disputed. Anyone can challenge a label through an issue, and the outcome is recorded.
 - Scanner maintainers are invited to review labels before results are published.

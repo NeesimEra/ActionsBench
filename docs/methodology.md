@@ -56,13 +56,14 @@ real repositories are never included.
 | Status | Meaning |
 |---|---|
 | `proposed` | One person has labeled it. The label is a claim, not yet independently checked. |
-| `agreed` | An independent reviewer, different from the author, checked the label. |
+| `ai-reviewed` | A separate agent session checked the label and supporting evidence; no unresolved concern identified in its recorded scope. Not independent human review. |
+| `agreed` | An independent human reviewer, different from the author, checked the label. |
 | `disputed` | A challenge could not be resolved. The case stays, marked, with the argument recorded. |
 
 Every case carries a written `rationale` and at least one `reference`. If a label was
 reasoned from first principles and no independent source exists, the rationale says so.
 
-### Three different levels of confidence
+### Different levels of confidence
 
 1. **`proposed`**: one person has labeled it.
 2. **Evidence-audited**: the facts the label rests on were checked against primary sources, and where
@@ -71,7 +72,13 @@ reasoned from first principles and no independent source exists, the rationale s
    facts (is this context attacker-controlled, does this advisory range hold, was this runner image
    retired) and found real defects, but it is not independent: the author, or the assistant that
    wrote the case, cannot be the independent reviewer of it.
-3. **`agreed`**: a person other than the author checked the label. Judgements such as the choice of
+3. **`ai-reviewed`**: a separate agent session challenged the workflow, rationale, references,
+   class and anchor. Its dated record states sources, scope, findings and limitations. The
+   `reviewer` uses an `ai:` identity and `review_record` links the evidence. Cases with unresolved
+   factual, rationale or classification concerns stay `proposed` pending resolution and re-review.
+   Separate sessions are not independent humans and may share model biases. This status does
+   not satisfy human-review milestones or justify rankings. See [ADR 0005](adr/0005-ai-assisted-label-review.md).
+4. **`agreed`**: a person other than the author checked the label. Judgements such as the choice of
    class or where a case sits on a definitional boundary can only be settled this way.
 
 Quote results with the level that applies.

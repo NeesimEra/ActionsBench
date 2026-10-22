@@ -60,8 +60,9 @@ Read [docs/methodology.md](docs/methodology.md) first. In short:
    interpreter. Put a short `evidence` substring that appears on that line.
 4. Write a `rationale` a reviewer can check, and add `references`. If you reasoned the
    label from first principles and found no independent source, say so in the rationale.
-5. Leave `status: proposed` and `reviewer: null`. An independent reviewer moves a case to
-   `agreed`. You cannot review your own case.
+5. Leave `status: proposed` and `reviewer: null`. A separate agent session may support
+   `ai-reviewed` with a dated `review_record`; an independent human reviewer moves a case to
+   `agreed`. You cannot approve your own case.
 6. Run `uv run actionsbench validate`.
 
 Never add a workflow from a real repository that still has a live vulnerability, real
@@ -78,6 +79,13 @@ an advisory, or a minimal reproduction. A challenge that cannot be resolved mark
 Read the workflow, decide independently whether the label is right, then set `status:
 agreed` and your handle as `reviewer` in a pull request, or comment on the case's pull
 request or issue if you disagree.
+
+For AI-assisted review, use a separate agent session that challenges the case against primary
+sources without tuning to scanners. Record its identity as `ai:<system>:<session>`, and link a
+dated repository-relative record or URL in `review_record`. The record must cover the reviewed
+case contents, sources, findings, disposition and limitations. Use `ai-reviewed` only after
+concerns are resolved; leave uncertain or challenged cases `proposed`. This is not independent
+human agreement. A substantive case edit requires re-review before restoring the status.
 
 ## Adding a scanner adapter
 
