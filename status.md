@@ -1198,3 +1198,60 @@ changelog records.
 
 
 
+## 2026-10-22: Platform P0 accepted in scope and built (ADR 0007); UI in Next.js
+
+**Decision**
+
+- The owner reversed the 2026-10-06 hosted-platform deferral and mandated the Next.js LTS
+  stack for the UI. ADR 0007 records the decision with the guardrails that made the
+  deferral sensible: corpus content is data (never executed), label-review status travels
+  with every score, per-class only (no overall score, no "best scanner"), results append-only
+  and reproducible, findings stay submittable as static files via pull request.
+- Next.js has no formal LTS program, so "LTS stable" is recorded as the current stable
+  major line pinned to a patch: Next.js 16.4.2, React 19.3, TypeScript 5, Node 22 in CI.
+
+**Done**
+
+- `docs/adr/0007-hosted-platform.md` (new), `docs/platform.md` (new spec: invariants,
+  P0–P4 milestones, run instructions, stack pins), `docs/PRD.md`: hosted-platform non-goal
+  lifted for the platform only; "no single best scanner / no overall score" kept as hard
+  rules; revision-log row 0.2.1.
+- `platform/api` (uv project): FastAPI JSON API. The only component that loads the corpus
+  (`require_valid_corpus`), screens findings documents against `findings.schema.json`
+  (`validate_json`) and scores them with the harness's `score(matching="region")` — the
+  CLI's own code path, no reimplementation. Endpoints: `/api/summary`, `/api/cases`,
+  `/api/cases/{id}`, `/api/cases/{id}/files/…` (text, byte-capped, traversal-refusing),
+  `/api/classes/{cls}` (raw str + manual validation so unknown classes 404, not 422),
+  `/api/results` (per-class rows with in-scope flags, matching rule, harness and corpus
+  versions stated; invalid or unscoreable documents appear as problems, never 500s),
+  `/api/records/…` (`.md`/`.txt` under `docs/` only, size-capped, symlink-refusing).
+- `platform/web` (npm project): Next.js 16 App Router, TypeScript, no Tailwind. Server
+  components only, every data page `force-dynamic` (the web build succeeds with the API
+  down), `/api/*` proxy rewrite keeps the browser same-origin, typed client in
+  `lib/api.ts`, no client-side scoring logic, honest "API unreachable" states.
+- CI: `platform-api` job (Python 3.11/3.13, uv 0.11.7, ruff, format, strict mypy, pytest,
+  working directory pinned to `platform/api` so tests cannot pick up the root config) and
+  `platform-web` job (setup-node v7.1.0 pinned, Node 22, `npm ci`, `typecheck`, `build`).
+
+**Agent teams used**
+
+- Research: verified the uv editable path-source dependency across projects, the findings
+  schema's exact contract, FastAPI's 422-vs-404 enum-param behavior, Node availability, and
+  enumerated every bug in the initial draft (missing `require_valid_corpus`/`WeaknessClass`
+  imports, placeholder test junk). 
+- Implementation: rebuilt to the API + Next.js split, fixed the draft bugs, wrote 21 API
+  tests, both CI jobs; everything green.
+- Evaluation: adversarial review verdict FIX-FIRST with one blocker — an invalid-UTF-8
+  findings document produced a 500 and hid valid documents — plus three conformance majors
+  (matching rule not stated; corpus/harness versions absent; out-of-scope findings dropped
+  silently). All applied; nits (records byte cap, `case.yaml` symmetry) applied too, and
+  every mutation-test gap the evaluation flagged became a test.
+
+**Verified**
+
+- `platform/api`: pytest 29 passed, ruff + format + strict mypy clean.
+- `platform/web`: `tsc --noEmit` clean, `next build` green with the API down (8 dynamic
+  routes), full-stack smoke through the proxy: corpus, case, class, results pages 200 with
+  provenance/matching/version disclosures, unknown class 404.
+- Root untouched: 283 unit tests, 6 integration deselected, `actionsbench validate` →
+  `OK: 44 case(s) valid.`, repo-wide ruff clean.
