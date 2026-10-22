@@ -3,9 +3,9 @@
 Corpus versions are immutable once released. A new version adds or amends cases; it never
 silently rewrites old ones. Each case records the version that introduced it in `added_in`.
 
-## 0.2.0
+## 0.2.0 (2026-10-22)
 
-Prepared for release; the date is set when the dry run passes. This version extends the case
+Released after a TestPyPI dry run. This version extends the case
 schema: older validators reject it. It amends existing cases (fixtures, anchors, labels and
 their provenance); no case was added or removed, so every case remains `added_in: 0.1.0`.
 
