@@ -218,7 +218,14 @@ be reproduced and compared.
   secrets-exposure, artifact-integrity) and actionlint on four (injection, control-flow,
   runner-compatibility, secrets-exposure), each through a small number of reviewed rules. Known-vulnerable-component
   is out of scope for zizmor because it needs online mode, which the adapter disables for
-  determinism. Hardening-gap has no cases. Out of scope means "uncovered", never "missed".
+  determinism. Poutine local analysis is judged on three classes: injection, secrets-exposure,
+  privileged-trigger. Hardening-gap has no cases. Out of scope means "uncovered", never "missed".
+- **Cross-region anchors remain mismatches.** Poutine 1.1.6 detects the all-secrets and
+  untrusted-checkout patterns but reports the job header and execution step respectively,
+  rather than the labeled step expression and trigger. Each currently incurs one FP and
+  one FN; this is a matching limitation, not a false alarm on a clean case. See the mapping
+  review for exact locations. The third tool supplies evidence for revisiting ADR 0003,
+  but no matching or label change is made for it here.
 - **Sink correction exposes another cross-step mismatch.** Under ADR 0006, AB-ART-0001
   anchors at upload (line 15), not credential persistence. Zizmor reports checkout (line 12)
   and therefore incurs an FP/FN pair despite flagging the persistence risk. The class is
@@ -235,8 +242,8 @@ be reproduced and compared.
 - **Within-region anchoring differs from cross-region anchoring.** Early observations were
   one or two lines inside the same construct (for example a long run block's key versus
   interpolation). Region matching removes those exact-line mismatches, while a one-line
-  tolerance does not remove all of them. The corrected artifact upload sink crosses
-  constructs and remains a mismatch. Labels were corrected for
+  tolerance does not remove all of them. Later poutine observations and the corrected
+  artifact upload sink cross constructs and remain mismatches. Labels were corrected for
   source/sink semantics, not to suit a tool.
 - actionlint needs a project marker (an empty `.git` directory) in the isolated copy, and its
   external linters (shellcheck, pyflakes) are disabled so results do not depend on the machine.
@@ -244,9 +251,10 @@ be reproduced and compared.
   single human author, so they are a pipeline check and an early signal, not a ranking. Later
   agent evidence review does not supply independent human agreement. Per-class
   numbers, never a single score, are the output.
-- The SARIF parser has been checked against real zizmor 1.30.1 output only (rule IDs are
+- The SARIF parser has been checked against real zizmor 1.30.1 output (rule IDs are
   prefixed, for example `zizmor/template-injection`, and paths are case-relative on an
-  isolated copy). Other tools still have to be checked one at a time.
+  isolated copy) and poutine 1.1.6 (unprefixed rule IDs, `driver.semanticVersion`). Other
+  tools still have to be checked one at a time.
 - Scanners report findings outside the labeled weakness, for example zizmor's
   `self-repository` note on a composite-action call. Whether such a rule maps to a
   benchmark class, or is deliberately left unmapped, is a per-tool judgement made when an

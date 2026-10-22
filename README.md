@@ -51,18 +51,24 @@ uv run actionsbench stats         # cases per weakness class
 uv run actionsbench run --tool zizmor      # needs uvx; add --config persona=auditor for another setting
 sh scripts/install-actionlint.sh           # pinned, checksum-verified download into .tools/
 uv run actionsbench run --tool actionlint
+sh scripts/install-poutine.sh              # pinned, checksum-verified download into .tools/
+uv run actionsbench run --tool poutine
 uv run actionsbench score results/zizmor-1.30.1-regular/findings.json
 ```
 
-`run` executes a scanner that has a reviewed adapter (zizmor, scored on six weakness
-classes, and actionlint, scored on four) and writes a findings file; raw output goes to `results/` (gitignored).
+`run` executes a scanner that has a reviewed adapter (zizmor, scored on six weakness classes;
+actionlint, four; poutine, three) and writes a findings file; raw output goes to `results/` (gitignored).
 `score` takes any normalized findings file (schema:
 [findings.schema.json](https://github.com/NeesimEra/ActionsBench/blob/main/src/actionsbench/schemas/findings.schema.json)), so a scanner
 without an adapter can still be scored by producing that file. More adapters are planned
 (see [plan.md](https://github.com/NeesimEra/ActionsBench/blob/main/plan.md)).
 
-Run the commands from the repository root, or pass `--corpus` explicitly. The
-`ai-reviewed` status described here is unreleased; PyPI 0.1.1 does not include it.
+Poutine runs local analysis with an explicit empty config and its version check disabled.
+Its job- and execution-step anchors expose limits of region matching; see the
+[mapping review](https://github.com/NeesimEra/ActionsBench/blob/main/docs/rule-mappings.md#poutine-116-local-analysis).
+
+Run the commands from the repository root, or pass `--corpus` explicitly. The poutine adapter
+and `ai-reviewed` status described here are unreleased; PyPI 0.1.1 does not include them.
 
 ## How scoring works
 

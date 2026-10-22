@@ -795,3 +795,270 @@ accepts the security and maintenance load. Until then results come in as a findi
 **Not deferred, undecided:** a static corpus explorer and per-class result pages on GitHub Pages (generated from the
 repository, no backend, no accounts). Suggested trigger: the first outside reviewer, or contributors asking for it.
 Result pages only after independent review. Not started.
+
+---
+
+## 2026-10-22: Scoring correctness fixes
+
+**Done**
+
+- Region lookup now returns no region for lines outside a file. A finding past EOF can no
+  longer receive a true positive merely because its label is in the final construct.
+- Replaced greedy matching with maximum one-to-one matching, using augmenting paths and
+  preferring nearby candidates. Line-tolerance TP counts no longer depend on input order.
+- F1 now uses `2TP / (2TP + FP + FN)`: errors with no true positives yield zero, not null.
+- Added regressions for file bounds, newline endings, input permutations, chained
+  reassignments, duplicate findings and F1 denominators. Updated the methodology and
+  corrected the README's stale injection-only adapter scope description.
+
+**Verified (by running it)**
+
+- 219 unit tests and all 5 real-scanner integration tests pass. Existing corpus TP/FP/FN
+  counts are unchanged for zizmor's three personas and actionlint.
+- Ruff lint and formatting, strict mypy, and validation of all 44 cases pass.
+
+**Next**
+
+- poutine adapter, independent label review, and broader corpus coverage remain open.
+  No scanner mappings, corpus labels, release versions or hosting decisions changed.
+
+---
+
+## 2026-10-22: poutine adapter and three-tool pipeline
+
+**Done**
+
+- Added poutine 1.1.6 after inspecting its real SARIF on all 44 isolated cases and reading
+  documentation/source at the pinned tag. The installer verifies the upstream release's
+  SHA-256 manifest; as with actionlint, this is not protection against a compromised release.
+- Local analysis uses an explicit empty config and disables the upstream version check.
+  The adapter reads `driver.semanticVersion`; version drift remains a runner failure.
+- Reviewed mappings: injection, job_all_secrets to secrets-exposure, and
+  untrusted_checkout_exec to privileged-trigger. Other rules remain visible and unmapped.
+- Recorded two cross-region anchor mismatches without adjusting labels or matching:
+  all-secrets at the job header and privileged execution at the build step.
+
+**Verified**
+
+- `actionsbench run --tool poutine` ran 44 of 44 cases; its findings file scores successfully.
+- Six real-scanner integration tests pass (poutine, actionlint, zizmor's three personas and
+  its configuration-effect test). Raw counts are recorded in the mapping review, not a ranking.
+- The subsequent agent audit also found reachability defects in existing fixtures, so
+  detections and counts must not be treated as proof that those sinks execute.
+
+---
+
+## 2026-10-22: Separate ai-reviewed status and parallel label evidence audit
+
+**Decision (owner, in chat):** run agents to review the labels, then add `ai-reviewed`
+rather than treating agent review as independent human `agreed`. ADR 0005 records the policy.
+
+**Done**
+
+- Four read-only agent sessions covered all 44 cases in non-overlapping groups, challenging
+  primary-source evidence, attacker control, reachability, class fit, anchors and negatives.
+- Added `ai-reviewed` to the model and schema. It requires a separate `ai:` reviewer and
+  a nonblank `review_record`; `agreed` remains human-only. Updated contributor/methodology
+  guidance and recorded the schema extension as unreleased.
+- Promoted 27 supported cases, with reviewer session identity and a dated evidence link.
+  Seventeen remain proposed pending the concerns in docs/ai-label-audit-2026-10-22.md.
+  No workflows, expected findings, anchors, rationales or references changed.
+- Main blockers: AB-INJ-0007 omits checkout before invoking its local action;
+  AB-TRG-0001 pins checkout with a guard blocking the intended fork-head checkout.
+  AB-NEG-0007 has unresolved advisory/source inconsistency, not a demonstrated new exploit.
+- Historical audit and released 0.1.1 statements are identified as historical. No tag,
+  DOI archive, PyPI publication or version declaration changed.
+
+**Verified**
+
+- 268 unit tests and all 6 real-scanner integration tests pass. Ruff lint/format, strict
+  mypy and all 44 corpus cases validate. Stats reports ai-reviewed=27, proposed=17.
+- Built wheel installs in a clean environment and validates the bundled updated corpus
+  from an empty directory. This local development build is not a release artifact.
+
+**Limits / next**
+
+- No case is independently human-reviewed. Separate agent contexts do not eliminate shared
+  model bias or satisfy the PRD's human agreement target. No corpus payload was run in the audit.
+- Resolve the 17 recorded concerns and request targeted re-review before promotion.
+  Changes remain uncommitted and unreleased; do not publish current numbers as rankings.
+
+---
+
+## 2026-10-22: Repair and re-review the two reachability blockers
+
+**Done**
+
+- AB-INJ-0007 now checks out the repository with a full SHA pin and nonpersistent
+  credentials before calling its local composite action. The input source moves to caller
+  line 19; the injection sink label remains action.yml line 10.
+- AB-TRG-0001 explicitly opts into checkout v7.0.1's unsafe fork checkout, then executes
+  a provided benign .github/build.mk target from that revision. Its rationale limits impact
+  to untrusted execution in trusted context, with read-only token/cache access and no claim
+  of secret theft or cache writes. The trigger label stays at line 3; execution is line 19.
+- Both original reviewing agents independently re-read the revised fixtures and primary
+  sources in their separate review sessions. Both cleared their prior blocker within
+  static/documented scope. Promoted these two cases to ai-reviewed with linked evidence.
+- Current totals: 29 ai-reviewed, 15 proposed, no human-agreed cases. Initial audit tables
+  remain historical; the targeted re-review section records current dispositions.
+- Added three static regressions for provisioning order, guard opt-in and build-target
+  inclusion in the isolated scanner copy. No workflow, script, payload or recipe was run.
+
+**Verified**
+
+- 271 unit tests and six real-scanner integration tests pass; scanner TP/FP/FN counts are
+  unchanged. Poutine's execution anchor changed from line 18 to 19 as expected.
+- Ruff lint/format, strict mypy, all 44 cases, and clean-environment wheel installation pass.
+
+**Limits / next**
+
+- Evidence remains static/documented, not a live end-to-end runner demonstration or human
+  agreement. Resolve the remaining 15 proposed cases before requesting their promotion.
+- All changes remain uncommitted and unreleased; no published version or archive changed.
+
+---
+
+## 2026-10-22: Resolve AB-NEG-0007's ambiguous patched-version negative
+
+**Done**
+
+- Confirmed the upstream discrepancy: the action advisory names 4.1.3 as patched; the related
+  toolkit advisory names 2.1.2 in structured data but recommends 2.1.7 in prose. The original
+  action pin bundles toolkit 2.1.3 and has a static extraction concern, not a proven exploit.
+- Changed the negative to verified action v4.1.8 SHA fa0a91b85d4f404e444e00e005971372dc801d16.
+  Its lockfile and shipped metadata both identify toolkit 2.1.8, above both thresholds.
+- Replaced the blanket “reporting a known vulnerable component here is wrong” rationale
+  with a negative explicitly scoped to the two cited advisories. Disclosed that successful
+  artifact availability and universal dependency safety are not established.
+- The original advisory-review agent independently checked the revised files and primary
+  sources and cleared ai-reviewed status. Its dated record retains the old uncertainty
+  and states the revised disposition without adjudicating the old version's exploitability.
+- Added two offline pin regressions. Current totals: 30 ai-reviewed, 14 proposed, no agreed.
+
+**Verified**
+
+- 273 unit tests and six real-scanner integration tests pass; observed scanner counts are
+  unchanged. Lint, format, strict types and all 44 corpus cases validate.
+
+**Limits / next**
+
+- No live workflow, artifact retrieval, extraction or exploit was executed. Upstream advisory
+  inconsistency remains upstream; using a later pin avoids it for this scoped negative.
+- Resolve rationale inaccuracies and class/anchor boundaries in the remaining 14 proposed
+  cases. Changes remain uncommitted and unreleased.
+
+---
+
+## 2026-10-22: Correct ten factual rationale issues and obtain targeted re-review
+
+**Done**
+
+- Corrected push/ref authority and partial Git identity sanitization for AB-INJ-0004/0005,
+  constrained-number/hash reasoning for AB-NEG-0012, and mutable branch/tag wording for
+  AB-PIN-0002. No scanner-list membership is treated as a security proof.
+- Scoped AB-SEC-0001 to blanket-forwarding policy without inventing fictional callee needs;
+  corrected AB-RUN-0002's retirement postponement chronology and hosted-runner assumption.
+- Corrected AB-CTL-0001's implicit success() behavior; bounded AB-NEG-0008 to normal token
+  cleanup, AB-NEG-0009 to nonconstant case-insensitive comparison, and AB-NEG-0018 to
+  fail-closed checksum gating rather than authentic/successful download claims.
+- Four original reviewing sessions checked the ten revised cases against primary sources
+  and cleared each within its static/documented scope. Recorded all verdicts and limits;
+  promoted the ten with reviewer identities and dated review records.
+- Current totals: 40 ai-reviewed, 4 proposed, no human-agreed cases. AB-ART-0001/0002 and
+  AB-NEG-0004/0015 remain proposed because their class/anchor or least-authority boundaries
+  require an explicit decision, not just wording corrections.
+
+**Verified**
+
+- Compared the ten cases with HEAD: workflow/action bytes and expected findings, anchors
+  and evidence substrings are unchanged. Only descriptive/review metadata changed.
+- 273 unit tests, all six scanner integration tests, lint/format, strict types and corpus
+  validation pass. Scanner TP/FP/FN counts are unchanged; stats reports 40/4.
+- Built wheel installs into a clean environment and validates its bundled corpus.
+
+**Limits / next**
+
+- Agent evidence review is not human agreement; no corpus workflow, script, payload or
+  checksum command was executed in these reviews. One GNU documentation refresh timed out;
+  the preceding verified source and freshly checked shell documentation are recorded.
+- Resolve the four remaining boundary cases explicitly. All changes remain uncommitted
+  and unreleased; no published tag, version or archive changed.
+
+---
+
+## 2026-10-22: Resolve final four boundary cases; all 44 agent-reviewed
+
+**Decision (owner, in chat):** retain AB-ART-0001's study-compatible artifact-integrity
+classification with an explicit confidentiality exception, and anchor it at the upload
+sink. ADR 0006 records that choice and its consequences.
+
+**Done**
+
+- Moved AB-ART-0001 from checkout persistence line 13 to upload line 15; moved AB-ART-0002
+  from curl retrieval line 14 to tar consumption line 15. Artifact workflow bytes and
+  classes are unchanged. Corrected illustrative-source and impact limitations.
+- AB-NEG-0004's echo-only job now requests permissions: {} instead of unused contents read.
+  AB-NEG-0015 now uses exactly one named key for a benign fixed-message HMAC, passing it
+  only through the environment, failing on empty input and printing only the tag. It also
+  requests no token permissions. Ordinary fork secret withholding is explicitly disclosed.
+- Two original reviewing sessions checked the revised four cases and primary evidence.
+  All four cleared static/documented review and carry reviewer identity and evidence links.
+  Current totals: 44 ai-reviewed, zero proposed, zero human-agreed.
+- Added four static regressions for minimal permissions, actual key consumption and output
+  shape (AST inspection only), sink anchors and the checkout/upload region boundary.
+
+**Verified and changed observations**
+
+- 277 unit tests and six real-scanner integration tests pass. Lint/format, strict types,
+  all 44 corpus cases, and clean-environment wheel installation pass; stats says ai-reviewed=44.
+- Initial scanner regression failures correctly caught the anchor change. Real zizmor
+  still reports checkout line 12; its artifact region counts become 0 TP / 1 FP / 2 FN
+  instead of 1/0/1 at all personas. Integration expectations now record that observed
+  mismatch; line tolerance three crosses the steps, while region matching does not.
+- All other mapped-class counts are unchanged. Neither the matching algorithm nor rule
+  mappings were tuned to restore the earlier score; the mapping review discloses the cost.
+
+**Limits / next**
+
+- No live upload/download/extraction, signing script, real secret, corpus workflow or
+  payload was executed during label review. All 44 statuses remain scoped AI evidence
+  judgments, not independent human agreement, production safety certification or rankings.
+- Organize and review the accumulated scoring, adapter, schema/policy and corpus changes
+  before committing or preparing a new release. Everything remains uncommitted/unreleased;
+  no published version, immutable tag or DOI archive changed.
+
+---
+
+## 2026-10-22: Remove matcher recursion limit found during pre-commit review
+
+**Review finding**
+
+- The accumulated 84-file diff was reviewed before committing. The new maximum-matching
+  implementation used recursive augmentation and crashed on valid large custom cases.
+  A 1,050-label/finding dense reproduction raised RecursionError; current corpus cases
+  were too small to expose it. This was the review's blocking correctness finding.
+
+**Done**
+
+- Replaced recursive augmentation with an explicit depth-first stack and parent-edge
+  reconstruction. Candidate traversal order and maximum one-to-one matching are preserved.
+  Ownership changes only when a free finding completes a path; failed searches leave
+  previous matches unchanged. No recursion-limit adjustment or input cap was introduced.
+- Added a sparse 1,100-label path regression and a failed-augmentation preservation test.
+  The deep-path test was observed failing before the fix and passing afterward.
+
+**Verified**
+
+- 279 unit tests, all six scanner integration tests, corpus validation, lint/format and
+  strict types pass. Scanner counts and all 44 ai-reviewed case statuses are unchanged.
+- The original dense 1,050-label case now matches all findings without an exception.
+  Full match/miss/extra results equal the recursive reference on 2,000 seeded small graphs.
+- The review-verifier agent re-read the stack/parent invariants and independently reran
+  the new regressions and original reproduction; it cleared the blocker without new findings.
+
+**Still open / not changed in this fix**
+
+- Nonblocking review suggestions: behavioral installer checksum tests, packaged audit
+  provenance, and comprehensive wheel checks for non-YAML fixture files.
+- Recommended commit order remains scoring fixes, AI-review infrastructure, audited corpus
+  revisions, then poutine support. No files were staged or committed; no release was made.

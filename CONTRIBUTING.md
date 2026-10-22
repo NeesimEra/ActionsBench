@@ -91,7 +91,7 @@ human agreement. A substantive case edit requires re-review before restoring the
 
 ## Adding a scanner adapter
 
-Two adapters exist so far (zizmor and actionlint). Add another only after checking the tool's
+Three adapters exist so far (zizmor, actionlint and poutine). Add another only after checking the tool's
 real output:
 
 1. Run the tool by hand on an isolated copy of a case's `.github/` and read its raw output.
