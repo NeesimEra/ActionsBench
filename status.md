@@ -1177,5 +1177,24 @@ changelog records.
   passes the checker (bundled corpus, audit record, every fixture file, install from an
   empty directory). `actionsbench --version` prints 0.2.0.
 
+---
+
+## 2026-10-22: TestPyPI dry run passed; the 0.2.0 release date is set
+
+- Owner merged PR #30; the dry run was dispatched from `dev` (Actions run 39792842059),
+  `testpypi` deployment approved. Build and check passed, trusted publishing uploaded the
+  wheel and sdist with no stored token, and the Publish-to-PyPI job stayed skipped.
+- Verification: TestPyPI lists `actionsbench-0.2.0-py3-none-any.whl` and
+  `actionsbench-0.2.0.tar.gz` with SHA-256 digests identical to the locally built
+  distributions (`5f1cf7ce…` / `7a98357c…`); a clean install from TestPyPI (with
+  dependencies from PyPI) printed `actionsbench 0.2.0` and `OK: 44 case(s) valid.` from an
+  empty directory.
+- `CITATION.cff` keeps 2026-10-22 as the release date and has no DOI until Zenodo mints the
+  0.2.0 record; the changelog now carries the same date. The version DOI is added in a
+  follow-up after the GitHub release.
+- Still owner-gated: dev-to-main release PR, the GitHub release `v0.2.0` on main (creates
+  the tag Zenodo keys on), then the `pypi` environment approval.
+
+
 
 
