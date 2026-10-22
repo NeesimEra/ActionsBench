@@ -22,15 +22,37 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+# The file that every ai-reviewed case's review_record points at; bundled via
+# force-include in pyproject.toml.
+AUDIT_DOC = "actionsbench/_corpus/docs/ai-label-audit-2026-10-22.md"
+
+
 def packaged_cases(names: list[str]) -> set[str]:
     prefix = "actionsbench/_corpus/cases/"
     return {n.split("/")[3] for n in names if n.startswith(prefix) and n.endswith("/case.yaml")}
+
+
+def check_case_files(wheel_names: set[str]) -> list[str]:
+    """Every file of every repo case must be packaged, not just its case.yaml and YAMLs."""
+    problems: list[str] = []
+    for case_dir in sorted((ROOT / "corpus" / "cases").iterdir()):
+        if not case_dir.is_dir():
+            continue
+        for path in sorted(case_dir.rglob("*")):
+            if not path.is_file():
+                continue
+            bundled = "actionsbench/_corpus/" + path.relative_to(ROOT / "corpus").as_posix()
+            if bundled not in wheel_names:
+                problems.append(f"file {path.relative_to(ROOT)} is not in the wheel")
+    return problems
 
 
 def check_contents(wheel: Path) -> list[str]:
     problems: list[str] = []
     with zipfile.ZipFile(wheel) as archive:
         names = archive.namelist()
+        audit = archive.read(AUDIT_DOC).decode() if AUDIT_DOC in names else None
+    wheel_names = set(names)
 
     expected = {p.name for p in (ROOT / "corpus" / "cases").iterdir() if p.is_dir()}
     packaged = packaged_cases(names)
@@ -39,6 +61,13 @@ def check_contents(wheel: Path) -> list[str]:
             "packaged cases differ from the repository corpus: "
             f"missing {sorted(expected - packaged)}, unexpected {sorted(packaged - expected)}"
         )
+    problems += check_case_files(wheel_names)
+    if audit is None:
+        problems.append(f"missing the label audit record {AUDIT_DOC}")
+    else:
+        for case in sorted(packaged):
+            if case not in audit:
+                problems.append(f"the audit record in the wheel never mentions case {case}")
     for case in sorted(packaged):
         has_workflow = any(
             n.startswith(f"actionsbench/_corpus/cases/{case}/.github/")

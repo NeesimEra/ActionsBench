@@ -5,6 +5,13 @@ silently rewrites old ones. Each case records the version that introduced it in 
 
 ## Unreleased
 
+- Wheels now bundle the dated label-audit record next to the corpus
+  (`actionsbench/_corpus/docs/ai-label-audit-2026-10-22.md`), so installed users can
+  read each `review_record` offline, and the wheel checker verifies every fixture file
+  of every packaged case (it previously only required `case.yaml` plus some YAML, so a
+  missing `build.mk` would have passed). The poutine installer gained behavioral tests
+  proving it aborts on a checksum mismatch or missing manifest entry before extracting
+  or executing anything (no network is used).
 - Added `ai-reviewed`, distinct from independent human `agreed`, with agent reviewer identity
   and a required `review_record`. This extends the case schema; older validators will reject it.
 - Four agent sessions audited all 44 cases on 2026-10-22. Promoted 27 supported cases;
