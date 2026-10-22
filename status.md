@@ -1131,4 +1131,51 @@ sink. ADR 0006 records that choice and its consequences.
   from an empty directory.
 - Nothing was merged, tagged, released, or published on this follow-up branch.
 
+---
+
+## 2026-10-22: Prepared the 0.2.0 release (local only, nothing published)
+
+**Decision (owner, in chat):** "merge lets move to 1" — PR #29 merged (squashed, `dev` at
+`4200ab3`), then start the release decision: the pending schema extension (`ai-reviewed` +
+`review_record`) and packaging work have to land as a new corpus/package version. 0.1.1's
+tag, archive, DOI and PyPI distribution stay frozen.
+
+**Why 0.2.0:** the case schema gains required fields that older validators reject, so the
+corpus cannot ship as a patch-level 0.1.2. No case was added or removed, so every case keeps
+`added_in: 0.1.0`; the corpus version number only dates provenance changes, which the
+changelog records.
+
+**Done (branch `chore/release-0.2.0`, PR targets `dev`)**
+
+- `pyproject.toml` and `src/actionsbench/__init__.py` version to 0.2.0 (the wheel checker
+  reads the version from pyproject, so it stays in lockstep).
+- `corpus/CHANGELOG.md`: Unreleased becomes a 0.2.0 section stating the schema break, that
+  the case set is unchanged, and that the release date is set when the dry run passes
+  (mirroring the 0.1.1 flow, where the date landed in a later commit).
+- `CITATION.cff`: version 0.2.0, date-released 2026-10-22 (correctable at release), abstract
+  updated to describe the `ai-reviewed` provenance accurately, and the 0.1.1 record DOI
+  removed with a YAML comment explaining the version DOI is added after Zenodo mints the
+  0.2.0 record. Citing 0.2.0 with 0.1.1's DOI would be wrong Zenodo metadata.
+- README banner and corpus README status paragraph now describe 0.2.0 as prepared, not
+  published (the PyPI 0.1.1 limitations keep being called out as such).
+- `docs/PRD.md` revision-log row for 0.2.0.
+- No ADR or dated audit statements were rewritten; their "unreleased" phrasing is treated as
+  a historical record of the decision date.
+
+**Release sequence that still requires the owner (nothing done here)**
+
+1. TestPyPI dispatch dry run; the owner approves the `testpypi` deployment; the release date
+   is set in `CITATION.cff` and the changelog.
+2. Dev-to-main release PR; the GitHub release `v0.2.0` on the main commit creates the tag.
+3. Zenodo mints the 0.2.0 version record; a follow-up adds that DOI to README and
+   `CITATION.cff` (0.1.1's record DOI 10.5281/zenodo.23175473 stays valid for 0.1.1).
+4. The owner approves the `pypi` environment; trusted publishing uploads the wheel and sdist.
+
+**Verified**
+
+- 283 unit tests, lint, format, strict mypy, 44/44 validate; the wheel builds as 0.2.0 and
+  passes the checker (bundled corpus, audit record, every fixture file, install from an
+  empty directory). `actionsbench --version` prints 0.2.0.
+
+
 
