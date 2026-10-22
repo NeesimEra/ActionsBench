@@ -2,10 +2,11 @@
 
 A labeled benchmark and evaluation harness for GitHub Actions workflow security scanners.
 
-> **Status: initial release (0.1.1, pre-1.0); 0.2.0 in preparation.** The corpus is a small hand-built set
-> (44 cases). Version 0.2.0 carries all 44 labels as `ai-reviewed` following a
-> [parallel agent audit](docs/ai-label-audit-2026-10-22.md), plus a third scanner adapter (poutine).
-> No label has independent human review. Published 0.1.1 still contains the original 44 `proposed` labels.
+> **Status: 0.2.0 published (pre-1.0).** The corpus is a small hand-built set
+> (44 cases). All 44 labels are `ai-reviewed` following a
+> [parallel agent audit](docs/ai-label-audit-2026-10-22.md), and the release adds a third
+> scanner adapter (poutine). No label has independent human review. The 0.1.1 release
+> still contains the original 44 `proposed` labels.
 > Nothing here is a result yet. It is public early so the
 > labels can be challenged, not because it is finished.
 
@@ -36,7 +37,7 @@ actionsbench validate         # works from any directory: the corpus is bundled
 ```
 
 The package bundles the corpus, so it can validate and score without a clone. Archived releases have a
-DOI on [Zenodo](https://doi.org/10.5281/zenodo.23175473) (this version; the concept DOI
+DOI on [Zenodo](https://doi.org/10.5281/zenodo.23569097) (this version; the concept DOI
 [10.5281/zenodo.23175472](https://doi.org/10.5281/zenodo.23175472) always resolves to the latest). The
 code is MIT and the corpus is CC BY 4.0.
 
@@ -68,7 +69,7 @@ Its job- and execution-step anchors expose limits of region matching; see the
 [mapping review](https://github.com/NeesimEra/ActionsBench/blob/main/docs/rule-mappings.md#poutine-116-local-analysis).
 
 Run the commands from the repository root, or pass `--corpus` explicitly. The poutine adapter
-and `ai-reviewed` status described here land in 0.2.0; PyPI 0.1.1 does not include them.
+and `ai-reviewed` status described here are included from PyPI 0.2.0 on.
 
 ## How scoring works
 
