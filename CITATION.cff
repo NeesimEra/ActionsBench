@@ -7,8 +7,7 @@ authors:
     given-names: Aliu
 version: 0.2.0
 date-released: 2026-10-22
-# The version DOI is added after the release creates the next Zenodo record, as 0.1.1's
-# was (its record DOI 10.5281/zenodo.23175473; concept DOI 10.5281/zenodo.23175472).
+doi: 10.5281/zenodo.23569097
 license: CC-BY-4.0
 repository-code: "https://github.com/NeesimEra/ActionsBench"
 url: "https://github.com/NeesimEra/ActionsBench"

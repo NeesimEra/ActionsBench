@@ -1195,6 +1195,41 @@ changelog records.
 - Still owner-gated: dev-to-main release PR, the GitHub release `v0.2.0` on main (creates
   the tag Zenodo keys on), then the `pypi` environment approval.
 
+---
+
+## 2026-10-22: 0.2.0 released end to end (GitHub release, Zenodo DOI, PyPI)
+
+**Authorization (owner, in chat):** "I'm waiving it for you to do it now" — the owner
+merged release PR #32 into `main` first; the remaining chain was executed with the wheel/
+sdist digests recorded at every hop.
+
+**Done**
+
+- Verified `main` (merge commit `edff2d9`) is content-identical to `dev`, built the
+  distributions locally from that commit, and created the GitHub release `v0.2.0` on it
+  with the corpus-only archive (`actionsbench-corpus-0.2.0.tar.gz`, same layout as 0.1.1's)
+  and release notes. The tag is a release artifact and was never rewritten.
+- The release-triggered publish run (Actions run 39800374135) passed the tag/equals-version
+  check, built and checked the distributions, and published through the `pypi` environment.
+- Attached the PyPI-identical wheel, sdist and `SHA256SUMS` to the release afterwards:
+  PyPI's digests matched the local build byte for byte
+  (`b50cddc0…` wheel, `aa7d5c9b…` sdist) because hatchling reproduced the build.
+- Zenodo minted the version record from the tag automatically: version DOI
+  **10.5281/zenodo.23569097** (concept DOI 10.5281/zenodo.23175472 unchanged); its archive
+  contains the tag snapshot.
+- PR #33 records the DOI in `CITATION.cff` and `README.md`, rewords the README status
+  banner from "0.2.0 in preparation" to "0.2.0 published", and switches the install-features
+  sentence from PyPI 0.1.1 to PyPI 0.2.0 inclusively. Dates and all historical statements
+  elsewhere are untouched.
+
+**Verified (by using it)**
+
+- A clean install from real PyPI printed `actionsbench 0.2.0` and `OK: 44 case(s) valid.`
+  from an empty directory.
+- TestPyPI earlier held the identical 0.2.0 artifacts; both registries now carry the
+  version. 0.1.1's record DOI 10.5281/zenodo.23175473 remains valid and immutable.
+
+
 
 
 
