@@ -84,6 +84,9 @@ select = ["E", "F", "I", "B", "UP", "SIM", "S", "C4", "PT", "RET", "RUF"]
 "tests/**" = ["S101"]
 # The scripts run fixed commands (uv, the installed entry point) with fixed arguments on purpose.
 "scripts/**" = ["S603", "S607"]
+# Same reason: the installer test runs the repo's own fixed script on fixtures it generates,
+# never on untrusted paths or corpus payloads.
+"tests/test_install_poutine.py" = ["S603", "S607"]
 
 [tool.mypy]
 python_version = "3.11"
