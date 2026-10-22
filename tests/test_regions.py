@@ -108,8 +108,17 @@ def test_composite_action_steps_are_regions_even_when_the_dash_is_at_the_parent_
     assert idx.region(7) == idx.region(8) == ("runs", "steps", 1)
 
 
-def test_a_line_past_the_end_of_the_file_is_the_last_region() -> None:
-    assert index().region(500) == ("jobs", "deploy")
+@pytest.mark.parametrize("line", [-1, 0, len(WORKFLOW.splitlines()) + 1, 1_000_000])
+def test_a_line_outside_the_file_has_no_region(line: int) -> None:
+    assert index().region(line) is None
+
+
+@pytest.mark.parametrize("ending", ["", "\n", "\n\n"])
+def test_last_line_is_in_bounds_with_or_without_a_final_newline(ending: str) -> None:
+    text = "name: Example" + ending
+    idx = index(text)
+    assert idx.region(len(text.splitlines())) == ("name",)
+    assert idx.region(len(text.splitlines()) + 1) is None
 
 
 @pytest.mark.parametrize(

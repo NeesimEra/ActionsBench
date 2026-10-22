@@ -55,10 +55,8 @@ class ClassScore:
 
     @property
     def f1(self) -> float | None:
-        precision, recall = self.precision, self.recall
-        if precision is None or recall is None or precision + recall == 0:
-            return None
-        return 2 * precision * recall / (precision + recall)
+        denominator = 2 * self.tp + self.fp + self.fn
+        return 2 * self.tp / denominator if denominator else None
 
 
 @dataclass(frozen=True, slots=True)
@@ -124,7 +122,8 @@ class _RegionMatcher:
         index = self._index(case, expected.file)
         if index is None:
             return gap if gap == 0 else None  # unparseable: exact line only, never a guess
-        return gap if index.region(found.line) == index.region(expected.line) else None
+        region = index.region(found.line)
+        return gap if region is not None and region == index.region(expected.line) else None
 
 
 def _match(
@@ -133,22 +132,55 @@ def _match(
     found: Sequence[Finding],
     matcher: _Matcher,
 ) -> tuple[int, list[ExpectedFinding], list[Finding]]:
-    unmatched = list(found)
-    missed: list[ExpectedFinding] = []
-    matched = 0
+    # Maximum bipartite matching: a greedy nearest choice can consume the only finding
+    # available to another label. Prefer nearby findings, but reassign earlier matches
+    # along augmenting paths when that lets another label match.
+    candidates: list[list[int]] = []
     for exp in expected:
-        best: Finding | None = None
-        best_distance: int | None = None
-        for candidate in unmatched:
+        distances = []
+        for index, candidate in enumerate(found):
             distance = matcher.distance(case, exp, candidate)
-            if distance is not None and (best_distance is None or distance < best_distance):
-                best, best_distance = candidate, distance
-        if best is None:
-            missed.append(exp)
-        else:
-            unmatched.remove(best)
-            matched += 1
-    return matched, missed, unmatched
+            if distance is not None:
+                distances.append((distance, index))
+        candidates.append([index for _, index in sorted(distances)])
+
+    owners: dict[int, int] = {}  # finding index -> expected index
+
+    def assign(root: int) -> bool:
+        # Preserve depth-first candidate order without consuming Python call frames.
+        # Each owned finding leads to its label; parents record the alternating path.
+        stack = [(root, iter(candidates[root]))]
+        visited: set[int] = set()
+        parents: dict[int, tuple[int, int]] = {}
+        while stack:
+            expected_index, choices = stack[-1]
+            for finding_index in choices:
+                if finding_index in visited:
+                    continue
+                visited.add(finding_index)
+                owner = owners.get(finding_index)
+                if owner is None:
+                    # Only mutate ownership after reaching a free finding. Failed
+                    # searches leave all earlier assignments intact.
+                    owners[finding_index] = expected_index
+                    while expected_index != root:
+                        parent, previous_finding = parents[expected_index]
+                        owners[previous_finding] = parent
+                        expected_index = parent
+                    return True
+                parents[owner] = (expected_index, finding_index)
+                stack.append((owner, iter(candidates[owner])))
+                break
+            else:
+                stack.pop()
+        return False
+
+    for expected_index in range(len(expected)):
+        assign(expected_index)
+    matched_expected = set(owners.values())
+    missed = [exp for index, exp in enumerate(expected) if index not in matched_expected]
+    unmatched = [finding for index, finding in enumerate(found) if index not in owners]
+    return len(owners), missed, unmatched
 
 
 def _check_inputs(cases_by_id: dict[str, Case], report: ScannerReport) -> None:

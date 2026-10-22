@@ -82,9 +82,10 @@ def _step_index(container: Node, line: int, end: int | None) -> int | None:
 class RegionIndex:
     """The regions of one file, built once and queried by line number."""
 
-    def __init__(self, top: list[_Entry]) -> None:
+    def __init__(self, top: list[_Entry], line_count: int) -> None:
         self._top = top
         self._top_starts = [e.start for e in top]
+        self._line_count = line_count
 
     @classmethod
     def from_text(cls, text: str) -> RegionIndex | None:
@@ -94,9 +95,12 @@ class RegionIndex:
             return None
         if not isinstance(root, MappingNode):
             return None
-        return cls(_entries(root))
+        return cls(_entries(root), len(text.splitlines()))
 
-    def region(self, line: int) -> Region:
+    def region(self, line: int) -> Region | None:
+        """Return the containing region, or None for a line outside the file."""
+        if not 1 <= line <= self._line_count:
+            return None
         top_index = _last_at_or_before(self._top_starts, line)
         if top_index is None:
             return PREAMBLE

@@ -13,7 +13,7 @@ from actionsbench.models import (
     Status,
 )
 from actionsbench.report import to_json, to_text
-from actionsbench.scoring import ScoreResult, ScoringInputError, score
+from actionsbench.scoring import ClassScore, ScoreResult, ScoringInputError, score
 from actionsbench.taxonomy import WeaknessClass
 
 INJ = WeaknessClass.INJECTION
@@ -101,6 +101,16 @@ def test_clean_negative_scores_nothing() -> None:
     assert result.cases_scored == 1
 
 
+@pytest.mark.parametrize(
+    ("tp", "fp", "fn", "expected"),
+    [(0, 1, 1, 0.0), (0, 0, 1, 0.0), (0, 1, 0, 0.0), (0, 0, 0, None), (1, 1, 1, 0.5)],
+)
+def test_f1_uses_the_count_based_denominator(
+    tp: int, fp: int, fn: int, expected: float | None
+) -> None:
+    assert ClassScore(tp=tp, fp=fp, fn=fn).f1 == expected
+
+
 def test_wrong_line_does_not_match_in_line_mode_at_zero_tolerance() -> None:
     cases = [make_case("AB-INJ-0001", exp(line=5))]
     result = score(
@@ -142,6 +152,60 @@ def test_closest_finding_wins_with_tolerance() -> None:
     result = score(cases, report(findings, run={"AB-INJ-0001"}), matching="line", line_tolerance=2)
     s = result.per_class[INJ]
     assert (s.tp, s.fp) == (1, 1)
+
+
+@pytest.mark.parametrize("expected_lines", [(5, 7), (7, 5)])
+@pytest.mark.parametrize("finding_lines", [(6, 4), (4, 6)])
+def test_tolerance_maximizes_matches_regardless_of_input_order(
+    expected_lines: tuple[int, int], finding_lines: tuple[int, int]
+) -> None:
+    case = make_case("AB-INJ-0001", *(exp(line=line) for line in expected_lines))
+    findings = [found(case.id, line=line) for line in finding_lines]
+    result = score([case], report(findings), matching="line", line_tolerance=1)
+    s = result.per_class[INJ]
+    assert (s.tp, s.fp, s.fn) == (2, 0, 0)
+    assert result.mismatches == []
+
+
+def test_tolerance_can_reassign_a_chain_of_existing_matches() -> None:
+    case = make_case("AB-INJ-0001", *(exp(line=line) for line in (5, 7, 9)))
+    findings = [found(case.id, line=line) for line in (6, 8, 4)]
+    result = score([case], report(findings), matching="line", line_tolerance=1)
+    s = result.per_class[INJ]
+    assert (s.tp, s.fp, s.fn) == (3, 0, 0)
+
+
+def test_matching_handles_an_augmenting_path_beyond_the_default_recursion_limit() -> None:
+    # Each label first gets its exact finding. The final label has to reassign all
+    # 1,099 owners to reach the free finding at line 1. This is a sparse deep path,
+    # rather than a dense duplicate graph, so the regression stays inexpensive.
+    count = 1100
+    case = make_case("AB-INJ-0001", *(exp(line=2 * i) for i in range(1, count + 1)))
+    findings = [found(case.id, line=2 * i) for i in range(1, count)]
+    findings.append(found(case.id, line=1))
+    result = score([case], report(findings), matching="line", line_tolerance=2)
+    cell = result.per_class[INJ]
+    assert (cell.tp, cell.fp, cell.fn) == (count, 0, 0)
+    assert result.mismatches == []
+
+
+def test_unsuccessful_augmentation_preserves_existing_matches() -> None:
+    case = make_case("AB-INJ-0001", *(exp(line=line) for line in (5, 7, 9)))
+    findings = [found(case.id, line=line) for line in (6, 8)]
+    result = score([case], report(findings), matching="line", line_tolerance=1)
+    cell = result.per_class[INJ]
+    assert (cell.tp, cell.fp, cell.fn) == (2, 0, 1)
+    assert [e.line for e in result.mismatches[0].missed] == [9]
+    assert result.mismatches[0].extra == ()
+
+
+def test_identical_findings_are_distinct_matching_candidates() -> None:
+    case = make_case("AB-INJ-0001", exp(line=5), exp(line=7))
+    findings = [found(case.id, line=6)] * 3
+    result = score([case], report(findings), matching="line", line_tolerance=1)
+    s = result.per_class[INJ]
+    assert (s.tp, s.fp, s.fn) == (2, 1, 0)
+    assert len(result.mismatches[0].extra) == 1
 
 
 def test_expected_finding_outside_scope_is_uncovered_not_a_miss() -> None:
@@ -303,6 +367,16 @@ def test_job_keys_outside_steps_are_one_region(tmp_path: Path) -> None:
 def test_region_matching_is_still_one_to_one(tmp_path: Path) -> None:
     cell = region_score(tmp_path, CHECKOUT_USES, [CHECKOUT_HEADER, CHECKOUT_USES]).per_class[PIN]
     assert (cell.tp, cell.fp, cell.fn) == (1, 1, 0)
+
+
+@pytest.mark.parametrize("finding_line", [len(WORKFLOW.splitlines()) + 1, 1_000_000])
+def test_a_finding_past_eof_does_not_match_the_last_region(
+    tmp_path: Path, finding_line: int
+) -> None:
+    result = region_score(tmp_path, line_of("secrets: inherit"), [finding_line])
+    cell = result.per_class[PIN]
+    assert (cell.tp, cell.fp, cell.fn) == (0, 1, 1)
+    assert to_json(result)["classes"][list(WeaknessClass).index(PIN)]["f1"] == 0.0
 
 
 def test_the_closest_finding_in_the_region_is_the_one_that_matches(tmp_path: Path) -> None:

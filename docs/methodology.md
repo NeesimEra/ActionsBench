@@ -106,6 +106,10 @@ Matching is **one-to-one**: a finding can satisfy at most one expected finding. 
 that reports the same line twice gets one true positive and one false positive, so
 duplicates cannot inflate recall.
 
+Only lines within the file can share a region; a finding past the end of the file cannot
+match the final construct. Matching maximizes the number of matched pairs, preferring
+nearby candidates but reassigning them when needed to avoid losing a valid match.
+
 ## 5. Scope
 
 Scanners do not all claim to cover all weakness classes. For example, actionlint is mainly
@@ -160,6 +164,9 @@ a case it did not run is rejected as inconsistent.
 Per weakness class: true positives, false positives, false negatives, precision, recall, F1,
 plus the coverage counts above. Precision, recall and F1 are undefined (`null`) when their
 denominator is zero. They are never reported as 0 or 1 by default.
+
+F1 is computed as `2TP / (2TP + FP + FN)`. It is zero when there are errors but no true
+positives, and undefined only when TP, FP and FN are all zero.
 
 There is **no overall score**. Results are per class so the output cannot be read as a
 leaderboard, and so a tool's strengths and gaps stay visible.
