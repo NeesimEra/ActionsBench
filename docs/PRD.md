@@ -79,9 +79,15 @@ In March 2026, attackers force-pushed malicious code to most version tags of the
 - Supporting CI systems other than GitHub Actions.
 - Cataloguing vulnerabilities in real repositories.
 - Scoring the quality of automatic fixes (candidate for a later track, see Milestones).
-- A hosted service, API or web frontend. Results are published as versioned static files and
-  reports. A static results site may follow once there are results worth browsing; it would
-  still need no backend and must show per-class evidence, not a ranking.
+- A single "best scanner" ranking or an overall score. The platform (ADR 0007) shows
+  per-class scores with evidence; results are never aggregated into one number or one
+  winner.
+
+On 2026-10-22 the owner accepted a hosted platform under ADR 0007 (read-only corpus and
+results browsing now; submissions and sandboxed runs as gated later milestones, with the
+label-review status always attached to every score). The earlier blanket non-goal stands
+for everything the platform is not: no auto-updated mythic scoreboards, no service-run
+magic, no execution of corpus content, and no result without its provenance.
 
 ---
 
@@ -314,3 +320,4 @@ Stop or pivot if any of these hold after the spike:
 | 0.1.3 | 2026-10-04 | Matching rule decided: same step, job or top-level key instead of a line tolerance (ADR 0003). Taxonomy verified against the paper. |
 | 0.1.4 | 2026-10-04 | First pre-release (v0.1.0) cut with gate C waived by the owner: 44 cases, two scanner adapters, labels evidence-audited but not independently reviewed. |
 | 0.2.0 | 2026-10-22 | All 44 labels moved to `ai-reviewed` by a parallel four-session agent audit (ADR 0005); artifact-class anchors corrected against the study, disclosed not compensated (ADR 0006); fixture reachability and advisory-pin repairs; poutine adapter added (three scanners total); matching made maximum-cardinality and stack-safe; wheels ship the audit record with every fixture file checked. |
+| 0.2.1 | 2026-10-22 | The hosted platform is accepted in scope under ADR 0007 (P0 read-only corpus/results browsing in `platform/`, submissions, sandboxed runner, per-class board as later milestones). The blanket "no hosted service/frontend" non-goal is lifted for the platform only; the "no single best scanner" and no-overall-score rules are hard rules on it. |

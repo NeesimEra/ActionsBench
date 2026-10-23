@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "actionsbench-platform"
+version = "0.0.0"
+description = "JSON API for the read-only ActionsBench web platform (ADR 0007, milestone P0)."
+requires-python = ">=3.11"
+dependencies = [
+    # Single source of truth for the corpus loader, taxonomy and scorer: the harness package
+    # is used exactly as the CLI uses it, never reimplemented here.
+    "actionsbench>=0.2.0",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+]
+
+[tool.uv.sources]
+# platform/api lives two levels below the repository root that owns the harness package.
+actionsbench = { path = "../..", editable = true }
+
+[project.scripts]
+actionsbench-platform-api = "actionsbench_platform.app:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "httpx>=0.27",
+    "ruff>=0.6",
+    "mypy>=1.11",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/actionsbench_platform"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+extend-exclude = ["corpus"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "S", "C4", "PT", "RET", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+files = ["src", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--strict-markers -ra -m 'not integration'"
