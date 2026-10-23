@@ -3,6 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 import { api } from "@/lib/api";
 import { SidebarNav } from "@/components/sidebar-nav";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export const metadata: Metadata = {
   title: "ActionsBench — a labeled benchmark for GitHub Actions security scanners",
@@ -14,13 +15,34 @@ export default async function Layout({ children }: { children: React.ReactNode }
   // One fetch, no caching: the sidebar always reflects what the API answered.
   const summary = await api.summary();
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  const theme = localStorage.getItem('theme');
+                  if (theme === 'light') {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                  } else if (theme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body>
         <div className="shell">
           <aside className="sidebar">
-            <p className="site">
-              <Link href="/">ActionsBench</Link>
-            </p>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", marginBottom: "0.75rem" }}>
+              <p className="site" style={{ margin: 0 }}>
+                <Link href="/">ActionsBench</Link>
+              </p>
+              <ThemeToggle />
+            </div>
             <nav aria-label="Platform navigation">
               <SidebarNav />
             </nav>

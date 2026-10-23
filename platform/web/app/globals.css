@@ -1,8 +1,8 @@
-/* ActionsBench platform — Grok-style dark theme: near-black surfaces, hairline borders,
-   large radii, one centered evidence column. Presentational only: every class the pages
-   use below is what the API-informed server components already render. */
+/* ActionsBench platform — light and dark themes */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;650&display=swap');
 
 :root {
+  /* Dark theme (default) */
   --bg: #0a0a0b;
   --panel: #131315;
   --panel-2: #1b1b1e;
@@ -15,7 +15,59 @@
   --bad: #f87171;
   --radius-card: 16px;
   --radius-input: 28px;
+  --code-bg: #1b1b1e;
+  --code-ink: #dcdce0;
+  --pill-bg: #1b1b1e;
+  --jump-btn-bg: #f5f5f6;
+  --jump-btn-ink: #0a0a0b;
+  --sidebar-bg: #131315;
+  --sidebar-top-bg: rgba(19, 19, 21, 0.9);
   color-scheme: dark;
+}
+
+[data-theme="light"] {
+  /* Light theme */
+  --bg: #ffffff;
+  --panel: #f9f9f9;
+  --panel-2: #f0f0f0;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.16);
+  --ink: #1a1a1a;
+  --muted: #666666;
+  --faint: #888888;
+  --good: #16a34a;
+  --bad: #dc2626;
+  --code-bg: #f0f0f0;
+  --code-ink: #1a1a1a;
+  --pill-bg: #f0f0f0;
+  --jump-btn-bg: #1a1a1a;
+  --jump-btn-ink: #ffffff;
+  --sidebar-bg: #f9f9f9;
+  --sidebar-top-bg: rgba(249, 249, 249, 0.9);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #ffffff;
+    --panel: #f9f9f9;
+    --panel-2: #f0f0f0;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-strong: rgba(0, 0, 0, 0.16);
+    --ink: #1a1a1a;
+    --muted: #666666;
+    --faint: #888888;
+    --good: #16a34a;
+    --bad: #dc2626;
+    --code-bg: #f0f0f0;
+    --code-ink: #1a1a1a;
+    --pill-bg: #f0f0f0;
+    --jump-btn-bg: #1a1a1a;
+    --jump-btn-ink: #ffffff;
+    --sidebar-bg: #f9f9f9;
+    --sidebar-top-bg: rgba(249, 249, 249, 0.9);
+    color-scheme: light;
+  }
 }
 
 * { box-sizing: border-box; }
@@ -26,9 +78,10 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font: 15px/1.6 -apple-system, ui-sans-serif, "Inter", "Segoe UI", system-ui, sans-serif;
+  font: 15px/1.6 'Inter', -apple-system, ui-sans-serif, system-ui, sans-serif;
   letter-spacing: -0.006em;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 a { color: var(--ink); text-decoration: none; }
@@ -36,15 +89,16 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 a:focus-visible,
 button:focus-visible,
-input:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.45);
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
 /* --- App shell -----------------------------------------------------------------
    Mobile / narrow: compact sticky top bar (brand + horizontal nav).
-   Desktop (>=1024px): sticky 232px sidebar + centered evidence column. */
+   Desktop (>=880px): sticky 232px sidebar + centered evidence column. */
 
 .shell { min-height: 100%; }
 
@@ -57,10 +111,11 @@ input:focus-visible {
   flex-wrap: wrap;
   gap: 0.35rem;
   padding: 0.6rem 1rem;
-  background: rgba(19, 19, 21, 0.9);
+  background: var(--sidebar-top-bg);
   -webkit-backdrop-filter: blur(14px);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .sidebar .site {
@@ -123,7 +178,7 @@ main {
     padding: 1.25rem 0.9rem;
     border-bottom: none;
     border-right: 1px solid var(--border);
-    background: var(--panel);
+    background: var(--sidebar-bg);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -169,6 +224,7 @@ h1 .pill { vertical-align: middle; position: relative; top: -0.12em; }
   border-radius: 12px;
   background: var(--panel);
   overflow-x: auto;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 table {
@@ -207,12 +263,13 @@ td.muted { color: var(--muted); }
 
 code {
   font: 0.82em ui-monospace, "SF Mono", Menlo, monospace;
-  background: var(--panel-2);
+  background: var(--code-bg);
   border: 1px solid var(--border);
   padding: 0.08em 0.35em;
   border-radius: 6px;
-  color: #dcdce0;
+  color: var(--code-ink);
   overflow-wrap: anywhere;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 pre {
@@ -222,7 +279,8 @@ pre {
   border-radius: var(--radius-card);
   padding: 1rem 1.1rem;
   overflow-x: auto;
-  color: #dcdce0;
+  color: var(--code-ink);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 
 /* --- Pills --------------------------------------------------------------------- */
@@ -233,15 +291,18 @@ pre {
   padding: 0.08rem 0.55rem;
   border: 1px solid var(--border);
   border-radius: 999px;
-  background: var(--panel-2);
+  background: var(--pill-bg);
   color: var(--muted);
   vertical-align: middle;
   white-space: nowrap;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 }
 .pill.neg { border-style: dashed; }
-.pill.ai-reviewed { border-color: rgba(125, 211, 252, 0.5); color: #7dd3fc; }
+.pill.ai-reviewed { border-color: rgba(125, 211, 252, 0.5); color: #0369a1; }
 .pill.agreed { border-color: rgba(74, 222, 128, 0.5); color: var(--good); }
 .pill.disputed { border-color: rgba(248, 113, 113, 0.5); color: var(--bad); }
+
+[data-theme="dark"] .pill.ai-reviewed { color: #7dd3fc; }
 
 td .pill { margin-left: 0.4rem; }
 
@@ -253,9 +314,11 @@ td .pill { margin-left: 0.4rem; }
   border-left: 3px solid var(--border-strong);
   padding: 0.65rem 0.95rem;
   margin: 0.75rem 0;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 .note { background: var(--panel); }
 .problem { background: rgba(248, 113, 113, 0.07); border-left-color: var(--bad); }
+[data-theme="light"] .problem { background: rgba(220, 38, 38, 0.05); }
 
 .problems { margin: 0.9rem 0; display: grid; gap: 0.4rem; }
 .problems p {
@@ -267,10 +330,11 @@ td .pill { margin-left: 0.4rem; }
   font-size: 0.82rem;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   overflow-wrap: anywhere;
-  color: #f1a9a9;
+  color: #f87171;
 }
+[data-theme="light"] .problems p { background: rgba(220, 38, 38, 0.05); color: var(--bad); }
 
-/* --- Home: Grok-style centered hero + command bar + chips ------------------------ */
+/* --- Home: centered hero + command bar + chips ------------------------ */
 
 .hero {
   display: flex;
@@ -293,9 +357,9 @@ td .pill { margin-left: 0.4rem; }
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-input);
   padding: 0.35rem 0.4rem 0.35rem 1.1rem;
-  transition: border-color 140ms ease;
+  transition: border-color 140ms ease, background-color 0.2s ease;
 }
-.jumpbox:focus-within { border-color: rgba(255, 255, 255, 0.32); }
+.jumpbox:focus-within { border-color: var(--ink); opacity: 0.9; }
 .jumpbox input {
   flex: 1;
   min-width: 0;
@@ -316,8 +380,8 @@ td .pill { margin-left: 0.4rem; }
   height: 2.4rem;
   border: none;
   border-radius: 999px;
-  background: var(--ink);
-  color: #0a0a0b;
+  background: var(--jump-btn-bg);
+  color: var(--jump-btn-ink);
   font-size: 1rem;
   line-height: 1;
   cursor: pointer;
@@ -396,6 +460,7 @@ td .pill { margin-left: 0.4rem; }
   border-radius: var(--radius-card);
   padding: 0.7rem 1rem;
   min-width: 7rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 .stat b { font-size: 1.3rem; font-weight: 600; line-height: 1.2; letter-spacing: -0.02em; }
 .stat span { font-size: 0.72rem; color: var(--muted); }
@@ -413,6 +478,7 @@ footer.guardrail {
   line-height: 1.55;
   color: var(--faint);
   max-width: 46rem;
+  transition: border-color 0.2s ease, color 0.2s ease;
 }
 footer.guardrail p { margin: 0.35rem 0; }
 footer.guardrail a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
