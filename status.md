@@ -1255,3 +1255,15 @@ changelog records.
   provenance/matching/version disclosures, unknown class 404.
 - Root untouched: 283 unit tests, 6 integration deselected, `actionsbench validate` →
   `OK: 44 case(s) valid.`, repo-wide ruff clean.
+## 2026-10-22: P0 UI restyled in a Grok-style dark theme (owner direction)
+
+- Owner direction: "build the UI like the Grok platform." The Next.js app's presentation
+  was rebuilt around that reference: near-black surfaces, hairline borders, large radii,
+  a slim sidebar app shell (provenance sentence pinned in its footer), and a centered
+  home hero whose command bar jumps to a case id or weakness class. No data,
+  contracts, invariants or server-rendering architecture changed; every disclosure
+  sentence is unchanged and the build stays API-down safe.
+- Dark not-found page added for route consistency.
+
+**Verified:** `tsc --noEmit` clean, `next build` green with the API down, all pages
+re-smoked through the proxy (home/case/class/results 200s, unknown-class 404).
