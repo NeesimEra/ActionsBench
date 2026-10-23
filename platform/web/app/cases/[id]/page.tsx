@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ApiUnreachable, NegativePill, StatusPill } from "@/components/pill";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { api } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
   if (payload.kind !== "payload") {
     return (
       <>
+        <Breadcrumbs crumbs={[{ label: "Home", href: "/" }, { label: "Cases", href: "/cases" }, { label: id }]} />
         <h1>{id}</h1>
         <ApiUnreachable />
       </>
@@ -24,6 +26,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <>
+      <Breadcrumbs crumbs={[{ label: "Home", href: "/" }, { label: "Cases", href: "/cases" }, { label: d.id }]} />
       <h1>
         {d.id} <StatusPill status={d.status} />
         {d.is_negative ? <NegativePill /> : null}

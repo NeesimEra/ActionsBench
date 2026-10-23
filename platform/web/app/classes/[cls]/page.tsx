@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ApiUnreachable, NegativePill, StatusPill } from "@/components/pill";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { api } from "@/lib/api";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,7 @@ export default async function ClassPage({ params }: { params: Promise<{ cls: str
   if (payload.kind !== "payload") {
     return (
       <>
+        <Breadcrumbs crumbs={[{ label: "Home", href: "/" }, { label: "Classes", href: "/" }, { label: cls }]} />
         <h1>{cls}</h1>
         <ApiUnreachable />
       </>
@@ -23,6 +25,7 @@ export default async function ClassPage({ params }: { params: Promise<{ cls: str
 
   return (
     <>
+      <Breadcrumbs crumbs={[{ label: "Home", href: "/" }, { label: "Classes", href: "/" }, { label: payload.payload.value }]} />
       <h1>{payload.payload.value}</h1>
       <p>
         All cases labeled (positive or negative) for this class. A negative case is the clean
