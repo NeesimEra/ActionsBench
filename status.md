@@ -1264,6 +1264,14 @@ changelog records.
   contracts, invariants or server-rendering architecture changed; every disclosure
   sentence is unchanged and the build stays API-down safe.
 - Dark not-found page added for route consistency.
+- Follow-up after owner review ("this ui is not aligning"): below the breakpoint the
+  sidebar was stacking as a 403px-tall full-width block above the content. It now
+  collapses into a compact sticky top bar (brand left, horizontally scrollable nav) and
+  becomes the fixed 232px sidebar from 880px; the provenance/guardrail footer moved into
+  the content column, stat tiles lay out as cards, tables sit in rounded cards that fit
+  their column, and faint text was raised to meet contrast.
 
 **Verified:** `tsc --noEmit` clean, `next build` green with the API down, all pages
-re-smoked through the proxy (home/case/class/results 200s, unknown-class 404).
+re-smoked through the proxy (home/case/class/results 200s, unknown-class 404); measured
+layout at 1000x700 reports no horizontal overflow, a 48px top bar / 232px sidebar, and
+tables that fit their column.

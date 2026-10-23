@@ -55,34 +55,36 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
 
       <section>
         <h2>Expected findings{d.is_negative ? " (clean twin claims)" : ""}</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Class</th>
-              <th>File</th>
-              <th>Line</th>
-              <th>Evidence substring</th>
-            </tr>
-          </thead>
-          <tbody>
-            {d.expected.map((expected) => (
-              <tr key={`${expected.file}:${expected.line}`}>
-                <td>
-                  <Link href={`/classes/${expected.weakness_class}`}>
-                    {expected.weakness_class}
-                  </Link>
-                </td>
-                <td>
-                  <Link href={`/cases/${d.id}/files/${expected.file}`}>{expected.file}</Link>
-                </td>
-                <td>{expected.line}</td>
-                <td>
-                  <code>{expected.evidence}</code>
-                </td>
+        <div className="tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>File</th>
+                <th>Line</th>
+                <th>Evidence substring</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {d.expected.map((expected) => (
+                <tr key={`${expected.file}:${expected.line}`}>
+                  <td>
+                    <Link href={`/classes/${expected.weakness_class}`}>
+                      {expected.weakness_class}
+                    </Link>
+                  </td>
+                  <td>
+                    <Link href={`/cases/${d.id}/files/${expected.file}`}>{expected.file}</Link>
+                  </td>
+                  <td>{expected.line}</td>
+                  <td>
+                    <code>{expected.evidence}</code>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section>

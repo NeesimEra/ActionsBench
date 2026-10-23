@@ -28,29 +28,31 @@ export default async function ClassPage({ params }: { params: Promise<{ cls: str
         All cases labeled (positive or negative) for this class. A negative case is the clean
         twin a scanner must not report.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Title</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {payload.payload.cases.map((entry) => (
-            <tr key={entry.id}>
-              <td>
-                <Link href={`/cases/${entry.id}`}>{entry.id}</Link>
-                {entry.is_negative ? <NegativePill /> : null}
-              </td>
-              <td>{entry.title}</td>
-              <td>
-                <StatusPill status={entry.status} />
-              </td>
+      <div className="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Status</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {payload.payload.cases.map((entry) => (
+              <tr key={entry.id}>
+                <td>
+                  <Link href={`/cases/${entry.id}`}>{entry.id}</Link>
+                  {entry.is_negative ? <NegativePill /> : null}
+                </td>
+                <td>{entry.title}</td>
+                <td>
+                  <StatusPill status={entry.status} />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }

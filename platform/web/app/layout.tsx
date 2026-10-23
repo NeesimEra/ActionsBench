@@ -24,16 +24,18 @@ export default async function Layout({ children }: { children: React.ReactNode }
             <nav aria-label="Platform navigation">
               <SidebarNav />
             </nav>
-            <div className="sidebottom">
+          </aside>
+          <main>
+            {children}
+            <footer className="guardrail">
               {summary.kind === "payload" ? <p>{summary.payload.provenance}</p> : null}
               <p>
-                Read-only corpus and per-class results. No overall score is shown anywhere
-                on this site, and the review status of the labels behind every score is
-                stated with it.
+                Read-only corpus and per-class results. No overall score is shown anywhere on
+                this site, and the review status of the labels behind every score is stated
+                with it.
               </p>
-            </div>
-          </aside>
-          <main>{children}</main>
+            </footer>
+          </main>
         </div>
       </body>
     </html>

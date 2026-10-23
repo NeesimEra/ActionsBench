@@ -17,35 +17,37 @@ export default async function CasesPage() {
       </p>
 
       {payload.kind === "payload" ? (
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Title</th>
-              <th>Classes</th>
-              <th>Status</th>
-              <th>Added in</th>
-            </tr>
-          </thead>
-          <tbody>
-            {payload.payload.cases.map((entry) => (
-              <tr key={entry.id}>
-                <td>
-                  <Link href={`/cases/${entry.id}`}>{entry.id}</Link>
-                </td>
-                <td>
-                  {entry.title}
-                  {entry.is_negative ? <NegativePill /> : null}
-                </td>
-                <td>{entry.classes.join(", ")}</td>
-                <td>
-                  <StatusPill status={entry.status} />
-                </td>
-                <td>{entry.added_in}</td>
+        <div className="tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Classes</th>
+                <th>Status</th>
+                <th>Added in</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {payload.payload.cases.map((entry) => (
+                <tr key={entry.id}>
+                  <td>
+                    <Link href={`/cases/${entry.id}`}>{entry.id}</Link>
+                  </td>
+                  <td>
+                    {entry.title}
+                    {entry.is_negative ? <NegativePill /> : null}
+                  </td>
+                  <td>{entry.classes.join(", ")}</td>
+                  <td>
+                    <StatusPill status={entry.status} />
+                  </td>
+                  <td>{entry.added_in}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       ) : (
         <ApiUnreachable />
       )}
