@@ -1,86 +1,53 @@
 "use client";
 
+// Light/dark switch. The initial value comes from localStorage; if nothing is
+// stored the OS preference decides (the inline script in layout.tsx applies it
+// before paint, so there is no flash). Only the theme attribute changes — no
+// data, scoring or corpus behaviour is involved.
+
 import { useEffect, useState } from "react";
 
+type Theme = "light" | "dark";
+
+function resolvedTheme(): Theme {
+  const stored = localStorage.getItem("theme");
+  if (stored === "light" || stored === "dark") return stored;
+  return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+}
+
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
+  const [theme, setTheme] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setTheme(resolvedTheme());
     setMounted(true);
-    const stored = localStorage.getItem("theme") as "light" | "dark" | null;
-    if (stored) {
-      setTheme(stored);
-      document.documentElement.setAttribute("data-theme", stored);
-    } else {
-      setTheme("system");
-      document.documentElement.removeAttribute("data-theme");
-    }
   }, []);
 
   function toggle() {
-    if (theme === "dark") {
-      setTheme("light");
-      localStorage.setItem("theme", "light");
-      document.documentElement.setAttribute("data-theme", "light");
-    } else if (theme === "light") {
-      setTheme("dark");
-      localStorage.setItem("theme", "dark");
-      document.documentElement.setAttribute("data-theme", "dark");
-    } else {
-      // system - switch to dark
-      setTheme("dark");
-      localStorage.setItem("theme", "dark");
-      document.documentElement.setAttribute("data-theme", "dark");
-    }
+    const next: Theme = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    localStorage.setItem("theme", next);
+    document.documentElement.setAttribute("data-theme", next);
   }
 
-  if (!mounted) {
-    return (
-      <button
-        style={{
-          background: "transparent",
-          border: "1px solid var(--border)",
-          borderRadius: "8px",
-          padding: "0.35rem 0.6rem",
-          color: "var(--muted)",
-          fontSize: "0.75rem",
-          cursor: "pointer",
-        }}
-        aria-label="Toggle theme"
-      >
-        ◐
-      </button>
-    );
-  }
-
-  const icon = theme === "dark" ? "☾" : theme === "light" ? "☀" : "◐";
+  const icon = mounted && theme === "light" ? "☀" : "☾";
+  const label = mounted
+    ? `Switch to ${theme === "dark" ? "light" : "dark"} theme`
+    : "Toggle theme";
 
   return (
     <button
+      type="button"
+      className="theme-toggle"
       onClick={toggle}
-      title={`Theme: ${theme}`}
-      style={{
-        background: "transparent",
-        border: "1px solid var(--border)",
-        borderRadius: "8px",
-        padding: "0.35rem 0.6rem",
-        color: "var(--muted)",
-        fontSize: "0.9rem",
-        cursor: "pointer",
-        transition: "background 120ms ease, color 120ms ease",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = "var(--panel-2)";
-        e.currentTarget.style.color = "var(--ink)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = "transparent";
-        e.currentTarget.style.color = "var(--muted)";
-      }}
-      aria-label="Toggle theme"
+      aria-label={label}
+      title={label}
+      suppressHydrationWarning
     >
-      {icon}
+      <span suppressHydrationWarning aria-hidden="true">
+        {icon}
+      </span>
     </button>
   );
 }

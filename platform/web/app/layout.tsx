@@ -22,11 +22,11 @@ export default async function Layout({ children }: { children: React.ReactNode }
             __html: `
               (function() {
                 try {
-                  const theme = localStorage.getItem('theme');
-                  if (theme === 'light') {
+                  var stored = localStorage.getItem('theme');
+                  if (stored === 'light' || stored === 'dark') {
+                    document.documentElement.setAttribute('data-theme', stored);
+                  } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
                     document.documentElement.setAttribute('data-theme', 'light');
-                  } else if (theme === 'dark') {
-                    document.documentElement.setAttribute('data-theme', 'dark');
                   }
                 } catch (e) {}
               })();
@@ -37,8 +37,8 @@ export default async function Layout({ children }: { children: React.ReactNode }
       <body>
         <div className="shell">
           <aside className="sidebar">
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", marginBottom: "0.75rem" }}>
-              <p className="site" style={{ margin: 0 }}>
+            <div className="sidebar-head">
+              <p className="site">
                 <Link href="/">ActionsBench</Link>
               </p>
               <ThemeToggle />
